@@ -1,397 +1,310 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>梦幻表白墙 | 自定义你的浪漫</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#ff5252',
-                        secondary: '#40c4ff',
-                        background: '#f9f9f9',
-                        text: '#333333'
-                    }
-                }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>傅裕安 · 生日快乐 | 爱心祝福弹窗</title>
+    <!-- 引入Google Fonts手写字体 (签名风格) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Pacifico&family=Satisfy&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 30% 30%, #2b1a2e, #0d0b14);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Dancing Script', '华文行楷', 'KaiTi', '楷体', cursive;
+            padding: 16px;
+            margin: 0;
+        }
+
+        /* 渐变弹出弹窗 (卡片) */
+        .popup-card {
+            width: 100%;
+            max-width: 700px;
+            background: linear-gradient(145deg, rgba(255, 245, 250, 0.9) 0%, rgba(255, 220, 240, 0.95) 100%);
+            backdrop-filter: blur(6px);
+            border-radius: 48px 24px 48px 24px;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(255, 200, 230, 0.5), 0 0 30px #ffb6c180;
+            padding: 30px 20px 30px 20px;
+            animation: popIn 0.6s cubic-bezier(0.21, 1.11, 0.35, 1.1) forwards;
+            transform-origin: center;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.7) rotate(-2deg);
+                filter: blur(8px);
+            }
+            60% {
+                opacity: 1;
+                transform: scale(1.02) rotate(0.5deg);
+                filter: blur(0);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0);
             }
         }
-    </script>
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .content-auto {
-                content-visibility: auto;
+
+        /* 爱心的容器 (相对定位，所有祝福语绝对定位在里面) */
+        .heart-container {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            margin: 0 auto;
+            /* 手机屏幕适当缩小 */
+            max-width: 85vw;
+            max-height: 85vw;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            /* 微光晕 */
+            filter: drop-shadow(0 0 15px #ffa5c3);
+        }
+
+        /* 每个祝福语小标签 */
+        .bless-word {
+            position: absolute;
+            font-size: 18px;
+            white-space: nowrap;
+            user-select: none;
+            pointer-events: none;  /* 让点击穿透，不干扰视觉 */
+            text-shadow: 0 2px 8px rgba(255, 255, 255, 0.7), 0 0 5px #ffc1cc;
+            transition: transform 0.2s ease;
+            font-weight: 500;
+            /* 默认颜色会通过js动态设置，这里给个基础色 */
+            color: #b22b5c;
+            opacity: 0.95;
+            /* 增加手绘感：轻微旋转 + 不同字体 */
+            font-family: 'Dancing Script', 'Pacifico', 'Satisfy', '华文行楷', cursive;
+        }
+
+        /* 中心大名字 (签名感) */
+        .center-name {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 58px;
+            font-weight: 800;
+            text-align: center;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #a02c5a, #d45c7a, #ff8da1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px #ffb3c6, 0 8px 20px rgba(160, 44, 90, 0.3);
+            z-index: 20;
+            white-space: nowrap;
+            letter-spacing: 4px;
+            font-family: 'Dancing Script', '华文行楷', 'KaiTi', cursive;
+            filter: drop-shadow(0 4px 6px #f9b5c0);
+            animation: softGlow 3s infinite alternate;
+        }
+
+        @keyframes softGlow {
+            0% { text-shadow: 0 0 20px #ffacc7, 0 0 30px #ff80a5; }
+            100% { text-shadow: 0 0 30px #ffd9e6, 0 0 50px #ffb1c7; }
+        }
+
+        /* 适配小屏：字体微调 */
+        @media (max-width: 550px) {
+            .popup-card {
+                padding: 20px 10px;
+                border-radius: 36px 18px 36px 18px;
             }
-            .firework {
-                position: absolute;
-                width: 10px;
-                height: 10px;
-                border-radius: 50%;
-                animation: explosion 1s ease-out forwards;
+            .heart-container {
+                width: 380px;
+                height: 380px;
             }
-            @keyframes explosion {
-                0% { transform: scale(1); opacity: 1; }
-                100% { transform: scale(15); opacity: 0; }
+            .bless-word {
+                font-size: 15px;
             }
-            .confetti {
-                position: absolute;
-                width: 10px;
-                height: 30px;
-                animation: fall 3s ease-in-out forwards;
+            .center-name {
+                font-size: 44px;
             }
-            @keyframes fall {
-                0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
-                100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        @media (max-width: 400px) {
+            .heart-container {
+                width: 300px;
+                height: 300px;
             }
+            .bless-word {
+                font-size: 13px;
+            }
+            .center-name {
+                font-size: 36px;
+                letter-spacing: 2px;
+            }
+        }
+
+        /* 底部小装饰 (可选) */
+        .footer-note {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 18px;
+            color: #ffe5f0;
+            opacity: 0.8;
+            letter-spacing: 2px;
+            font-family: 'Dancing Script', cursive;
+            text-shadow: 0 2px 5px #b34e71;
+        }
+        .footer-note span {
+            display: inline-block;
+            animation: sparkle 2s infinite;
+        }
+        @keyframes sparkle {
+            0% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); text-shadow: 0 0 15px gold; }
         }
     </style>
 </head>
-<body class="bg-background text-text transition-colors duration-300 min-h-screen flex flex-col">
-    <!-- 顶部导航 -->
-    <header class="bg-white shadow-md sticky top-0 z-50 transition-colors duration-300">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-primary transition-colors">梦幻表白墙</h1>
-            <div class="flex items-center gap-4">
-                <button id="colorSettingsBtn" class="bg-primary/10 text-primary p-2 rounded-full hover:bg-primary/20 transition-colors">
-                    <i class="fa fa-paint-brush"></i>
-                </button>
-                <button id="saveImageBtn" class="bg-primary/10 text-primary p-2 rounded-full hover:bg-primary/20 transition-colors">
-                    <i class="fa fa-download"></i>
-                </button>
-            </div>
+<body>
+    <div class="popup-card">
+        <!-- 爱心背景 + 祝福语区域 -->
+        <div class="heart-container" id="heartContainer">
+            <!-- 中心名字 (永远在最上层) -->
+            <div class="center-name">傅裕安<br><span style="font-size: 0.6em; letter-spacing: 6px;">生日快乐</span></div>
+            <!-- 祝福语将通过JS动态插入在这里 -->
         </div>
-    </header>
-
-    <!-- 颜色设置面板 -->
-    <div id="colorSettingsPanel" class="fixed top-0 right-0 bg-white/95 shadow-lg p-6 w-64 h-full transform translate-x-full transition-transform duration-300 z-50 overflow-y-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-primary">自定义颜色</h2>
-            <button id="closeSettingsBtn" class="text-gray-500 hover:text-gray-700">
-                <i class="fa fa-times"></i>
-            </button>
-        </div>
-        
-        <div class="space-y-6">
-            <div class="space-y-2">
-                <label class="block text-sm font-medium">背景色</label>
-                <input type="color" id="bgColorPicker" value="#f9f9f9" class="w-full h-10 rounded border border-gray-300 cursor-pointer">
-            </div>
-            
-            <div class="space-y-2">
-                <label class="block text-sm font-medium">文字色</label>
-                <input type="color" id="textColorPicker" value="#333333" class="w-full h-10 rounded border border-gray-300 cursor-pointer">
-            </div>
-            
-            <div class="space-y-2">
-                <label class="block text-sm font-medium">主色调</label>
-                <input type="color" id="primaryColorPicker" value="#ff5252" class="w-full h-10 rounded border border-gray-300 cursor-pointer">
-            </div>
-            
-            <div class="space-y-2">
-                <label class="block text-sm font-medium">烟花主色</label>
-                <input type="color" id="fireworkColorPicker" value="#ff5252" class="w-full h-10 rounded border border-gray-300 cursor-pointer">
-            </div>
-            
-            <button id="resetColorsBtn" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded transition-colors">
-                重置默认
-            </button>
+        <!-- 全屏观看氛围字 (模拟截图按钮) -->
+        <div class="footer-note">
+            <span>✨ 全屏观看 · 宠爱自己 ✨</span>
         </div>
     </div>
 
-    <!-- 主内容区 -->
-    <main class="flex-1 container mx-auto px-4 py-8 max-w-4xl">
-        <!-- 表白发布区 -->
-        <div class="bg-white rounded-xl shadow-md p-6 mb-8 transition-colors duration-300">
-            <h2 class="text-xl font-bold mb-4 text-primary">发布你的表白</h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium mb-2">表白内容</label>
-                    <textarea id="confessionContent" rows="3" placeholder="输入你的表白内容..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors resize-none"></textarea>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-2">署名 (可选)</label>
-                    <input type="text" id="confessionAuthor" placeholder="留下你的名字或匿名" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors">
-                </div>
-                <button id="submitConfessionBtn" class="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary/90 transition-colors">
-                    发布表白 <i class="fa fa-heart ml-1"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- 表白墙展示区 -->
-        <div id="confessionWall" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- 表白内容将通过JS动态添加 -->
-            <div class="confession-item bg-white rounded-xl shadow-md p-6 transition-colors duration-300 opacity-0 transform translate-y-4 animate-fade-in">
-                <div class="flex justify-between items-start mb-3">
-                    <h3 class="font-bold text-lg text-primary">匿名</h3>
-                    <span class="text-sm text-gray-500">刚刚</span>
-                </div>
-                <p class="text-gray-700 mb-4">这是第一条表白示例，快来发布你的吧！</p>
-                <button class="text-red-500 hover:text-red-700 text-sm delete-btn">
-                    <i class="fa fa-trash-o"></i> 删除
-                </button>
-            </div>
-        </div>
-    </main>
-
-    <!-- 烟花画布 -->
-    <canvas id="fireworksCanvas" class="fixed top-0 left-0 w-full h-full pointer-events-none z-10"></canvas>
-
-    <!-- 页脚 -->
-    <footer class="bg-white py-6 shadow-inner transition-colors duration-300">
-        <div class="container mx-auto px-4 text-center text-gray-500 text-sm">
-            <p>© 2026 梦幻表白墙 | 让每一份爱意都被看见</p>
-        </div>
-    </footer>
-
-    <!-- JavaScript 代码 -->
     <script>
-        // DOM元素
-        const colorSettingsPanel = document.getElementById('colorSettingsPanel');
-        const colorSettingsBtn = document.getElementById('colorSettingsBtn');
-        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-        const bgColorPicker = document.getElementById('bgColorPicker');
-        const textColorPicker = document.getElementById('textColorPicker');
-        const primaryColorPicker = document.getElementById('primaryColorPicker');
-        const fireworkColorPicker = document.getElementById('fireworkColorPicker');
-        const resetColorsBtn = document.getElementById('resetColorsBtn');
-        const saveImageBtn = document.getElementById('saveImageBtn');
-        const confessionWall = document.getElementById('confessionWall');
-        const confessionContent = document.getElementById('confessionContent');
-        const confessionAuthor = document.getElementById('confessionAuthor');
-        const submitConfessionBtn = document.getElementById('submitConfessionBtn');
-        const fireworksCanvas = document.getElementById('fireworksCanvas');
-        const ctx = fireworksCanvas.getContext('2d');
+        (function() {
+            // 祝福语库 (丰富一些，围绕“生日快乐/傅裕安”主题)
+            const blessings = [
+                "🥳 傅裕安", "🎂 生日快乐", "✨ 裕安", "💖 平安喜乐", 
+                "🌸 幸福美满", "🌟 心想事成", "🍰 甜蜜每一天", "🍀 好运连连",
+                "💫 永远开心", "🌹 被爱包围", "🎈 青春永驻", "💕 万事胜意",
+                "✨ 未来可期", "☀️ 笑口常开", "🎁 惊喜不断", "💗 有人宠你",
+                "🕯️ 许个愿吧", "👑 做自己的女王", "💐 裕安最棒", "🌺 美好如你",
+                "🍬 甜甜的", "🍭 快乐加倍", "💎 独一无二", "🌟 闪闪发光",
+                "🎵 天天好心情", "🍦 如夏般甜", "🍉 清爽一夏", "❄️ 如冬般暖",
+                "💞 被温柔以待", "💝 值得所有", "🌿 健康常在", "🏆 梦想成真",
+                "🥂 庆祝今天", "🦋 自由如风", "🌈 色彩斑斓", "🌻 向阳而生",
+                "傅裕安", "Happy Birthday", "Bonne fête", "Feliz cumple", "裕安", "🎂 傅裕安"
+            ];
 
-        // 设置画布尺寸
-        function resizeCanvas() {
-            fireworksCanvas.width = window.innerWidth;
-            fireworksCanvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-
-        // 颜色设置功能
-        colorSettingsBtn.addEventListener('click', () => {
-            colorSettingsPanel.classList.remove('translate-x-full');
-        });
-
-        closeSettingsBtn.addEventListener('click', () => {
-            colorSettingsPanel.classList.add('translate-x-full');
-        });
-
-        // 应用颜色设置
-        function applyColorSettings() {
-            document.body.style.setProperty('--tw-bg-background', bgColorPicker.value);
-            document.body.style.setProperty('--tw-text-text', textColorPicker.value);
-            document.body.style.setProperty('--tw-bg-primary', primaryColorPicker.value);
-            document.body.style.setProperty('--tw-text-primary', primaryColorPicker.value);
-            
-            // 更新Tailwind配置
-            document.documentElement.style.setProperty('--color-background', bgColorPicker.value);
-            document.documentElement.style.setProperty('--color-text', textColorPicker.value);
-            document.documentElement.style.setProperty('--color-primary', primaryColorPicker.value);
-        }
-
-        // 初始化颜色设置
-        document.documentElement.style.setProperty('--color-background', bgColorPicker.value);
-        document.documentElement.style.setProperty('--color-text', textColorPicker.value);
-        document.documentElement.style.setProperty('--color-primary', primaryColorPicker.value);
-
-        // 颜色选择器事件监听
-        bgColorPicker.addEventListener('input', applyColorSettings);
-        textColorPicker.addEventListener('input', applyColorSettings);
-        primaryColorPicker.addEventListener('input', applyColorSettings);
-
-        // 重置颜色
-        resetColorsBtn.addEventListener('click', () => {
-            bgColorPicker.value = '#f9f9f9';
-            textColorPicker.value = '#333333';
-            primaryColorPicker.value = '#ff5252';
-            fireworkColorPicker.value = '#ff5252';
-            applyColorSettings();
-        });
-
-        // 保存图片功能
-        saveImageBtn.addEventListener('click', () => {
-            html2canvas(document.body).then(canvas => {
-                const link = document.createElement('a');
-                link.download = '表白墙_' + new Date().toISOString().slice(0, 10) + '.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            });
-        });
-
-        // 表白发布功能
-        submitConfessionBtn.addEventListener('click', () => {
-            const content = confessionContent.value.trim();
-            const author = confessionAuthor.value.trim() || '匿名';
-
-            if (!content) {
-                alert('请输入表白内容！');
-                return;
+            // 爱心参数方程: x = 16 sin^3 t , y = 13cos t - 5cos 2t - 2cos 3t - cos 4t
+            function heartX(t) {
+                return 16 * Math.pow(Math.sin(t), 3);
+            }
+            function heartY(t) {
+                return 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
             }
 
-            // 创建表白项
-            const confessionItem = document.createElement('div');
-            confessionItem.className = 'confession-item bg-white rounded-xl shadow-md p-6 transition-colors duration-300 opacity-0 transform translate-y-4';
-            confessionItem.innerHTML = `
-                <div class="flex justify-between items-start mb-3">
-                    <h3 class="font-bold text-lg text-primary">${author}</h3>
-                    <span class="text-sm text-gray-500">${new Date().toLocaleString()}</span>
-                </div>
-                <p class="text-gray-700 mb-4">${content}</p>
-                <button class="text-red-500 hover:text-red-700 text-sm delete-btn">
-                    <i class="fa fa-trash-o"></i> 删除
-                </button>
-            `;
+            const container = document.getElementById('heartContainer');
+            let words = []; // 存储生成的span以便更新
 
-            // 添加到表白墙
-            confessionWall.prepend(confessionItem);
+            // 生成祝福语数量 (可调节密度)
+            const COUNT = 70; 
 
-            // 动画效果
-            setTimeout(() => {
-                confessionItem.classList.add('animate-fade-in');
-                confessionItem.classList.remove('opacity-0', 'transform', 'translate-y-4');
-            }, 10);
-
-            // 清空输入框
-            confessionContent.value = '';
-            confessionAuthor.value = '';
-
-            // 触发表白成功烟花
-            triggerFullScreenFireworks();
-        });
-
-        // 删除表白项
-        confessionWall.addEventListener('click', (e) => {
-            if (e.target.closest('.delete-btn')) {
-                const confessionItem = e.target.closest('.confession-item');
-                confessionItem.classList.add('opacity-0', 'transform', 'translate-y-4');
-                setTimeout(() => {
-                    confessionItem.remove();
-                }, 300);
-            }
-        });
-
-        // 烟花效果
-        let fireworks = [];
-        let animationId;
-
-        // 烟花类
-        class Firework {
-            constructor(x, y, color) {
-                this.x = x;
-                this.y = y;
-                this.color = color || fireworkColorPicker.value;
-                this.particles = [];
-                this.createParticles();
+            // 初始化创建所有span (一次性)
+            for (let i = 0; i < COUNT; i++) {
+                const span = document.createElement('span');
+                span.className = 'bless-word';
+                // 循环取祝福语
+                const text = blessings[i % blessings.length];
+                span.textContent = text;
+                // 添加随机旋转角度 (-7deg ~ 7deg) 更像手写
+                const rotate = (Math.random() * 14 - 7).toFixed(1);
+                span.style.transform = `rotate(${rotate}deg)`;
+                // 随机细微字体大小偏移
+                const baseSize = 18;
+                const sizeVar = Math.random() * 6 - 2; // -2 ~ 4
+                span.style.fontSize = (baseSize + sizeVar) + 'px';
+                // 随机颜色 (柔和的粉/紫/橙区间)
+                const hue = 320 + Math.random() * 40; // 320-360 粉红到粉紫, 也可以加点橙
+                const sat = 70 + Math.random() * 25; // 70-95%
+                const light = 55 + Math.random() * 25; // 55-80%
+                span.style.color = `hsl(${hue}, ${sat}%, ${light}%)`;
+                // 存起来以便定位
+                container.appendChild(span);
+                words.push(span);
             }
 
-            createParticles() {
-                const particleCount = Math.floor(Math.random()*30)+50;
-                for (let i = 0; i < particleCount; i++) {
-                    const angle = Math.random() * Math.PI * 2;
-                    const speed = Math.random()*5+2;
-                    this.particles.push({
-                        x: this.x,
-                        y: this.y,
-                        vx: Math.cos(angle) * speed,
-                        vy: Math.sin(angle) * speed,
-                        alpha: 1,
-                        decay: Math.random()*0.01+0.005
-                    });
+            // 根据容器大小重新计算爱心位置 (响应式)
+            function layoutHeart() {
+                // 获取容器实际尺寸 (宽高一致)
+                const rect = container.getBoundingClientRect();
+                const size = rect.width;  // 正方形边长
+
+                if (size === 0) return;
+
+                // 计算缩放和平移，让爱心完美居中并填满80%宽度
+                // x范围 [-16, 16] 跨度32, y范围 [-15, 5] 跨度20
+                const targetWidth = size * 0.8;     // 使用80%宽度
+                const scale = targetWidth / 32;      // 根据x跨度计算缩放因子 (x和y使用相同scale保持比例)
+
+                // 中心点
+                const centerX = size / 2;
+                const centerY = size / 2;
+
+                // y范围中心在 -5 (因为y从-15到5, 中心-5) 我们希望这个中心对准容器的垂直中心
+                // 所以偏移: top = centerY - (y + 5) * scale
+                // left = centerX + x * scale
+
+                for (let i = 0; i < words.length; i++) {
+                    const span = words[i];
+                    // t 均匀分布 0 到 2PI
+                    const t = (i / words.length) * Math.PI * 2;
+                    const x = heartX(t);
+                    const y = heartY(t);
+
+                    // 计算坐标
+                    const left = centerX + x * scale;
+                    const top = centerY - (y + 5) * scale;   // 因为y轴向下为正，减去(y+5)使爱心垂直居中
+
+                    span.style.left = left + 'px';
+                    span.style.top = top + 'px';
                 }
             }
 
-            update() {
-                this.particles.forEach(particle => {
-                    particle.x += particle.vx;
-                    particle.y += particle.vy;
-                    particle.vy += 0.05; // 重力
-                    particle.alpha -= particle.decay;
-                });
-                this.particles = this.particles.filter(particle => particle.alpha > 0);
-                return this.particles.length > 0;
-            }
+            // 初次布局
+            layoutHeart();
 
-            draw() {
-                this.particles.forEach(particle => {
-                    ctx.beginPath();
-                    ctx.arc(particle.x, particle.y, 2, 0, Math.PI * 2);
-                    ctx.fillStyle = `${this.color.replace('rgb', 'rgba').replace(')', `, ${particle.alpha})`)}`;
-                    ctx.fill();
-                });
-            }
-        }
-
-        // 触发全屏烟花
-        function triggerFullScreenFireworks() {
-            const fireworkCount = 10;
-            for (let i = 0; i < fireworkCount; i++) {
-                const x = Math.random() * window.innerWidth;
-                const y = Math.random() * window.innerHeight * 0.7;
-                fireworks.push(new Firework(x, y));
-            }
-        }
-
-        // 自动生成烟花
-        function autoGenerateFireworks() {
-            if (Math.random() < 0.02) {
-                const x = Math.random() * window.innerWidth;
-                const y = Math.random() * window.innerHeight * 0.5;
-                fireworks.push(new Firework(x, y));
-            }
-        }
-
-        // 动画循环
-        function animateFireworks() {
-            ctx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
-            
-            // 半透明背景用于拖影效果
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-            ctx.fillRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
-            
-            autoGenerateFireworks();
-            
-            // 更新并绘制烟花
-            fireworks = fireworks.filter(firework => {
-                const isAlive = firework.update();
-                if (isAlive) firework.draw();
-                return isAlive;
+            // 监听窗口大小变化，重新布局 (防抖优化)
+            let resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    layoutHeart();
+                }, 100);
             });
-            
-            animationId = requestAnimationFrame(animateFireworks);
-        }
-        animateFireworks();
 
-        // 点击触发烟花
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('#colorSettingsPanel') && !e.target.closest('#colorSettingsBtn')) {
-                fireworks.push(new Firework(e.clientX, e.clientY));
-            }
-        });
+            // 为了保险，在字体加载完后也可以重新布局 (有些浏览器渲染后尺寸微变)
+            window.addEventListener('load', layoutHeart);
 
-        // 导入html2canvas库用于截图
-        const html2canvasScript = document.createElement('script');
-        html2canvasScript.src = 'https://html2canvas.hertzen.com/dist/html2canvas.min.js';
-        document.head.appendChild(html2canvasScript);
-
-        // 添加动画样式
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(4px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            .animate-fade-in {
-                animation: fadeIn 0.5s ease-out forwards;
-            }
-        `;
-        document.head.appendChild(style);
+            // 可选：给一些祝福语加额外随机效果，已经加了随机颜色和旋转
+            // 额外让部分字轻微倾斜
+            words.forEach(span => {
+                // 再加一点点随机位移，使手写感更强 (不超过2px)
+                const shiftX = (Math.random() * 4 - 2).toFixed(1);
+                const shiftY = (Math.random() * 4 - 2).toFixed(1);
+                // 注意保留原有的旋转变换，加上位移
+                const originalTransform = span.style.transform; // 类似 rotate(...deg)
+                // 因为可能已经有rotate，我们追加translate
+                span.style.transform = `${originalTransform} translate(${shiftX}px, ${shiftY}px)`;
+            });
+        })();
     </script>
+
+    <!-- 注：字体回退方案，确保中文优雅 -->
+    <!-- 华文行楷在Windows通常为 STXingkai 或 华文行楷，Mac也有类似，加上KaiTi备用 -->
 </body>
 </html>
