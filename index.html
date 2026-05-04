@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>78没事干 ·</title>
-    <!-- 引入 Google Fonts 提升字体质感 -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <title>三点水</title>
     <style>
         * {
             margin: 0;
@@ -15,660 +13,786 @@
         }
 
         body {
-            min-height: 100vh;
-            background: radial-gradient(circle at 20% 30%, #e9f0e6, #c0ddbc);
-            font-family: 'Inter', system-ui, -apple-system, 'SF Pro Text', 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at 20% 30%, #cbe5cf, #9bc09b);
+            font-family: system-ui, -apple-system, 'Segoe UI', 'SF Pro Text', 'Inter', 'PingFang SC', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
             padding: 20px;
-            overflow-x: hidden;
-            position: relative;
         }
 
-        /* 灵动氛围 —— 微动态光影 */
-        .ambient-light {
-            position: fixed;
+        /* 液态玻璃整体容器 */
+        .phone-app {
+            max-width: 420px;
             width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            background: radial-gradient(800px circle at 30% 40%, rgba(210, 240, 170, 0.3), transparent 70%);
-            animation: breathGlow 8s infinite alternate;
-        }
-
-        @keyframes breathGlow {
-            0% { opacity: 0.3; transform: scale(1);}
-            100% { opacity: 0.8; transform: scale(1.08);}
-        }
-
-        /* 主容器：类似手机桌面，卡片列表风格 */
-        .home-screen {
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 10;
+            height: 700px;
+            background: rgba(248, 252, 240, 0.45);
+            backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            border-radius: 52px;
+            box-shadow: 0 30px 50px -12px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 245, 0.7);
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            position: relative;
+            transition: transform 0.2s cubic-bezier(0.2, 1.2, 0.4, 1);
         }
 
-        /* 状态栏简约模拟 */
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 12px;
-            font-size: 0.8rem;
-            font-weight: 590;
-            color: #2b4b2f;
-            letter-spacing: 0.2px;
-            background: rgba(255,255,240,0.3);
-            backdrop-filter: blur(20px);
-            border-radius: 30px;
-            margin-bottom: 8px;
+        .phone-app:active {
+            transform: scale(0.99);
         }
 
-        /* 可折叠/展开的卡片 — 灵动设计 */
-        .memo-card {
-            background: rgba(255, 255, 245, 0.7);
-            backdrop-filter: blur(25px);
-            border-radius: 48px;
-            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.05);
-            transition: all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            border: 1px solid rgba(255, 255, 220, 0.7);
-            overflow: hidden;
-            cursor: pointer;
+        /* 状态栏占位（无时间电量） */
+        .status-spacer {
+            height: 10px;
+            background: transparent;
         }
 
-        /* 卡片头部：始终可见 */
-        .card-header {
-            padding: 22px 24px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            transition: all 0.3s;
+        /* 头部 */
+        .contacts-header {
+            padding: 20px 20px 8px 20px;
         }
 
-        .avatar-circle {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #ffda88, #fcb045);
-            border-radius: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 12px 18px -8px rgba(0,0,0,0.2);
-            transition: transform 0.2s ease;
-        }
-
-        .avatar-circle svg {
-            width: 34px;
-            height: 34px;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-        }
-
-        .header-info {
-            flex: 1;
-        }
-
-        .buddy-name {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #1e3a2f;
-            letter-spacing: -0.3px;
-            line-height: 1.2;
-        }
-
-        .buddy-name span {
-            font-weight: 500;
-            font-size: 0.85rem;
-            background: rgba(60, 90, 50, 0.2);
-            padding: 2px 10px;
-            border-radius: 40px;
-            margin-left: 8px;
-        }
-
-        .memo-sub {
-            font-size: 0.7rem;
-            color: #5e7b5a;
-            margin-top: 4px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        /* 展开指示箭头 灵动旋转 */
-        .expand-icon {
-            background: rgba(0,0,0,0.08);
-            width: 36px;
-            height: 36px;
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
-        }
-
-        .expand-icon svg {
-            width: 20px;
-            height: 20px;
-            stroke: #3a5e3a;
-            stroke-width: 2;
-            fill: none;
-            transition: transform 0.3s;
-        }
-
-        /* 展开的内容区域 (默认折叠隐藏) */
-        .card-expand {
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            transition: max-height 0.55s cubic-bezier(0.33, 1, 0.68, 1), opacity 0.4s ease, padding 0.3s;
-            padding: 0 24px;
-        }
-
-        .memo-card.expanded .card-expand {
-            max-height: 360px;
-            opacity: 1;
-            padding: 0 24px 28px 24px;
-        }
-
-        .memo-card.expanded .expand-icon svg {
-            transform: rotate(180deg);
-        }
-
-        /* 内部精致控件 */
-        .detail-note {
-            background: rgba(230, 245, 215, 0.5);
-            border-radius: 32px;
-            padding: 16px 20px;
-            margin-top: 6px;
-            backdrop-filter: blur(8px);
-        }
-
-        .phone-field {
-            background: rgba(25, 45, 30, 0.2);
-            border-radius: 44px;
-            padding: 14px 20px;
-            margin: 12px 0;
+        .title-row {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            flex-wrap: wrap;
-            gap: 8px;
-            backdrop-filter: blur(4px);
         }
 
-        .phone-label {
-            font-size: 0.75rem;
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1D3A26;
+            letter-spacing: -0.5px;
+        }
+
+        /* 右侧字母索引条 (A–Z 滑动) */
+        .alphabet-scroll {
+            position: absolute;
+            right: 6px;
+            top: 100px;
+            bottom: 70px;
+            width: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            z-index: 20;
+            background: rgba(220, 235, 190, 0.3);
+            backdrop-filter: blur(16px);
+            border-radius: 60px;
+            padding: 8px 0;
+            user-select: none;
+        }
+
+        .alphabet-item {
+            font-size: 11px;
             font-weight: 600;
-            color: #506c48;
-            letter-spacing: 0.5px;
+            color: #3A6B3A;
+            text-align: center;
+            width: 22px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            border-radius: 30px;
+        }
+
+        .alphabet-item:active {
+            transform: scale(1.2);
+            background: #e9da9e;
+            color: #2b542b;
+        }
+
+        /* 联系人列表区域 */
+        .contacts-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 20px 20px 20px;
+            scroll-behavior: smooth;
+        }
+
+        .contacts-list::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        /* 分组标题 (只显示 S 组) */
+        .section-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #4C7A4A;
+            padding: 16px 0 6px 0;
+            letter-spacing: -0.2px;
+            background: transparent;
+        }
+
+        /* 单个联系人条目 — Q 弹卡片 */
+        .contact-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 12px;
+            margin: 6px 0;
+            background: rgba(245, 250, 230, 0.45);
+            backdrop-filter: blur(12px);
+            border-radius: 80px;
+            border: 0.5px solid rgba(255, 250, 180, 0.5);
+            transition: all 0.28s cubic-bezier(0.34, 1.3, 0.64, 1);
+            cursor: pointer;
+        }
+
+        .contact-row:active {
+            transform: scale(0.96);
+            background: rgba(235, 240, 200, 0.7);
+            box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.2);
+        }
+
+        .avatar-bubble {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(145deg, #ffdd99, #f5bc70);
+            border-radius: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 14px -6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .contact-name {
+            font-size: 18px;
+            font-weight: 590;
+            color: #1C3A26;
+        }
+
+        /* 详情弹窗 (Q弹进入动画) */
+        .detail-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(30, 45, 28, 0.55);
+            backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0.2s, opacity 0.25s ease;
+        }
+
+        .detail-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .detail-card {
+            width: 330px;
+            background: rgba(250, 252, 238, 0.92);
+            backdrop-filter: blur(40px);
+            border-radius: 64px;
+            padding: 32px 24px 36px;
+            border: 1px solid rgba(255, 245, 180, 0.7);
+            box-shadow: 0 30px 50px -15px black;
+            transform: scale(0.88) translateY(20px);
+            transition: transform 0.45s cubic-bezier(0.34, 1.3, 0.55, 1), opacity 0.3s;
+            opacity: 0;
+        }
+
+        .detail-overlay.active .detail-card {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .detail-avatar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .big-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ffdd99, #fcb35c);
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.2);
+        }
+
+        .detail-name {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            color: #2B4D2A;
+            margin: 12px 0 20px 0;
+        }
+
+        .phone-panel {
+            background: rgba(195, 215, 160, 0.4);
+            border-radius: 60px;
+            padding: 16px 20px;
+            text-align: center;
+            backdrop-filter: blur(8px);
+            margin-bottom: 18px;
+        }
+
+        .phone-label-mini {
+            font-size: 11px;
+            color: #56784A;
+            font-weight: 500;
         }
 
         .phone-number {
-            font-family: 'Inter', monospace;
-            font-size: 1.45rem;
-            font-weight: 650;
-            color: #1d3929;
-            letter-spacing: 0.5px;
+            font-size: 22px;
+            font-weight: 700;
+            font-family: monospace;
+            letter-spacing: 0.8px;
+            color: #1F4028;
+            margin-top: 6px;
             transition: all 0.2s;
         }
 
-        .hidden-blur {
+        .blur-phone {
             filter: blur(6px);
-            transition: filter 0.2s ease;
-        }
-        .revealed-number {
-            filter: blur(0);
         }
 
-        /* 验证码输入区 / 灵动玻璃风格 */
-        .code-section {
+        .code-row {
             display: flex;
-            gap: 12px;
-            align-items: center;
-            margin: 12px 0 8px;
-            background: rgba(255,255,245,0.6);
-            border-radius: 80px;
+            gap: 10px;
+            background: rgba(230, 240, 200, 0.7);
+            border-radius: 60px;
             padding: 4px 4px 4px 20px;
-            backdrop-filter: blur(12px);
-            border: 0.5px solid rgba(255,255,210,0.8);
+            margin: 14px 0 18px;
+            align-items: center;
         }
 
-        .code-section input {
+        .code-row input {
             flex: 1;
             background: transparent;
             border: none;
             padding: 12px 0;
-            font-size: 1rem;
-            font-weight: 500;
-            color: #1e3a2a;
-            outline: none;
+            font-size: 16px;
             font-family: monospace;
+            outline: none;
+            color: #2D542A;
+            font-weight: 500;
         }
 
-        .code-section input::placeholder {
-            color: #94a98b;
-            font-weight: 400;
-        }
-
-        .unlock-btn {
-            background: #f5bc70;
+        .unlock-glass {
+            background: #F9CF7C;
             border: none;
             padding: 8px 22px;
             border-radius: 60px;
             font-weight: 600;
-            color: #2a452a;
-            font-size: 0.9rem;
-            transition: 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            color: #2D542A;
+            transition: 0.12s linear;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
-        .unlock-btn:active {
+        .unlock-glass:active {
+            transform: scale(0.94);
+            background: #F5BC54;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 14px;
+            margin: 8px 0 12px;
+        }
+
+        .action-glass {
+            flex: 1;
+            background: rgba(185, 205, 140, 0.6);
+            backdrop-filter: blur(8px);
+            border: none;
+            padding: 12px 0;
+            border-radius: 60px;
+            font-weight: 590;
+            font-size: 15px;
+            color: #2E562A;
+            cursor: pointer;
+            transition: 0.12s;
+        }
+
+        .action-glass:active {
+            transform: scale(0.95);
+            background: #e0cd8a;
+        }
+
+        .close-detail-glass {
+            width: 100%;
+            background: rgba(110, 120, 80, 0.45);
+            border: none;
+            padding: 10px;
+            border-radius: 50px;
+            color: #3D623A;
+            font-weight: 500;
+            margin-top: 8px;
+            transition: 0.1s;
+        }
+
+        .close-detail-glass:active {
             transform: scale(0.96);
         }
 
-        .feedback-msg {
-            font-size: 0.7rem;
-            text-align: center;
-            margin-top: 14px;
-            color: #3a6740;
-            font-weight: 500;
-            background: rgba(240, 255, 220, 0.6);
-            padding: 6px 12px;
-            border-radius: 60px;
-            backdrop-filter: blur(4px);
+        /* 底部极简三语 + 作者 */
+        .bottom-micro {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 20px 16px;
+            background: rgba(215, 230, 180, 0.25);
+            backdrop-filter: blur(12px);
+            border-top: 0.5px solid rgba(210, 225, 150, 0.5);
         }
 
-        /* 灵动点击涟漪 (微光扩散) */
-        .ripple-effect {
+        .lang-micro {
+            display: flex;
+            gap: 8px;
+        }
+
+        .lang-micro span {
+            font-size: 11px;
+            font-weight: 500;
+            padding: 3px 10px;
+            border-radius: 30px;
+            background: rgba(145, 170, 100, 0.35);
+            cursor: pointer;
+            transition: 0.1s;
+            color: #2F5230;
+        }
+
+        .lang-micro span.active {
+            background: #EDD494;
+            color: #1D3A1D;
+        }
+
+        .author-micro {
+            font-size: 10px;
+            color: #5F8257;
+            opacity: 0.75;
+            letter-spacing: 0.3px;
+        }
+
+        /* 涟漪 Q弹特效 */
+        .ripple-bubble {
             position: fixed;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,235,150,0.6) 0%, rgba(255,200,100,0) 70%);
             pointer-events: none;
+            background: radial-gradient(circle, rgba(255, 240, 140, 0.7), rgba(200, 225, 120, 0));
             transform: scale(0);
-            animation: rippleAnim 0.6s ease-out forwards;
-            z-index: 999;
+            animation: popRipple 0.55s ease-out forwards;
+            z-index: 1100;
         }
 
-        @keyframes rippleAnim {
-            0% { transform: scale(0); opacity: 0.7;}
-            100% { transform: scale(6); opacity: 0;}
+        @keyframes popRipple {
+            0% { transform: scale(0); opacity: 0.7; }
+            100% { transform: scale(5); opacity: 0; }
         }
-
-        /* 优雅音乐控制条 */
-        .music-bar {
-            background: rgba(245, 255, 235, 0.6);
-            backdrop-filter: blur(30px);
-            border-radius: 40px;
-            padding: 8px 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 0.7rem;
-            font-weight: 500;
-            color: #2b5530;
-            border: 0.5px solid rgba(255,245,170,0.8);
-            margin-top: 8px;
-        }
-        .music-btn {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 4px 12px;
-            border-radius: 40px;
-            transition: 0.2s;
-            color: #335f3a;
-        }
-        .music-btn:active { transform: scale(0.9);}
     </style>
 </head>
 <body>
-<div class="ambient-light"></div>
 
-<div class="home-screen">
-    <!-- 仿灵动状态栏 -->
-    <div class="status-bar">
-        <span>91.78</span>
-        <span>虾七八</span>
-    </div>
-
-    <!-- 可折叠的同学备忘录卡片 - 沙鸡龙 -->
-    <div class="memo-card" id="memoCard">
-        <div class="card-header">
-            <div class="avatar-circle">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 13c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5z" fill="#FFE9B0" stroke="#F0A500" stroke-width="0.8"/>
-                </svg>
-            </div>
-            <div class="header-info">
-                <div class="buddy-name">沙鸡龙 <span>备注 彭于晏</span></div>
-                <div class="memo-sub">✨ 78没事干 · 轻触展开</div>
-            </div>
-            <div class="expand-icon">
-                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            </div>
-        </div>
-
-        <!-- 展开区域：号码获取面板 -->
-        <div class="card-expand">
-            <div class="detail-note">
-                <div class="phone-field">
-                    <span class="phone-label">📞 彭于晏电话</span>
-                    <span class="phone-number hidden-blur" id="phoneNumberDisplay">•••</span>
-                </div>
-                <div class="code-section">
-                    <input type="password" id="codeInput" placeholder="输入暗号「78」" maxlength="4" inputmode="numeric">
-                    <button class="unlock-btn" id="unlockBtn">获取号码</button>
-                </div>
-                <div id="feedbackMsg" class="feedback-msg">🍃 轻点卡片展开 · 正确暗号78显示号码</div>
-            </div>
+<div class="phone-app">
+    <div class="status-spacer"></div>
+    <div class="contacts-header">
+        <div class="title-row">
+            <span class="page-title">联系人</span>
         </div>
     </div>
 
-    <!-- 灵动音乐组件 - 轻快备忘录BGM 雨声+钢琴氛围 -->
-    <div class="music-bar">
-        <span>🎵  ·</span>
-        <button class="music-btn" id="musicToggleBtn">▶️ 播放</button>
+    <!-- 右侧字母滑动条 (A-Z 含S) -->
+    <div class="alphabet-scroll" id="alphabetScroll">
+        <!-- 动态生成 A-Z -->
     </div>
-    <div style="font-size: 10px; text-align: center; color: #53804b; margin-top: 8px; opacity:0.7;">作者-清 · 三点水 | 同学专享</div>
+
+    <!-- 联系人列表: 只展示沙鸡龙，位于 S 组 -->
+    <div class="contacts-list" id="contactsList">
+        <div class="section-title" id="sectionS">S</div>
+        <div class="contact-row" id="contactShajilong">
+            <div class="avatar-bubble">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3D5C3A" stroke-width="1.2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                </svg>
+            </div>
+            <span class="contact-name" id="contactNameLabel">沙鸡龙</span>
+        </div>
+    </div>
+
+    <!-- 底部：三语切换极小 + 作者 -->
+    <div class="bottom-micro">
+        <div class="lang-micro" id="langGroup">
+            <span data-lang="zh">简</span>
+            <span data-lang="en">En</span>
+            <span data-lang="yue">粤</span>
+        </div>
+        <div class="author-micro">清 · 三点水</div>
+    </div>
+</div>
+
+<!-- 详情浮层 -->
+<div id="detailOverlay" class="detail-overlay">
+    <div class="detail-card">
+        <div class="detail-avatar">
+            <div class="big-avatar">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#4A663A" stroke-width="1.2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                </svg>
+            </div>
+        </div>
+        <div class="detail-name" id="detailBuddyName">沙鸡龙</div>
+        <div class="phone-panel">
+            <div class="phone-label-mini">📞彭于晏 </div>
+            <div class="phone-number blur-phone" id="detailPhoneSpan">???????</div>
+        </div>
+        <div class="code-row">
+            <input type="password" id="secretCode" placeholder="验证码 78" maxlength="4" inputmode="numeric">
+            <button class="unlock-glass" id="unlockPhoneBtn">获取号码</button>
+        </div>
+        <div class="action-group">
+            <button class="action-glass" id="copyPhoneBtn">📋 复制号码</button>
+        </div>
+        <button class="close-detail-glass" id="closeDetailBtn">关闭</button>
+    </div>
 </div>
 
 <script>
-    // ================= 灵动卡片展开/折叠 + 涟漪特效 ==================
-    const memoCard = document.getElementById('memoCard');
-    const expandIcon = document.querySelector('.expand-icon');
-    
-    // 核心电话逻辑
+    // ======================= 真实号码配置 =======================
     const REAL_PHONE = "不知道";
-    const CORRECT_CODE = "78";
-    
-    let isUnlocked = false;
-    const phoneSpan = document.getElementById('phoneNumberDisplay');
-    const codeInput = document.getElementById('codeInput');
-    const unlockBtn = document.getElementById('unlockBtn');
-    const feedbackDiv = document.getElementById('feedbackMsg');
-    
-    // 更新号码显示
-    function updatePhoneUI() {
-        if (isUnlocked) {
-            phoneSpan.textContent = REAL_PHONE;
-            phoneSpan.classList.remove('hidden-blur');
-            phoneSpan.classList.add('revealed-number');
+    let isNumberRevealed = false;     // 号码是否已解锁
+    let currentLang = 'zh';
+
+    // 多语言词库 (只保留必要字段)
+    const langDict = {
+        zh: {
+            pageTitle: "联系人",
+            contactName: "沙鸡龙",
+            detailName: "沙鸡龙",
+            phoneLabel: "📞 同学专线",
+            hiddenNum: "????????",
+            placeholderCode: "验证码 78",
+            getBtn: "获取号码",
+            copyBtn: "📋 复制号码",
+            closeBtn: "关闭",
+            copyToastPre: "✅ 号码已复制: ",
+            wrongCode: "❌ 暗号错误，试试 78",
+            successMsg: "🔓 号码已显示",
+            sectionS: "S"
+        },
+        en: {
+            pageTitle: "Contacts",
+            contactName: "Sha Jilong",
+            detailName: "Sha Jilong",
+            phoneLabel: "📞 Class Line",
+            hiddenNum: "????????",
+            placeholderCode: "Code 78",
+            getBtn: "Reveal",
+            copyBtn: "📋 Copy Number",
+            closeBtn: "Close",
+            copyToastPre: "✅ Copied: ",
+            wrongCode: "❌ Wrong code, try 78",
+            successMsg: "🔓 Number revealed",
+            sectionS: "S"
+        },
+        yue: {
+            pageTitle: "聯絡人",
+            contactName: "沙雞龍",
+            detailName: "沙雞龍",
+            phoneLabel: "📞 同學專線",
+            hiddenNum: "????????",
+            placeholderCode: "密碼 78",
+            getBtn: "攞號碼",
+            copyBtn: "📋 複製號碼",
+            closeBtn: "閂閉",
+            copyToastPre: "✅ 號碼已複製: ",
+            wrongCode: "❌ 暗號錯咗，試下78",
+            successMsg: "🔓 號碼顯示咗",
+            sectionS: "S"
+        }
+    };
+
+    // DOM 元素
+    const pageTitleSpan = document.querySelector('.page-title');
+    const contactNameSpan = document.getElementById('contactNameLabel');
+    const sectionSElem = document.getElementById('sectionS');
+    const detailBuddyNameSpan = document.getElementById('detailBuddyName');
+    const detailPhoneSpan = document.getElementById('detailPhoneSpan');
+    const secretCodeInput = document.getElementById('secretCode');
+    const unlockBtn = document.getElementById('unlockPhoneBtn');
+    const copyBtn = document.getElementById('copyPhoneBtn');
+    const closeDetailBtn = document.getElementById('closeDetailBtn');
+    const detailOverlay = document.getElementById('detailOverlay');
+    const alphabetContainer = document.getElementById('alphabetScroll');
+
+    // 更新全部UI文字
+    function updateUILanguage() {
+        const dict = langDict[currentLang];
+        pageTitleSpan.innerText = dict.pageTitle;
+        contactNameSpan.innerText = dict.contactName;
+        sectionSElem.innerText = dict.sectionS;
+        detailBuddyNameSpan.innerText = dict.detailName;
+        secretCodeInput.placeholder = dict.placeholderCode;
+        unlockBtn.innerText = dict.getBtn;
+        copyBtn.innerText = dict.copyBtn;
+        closeDetailBtn.innerText = dict.closeBtn;
+        // 号码显示（未解锁时根据语言显示问号占位）
+        if (!isNumberRevealed) {
+            detailPhoneSpan.innerText = dict.hiddenNum;
+            detailPhoneSpan.classList.add('blur-phone');
         } else {
-            phoneSpan.textContent = "••• ••• ••••";
-            phoneSpan.classList.add('hidden-blur');
-            phoneSpan.classList.remove('revealed-number');
+            detailPhoneSpan.innerText = REAL_PHONE;
+            detailPhoneSpan.classList.remove('blur-phone');
         }
     }
-    
-    // 反馈提示灵动
-    function setMessage(msg, isError = false) {
-        feedbackDiv.textContent = msg;
-        feedbackDiv.style.background = isError ? "rgba(255,225,200,0.8)" : "rgba(215,245,190,0.8)";
-        feedbackDiv.style.color = isError ? "#a3492a" : "#2a6230";
-        setTimeout(() => {
-            if(!isUnlocked && feedbackDiv.textContent === msg) {
-                feedbackDiv.textContent = "🍃 轻点卡片展开 · 正确暗号78显示号码";
-                feedbackDiv.style.background = "rgba(240, 255, 220, 0.6)";
-                feedbackDiv.style.color = "#3a6740";
-            } else if(isUnlocked && feedbackDiv.textContent === msg) {
-                feedbackDiv.textContent = "✅ 号码已解锁 · 买鸡 📞";
-                feedbackDiv.style.background = "rgba(200, 235, 170, 0.7)";
-            }
-        }, 2000);
+
+    // 涟漪特效 (Q弹)
+    function addRipple(x, y) {
+        const ripple = document.createElement('div');
+        ripple.className = 'ripple-bubble';
+        ripple.style.left = (x - 24) + 'px';
+        ripple.style.top = (y - 24) + 'px';
+        ripple.style.width = '48px';
+        ripple.style.height = '48px';
+        document.body.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 550);
     }
-    
-    // 解锁逻辑 + 灵动反馈
+
+    // 显示浮层并重置解锁状态 (号码显示问号)
+    function openDetail() {
+        const dict = langDict[currentLang];
+        isNumberRevealed = false;
+        detailPhoneSpan.innerText = dict.hiddenNum;
+        detailPhoneSpan.classList.add('blur-phone');
+        secretCodeInput.value = '';
+        detailOverlay.classList.add('active');
+
+        // 让卡片从内部产生弹性涟漪 (更有Q弹感)
+        const cardRect = document.querySelector('.detail-card')?.getBoundingClientRect();
+        if (cardRect) addRipple(cardRect.left + cardRect.width/2, cardRect.top + 40);
+    }
+
+    // 关闭浮层
+    function closeDetail() {
+        detailOverlay.classList.remove('active');
+        isNumberRevealed = false;   // 下次打开还是问号
+    }
+
+    // 解锁号码 (输入78)
     function handleUnlock() {
-        if (isUnlocked) {
-            setMessage(`号码已显示: ${REAL_PHONE}`, false);
-            createRippleEffectFromEvent();
+        const inputCode = secretCodeInput.value.trim();
+        const dict = langDict[currentLang];
+        if (inputCode === "78") {
+            isNumberRevealed = true;
+            detailPhoneSpan.innerText = REAL_PHONE;
+            detailPhoneSpan.classList.remove('blur-phone');
+            // 灵动成功提示 (非alert 更Q)
+            const tip = document.createElement('div');
+            tip.innerText = dict.successMsg;
+            tip.style.position = 'fixed';
+            tip.style.bottom = '30%';
+            tip.style.left = '50%';
+            tip.style.transform = 'translateX(-50%)';
+            tip.style.backgroundColor = 'rgba(60,90,50,0.85)';
+            tip.style.backdropFilter = 'blur(20px)';
+            tip.style.color = '#FFF3CF';
+            tip.style.padding = '6px 20px';
+            tip.style.borderRadius = '60px';
+            tip.style.fontSize = '14px';
+            tip.style.fontWeight = '500';
+            tip.style.zIndex = '1200';
+            tip.style.pointerEvents = 'none';
+            document.body.appendChild(tip);
+            setTimeout(() => tip.remove(), 1500);
+        } else {
+            // 错误时抖动 + 错误提示
+            const phonePanel = document.querySelector('.phone-panel');
+            if (phonePanel) {
+                phonePanel.classList.add('shake-animation');
+                setTimeout(() => phonePanel.classList.remove('shake-animation'), 400);
+            }
+            const errTip = document.createElement('div');
+            errTip.innerText = dict.wrongCode;
+            errTip.style.position = 'fixed';
+            errTip.style.bottom = '30%';
+            errTip.style.left = '50%';
+            errTip.style.transform = 'translateX(-50%)';
+            errTip.style.backgroundColor = 'rgba(160,70,50,0.85)';
+            errTip.style.backdropFilter = 'blur(20px)';
+            errTip.style.color = '#FFEED0';
+            errTip.style.padding = '6px 20px';
+            errTip.style.borderRadius = '60px';
+            errTip.style.fontSize = '14px';
+            errTip.style.zIndex = '1200';
+            document.body.appendChild(errTip);
+            setTimeout(() => errTip.remove(), 1500);
+        }
+        // 增加涟漪反馈
+        const rectBtn = unlockBtn.getBoundingClientRect();
+        addRipple(rectBtn.left + rectBtn.width/2, rectBtn.top + rectBtn.height/2);
+    }
+
+    // 复制号码 (只有解锁后才能复制真实号码)
+    function handleCopy() {
+        const dict = langDict[currentLang];
+        if (!isNumberRevealed) {
+            const warnTip = document.createElement('div');
+            warnTip.innerText = dict.wrongCode;
+            warnTip.style.position = 'fixed';
+            warnTip.style.bottom = '30%';
+            warnTip.style.left = '50%';
+            warnTip.style.transform = 'translateX(-50%)';
+            warnTip.style.backgroundColor = 'rgba(150,70,50,0.9)';
+            warnTip.style.backdropFilter = 'blur(20px)';
+            warnTip.style.color = '#FFF2CF';
+            warnTip.style.padding = '8px 22px';
+            warnTip.style.borderRadius = '60px';
+            warnTip.style.fontSize = '13px';
+            warnTip.style.zIndex = '1200';
+            document.body.appendChild(warnTip);
+            setTimeout(() => warnTip.remove(), 1300);
+            // 抖动效果
+            const phonePanel = document.querySelector('.phone-panel');
+            if (phonePanel) {
+                phonePanel.classList.add('shake-animation');
+                setTimeout(() => phonePanel.classList.remove('shake-animation'), 400);
+            }
             return;
         }
-        const code = codeInput.value.trim();
-        if (code === CORRECT_CODE) {
-            isUnlocked = true;
-            updatePhoneUI();
-            setMessage(`✅ 暗号正确！沙鸡龙号码 ${REAL_PHONE} 已显现`, false);
-            // 额外灵动闪光
-            phoneSpan.style.transition = "all 0.2s";
-            phoneSpan.style.textShadow = "0 0 6px gold";
-            setTimeout(() => phoneSpan.style.textShadow = "", 500);
-            // 清空输入框，给人清爽感
-            codeInput.value = "";
-            // 播放一个轻微成功感（无音频权限，用视觉涟漪）
-            createRippleEffectFromEvent();
-        } else {
-            setMessage(`⚠️ 暗号“${code || '空'}”不对哦，试试78`, true);
-            // 错误时晃动弹窗
-            const phoneField = document.querySelector('.phone-field');
-            if(phoneField) {
-                phoneField.style.transform = "translateX(4px)";
-                setTimeout(() => phoneField.style.transform = "", 100);
-                setTimeout(() => phoneField.style.transform = "translateX(-3px)", 150);
-                setTimeout(() => phoneField.style.transform = "", 250);
-            }
-            createRippleEffectFromEvent(true);
+        // 已解锁，复制号码
+        navigator.clipboard.writeText(REAL_PHONE).then(() => {
+            const toastMsg = dict.copyToastPre + REAL_PHONE;
+            const copyTip = document.createElement('div');
+            copyTip.innerText = toastMsg;
+            copyTip.style.position = 'fixed';
+            copyTip.style.bottom = '25%';
+            copyTip.style.left = '50%';
+            copyTip.style.transform = 'translateX(-50%)';
+            copyTip.style.backgroundColor = 'rgba(70,100,55,0.85)';
+            copyTip.style.backdropFilter = 'blur(20px)';
+            copyTip.style.color = '#FFF7DF';
+            copyTip.style.padding = '6px 22px';
+            copyTip.style.borderRadius = '60px';
+            copyTip.style.fontSize = '14px';
+            copyTip.style.zIndex = '1200';
+            document.body.appendChild(copyTip);
+            setTimeout(() => copyTip.remove(), 1500);
+            addRipple(event.clientX, event.clientY);
+        }).catch(() => {
+            alert("复制失败，请手动复制");
+        });
+    }
+
+    // 构建右侧字母索引 (A-Z)
+    function buildAlphabet() {
+        const letters = [];
+        for (let i = 65; i <= 90; i++) {
+            letters.push(String.fromCharCode(i));
         }
+        alphabetContainer.innerHTML = '';
+        letters.forEach(letter => {
+            const span = document.createElement('div');
+            span.className = 'alphabet-item';
+            span.innerText = letter;
+            span.setAttribute('data-letter', letter);
+            span.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // 只有 S 组实际存在联系人，但如果用户点击任意字母也可滚动到 S 的位置，增强交互
+                if (letter === 'S') {
+                    const sectionElem = document.getElementById('sectionS');
+                    if (sectionElem) {
+                        sectionElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                } else {
+                    // 其他字母因为没有实际联系人，让列表滚动到顶部并且给一个轻微震动提示
+                    const listContainer = document.querySelector('.contacts-list');
+                    if (listContainer) listContainer.scrollTop = 0;
+                    const tipNo = document.createElement('div');
+                    tipNo.innerText = `📭 暂无${letter}开头的联系人`;
+                    tipNo.style.position = 'fixed';
+                    tipNo.style.bottom = '30%';
+                    tipNo.style.left = '50%';
+                    tipNo.style.transform = 'translateX(-50%)';
+                    tipNo.style.backgroundColor = 'rgba(80,80,60,0.8)';
+                    tipNo.style.backdropFilter = 'blur(20px)';
+                    tipNo.style.padding = '6px 16px';
+                    tipNo.style.borderRadius = '40px';
+                    tipNo.style.fontSize = '12px';
+                    tipNo.style.color = '#F9EFCF';
+                    tipNo.style.zIndex = '1200';
+                    document.body.appendChild(tipNo);
+                    setTimeout(() => tipNo.remove(), 1000);
+                }
+                // 给触摸点加涟漪
+                addRipple(e.clientX, e.clientY);
+            });
+            alphabetContainer.appendChild(span);
+        });
+        // 高亮 S 的样式小提示但不强制
+        const sElement = Array.from(alphabetContainer.children).find(el => el.innerText === 'S');
+        if (sElement) sElement.style.fontWeight = '800';
     }
-    
-    // 全局涟漪特效 (灵动点击反馈)
-    function createRippleEffectFromEvent(isError = false) {
-        // 从按钮或者当前点击生成涟漪，为了视觉，我们基于卡片中央或者鼠标位置，但这里用默认最后点击坐标（如果没有保存就用卡片中心）
-        // 在这里做个默认: 在卡片内生成一个优美扩散
-        const rect = memoCard.getBoundingClientRect();
-        const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 3;
-        addRipple(x, y, isError ? '#ffc285' : '#ffecaa');
+
+    // 三语切换绑定
+    function bindLanguageSwitcher() {
+        const langOptions = document.querySelectorAll('#langGroup span');
+        langOptions.forEach(opt => {
+            opt.addEventListener('click', (e) => {
+                const langVal = opt.getAttribute('data-lang');
+                if (langVal === 'zh') currentLang = 'zh';
+                else if (langVal === 'en') currentLang = 'en';
+                else if (langVal === 'yue') currentLang = 'yue';
+                updateUILanguage();
+                langOptions.forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                addRipple(e.clientX, e.clientY);
+                // 如果浮层开启且号码未解锁，同步占位文字
+                if (detailOverlay.classList.contains('active') && !isNumberRevealed) {
+                    detailPhoneSpan.innerText = langDict[currentLang].hiddenNum;
+                } else if (detailOverlay.classList.contains('active') && isNumberRevealed) {
+                    detailPhoneSpan.innerText = REAL_PHONE;
+                }
+            });
+        });
+        // 默认简体高亮
+        document.querySelector('#langGroup span[data-lang="zh"]').classList.add('active');
     }
-    
-    function addRipple(x, y, colorHint = '#ffecaa') {
-        const rippleDiv = document.createElement('div');
-        rippleDiv.classList.add('ripple-effect');
-        rippleDiv.style.left = `${x - 20}px`;
-        rippleDiv.style.top = `${y - 20}px`;
-        rippleDiv.style.width = '40px';
-        rippleDiv.style.height = '40px';
-        rippleDiv.style.background = `radial-gradient(circle, ${colorHint} 0%, rgba(255,210,90,0) 70%)`;
-        document.body.appendChild(rippleDiv);
-        setTimeout(() => {
-            rippleDiv.remove();
-        }, 600);
-    }
-    
-    // 监听点击卡片任意位置（除了按钮区域可能会干扰解锁按钮触发展开，需要做好权衡）
-    // 需求: 点击卡片头部展开/折叠，同时按钮区域独立触发号码获取。完美灵动交互。
-    let isExpanded = false;
-    const cardHeader = document.querySelector('.card-header');
-    
-    function toggleCard(e) {
-        // 防止点到内部按钮或输入框导致冒泡冲突：如果目标本身是按钮或者输入框/其父级包含unlock相关，就不触发展开折叠
-        let target = e.target;
-        let isBtn = target.closest('.unlock-btn') || target.closest('#codeInput') || target.closest('.code-section');
-        if (isBtn) return;  // 按钮交互时不触发卡片折叠
+
+    // 事件绑定
+    document.getElementById('contactShajilong').addEventListener('click', (e) => {
         e.stopPropagation();
-        memoCard.classList.toggle('expanded');
-        isExpanded = memoCard.classList.contains('expanded');
-        // 灵动微震动反馈
-        const icon = document.querySelector('.expand-icon');
-        if (icon) {
-            icon.style.transform = isExpanded ? 'scale(1.1)' : 'scale(1)';
-            setTimeout(() => { if(icon) icon.style.transform = ''; }, 200);
-        }
-        // 额外涟漪
-        const rect = memoCard.getBoundingClientRect();
-        addRipple(rect.left + rect.width - 40, rect.top + 30, '#f5e2a0');
-    }
-    
-    // 绑定卡片头部点击展开/折叠
-    if(cardHeader) {
-        cardHeader.addEventListener('click', toggleCard);
-    }
-    // 让展开图标也有点灵动的额外效果
-    expandIcon?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        memoCard.classList.toggle('expanded');
-        isExpanded = memoCard.classList.contains('expanded');
-        const rect = expandIcon.getBoundingClientRect();
-        addRipple(rect.left + 18, rect.top + 18, '#ffe7b0');
+        openDetail();
+        const rect = e.currentTarget.getBoundingClientRect();
+        addRipple(rect.left + rect.width/2, rect.top + rect.height/2);
     });
-    
-    // 按钮事件
     unlockBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         handleUnlock();
-        // 增加涟漪点
-        const btnRect = unlockBtn.getBoundingClientRect();
-        addRipple(btnRect.left + btnRect.width/2, btnRect.top + btnRect.height/2, '#f7d48a');
     });
-    // 回车解锁
-    codeInput.addEventListener('keypress', (e) => {
-        if(e.key === 'Enter') {
-            e.stopPropagation();
-            handleUnlock();
-            addRipple(codeInput.getBoundingClientRect().left + 10, codeInput.getBoundingClientRect().top + 20, '#ead494');
-        }
-    });
-    
-    // 初始化号码界面
-    updatePhoneUI();
-    
-    // 默认卡片是折叠状态，保持优雅
-    memoCard.classList.remove('expanded');
-    isExpanded = false;
-    
-    // ========== 背景音乐：灵动轻音乐（符合colorOS灵动感，纯音钢琴+水滴氛围）==========
-    // 使用 Web Audio 或者 Audio 对象。考虑到浏览器自动策略，创建后用户必须交互才能播放。
-    // 为了“搭配一首音乐”要求，优雅使用 Audio 元素，初始加载资源但不自动播放，通过用户点击播放按钮激活。
-    // 音乐源使用 无版权/可商用 的轻量、清新风格（基于网络公共资源，生成内嵌一个 OGG 不太现实，但可以用一个来自 dynamic 的音符？
-    // 但确保体验，采用浏览器支持的 Web Audio 合成一段有氛围的短旋律? 但需求是音乐，最好是现成音频。为了稳定且无网络请求更好，使用一个基于 Web Audio API 产生的持续“自然水声+钢琴”太复杂，但可以使用 Audio 元素播放一段CC0音乐片段。
-    // 最好的兼容：嵌入一个隐藏的 audio 播放轻音乐链接，但为了避免外链失效，用 Web Audio 简单生成氛围和弦？太复杂。我们用最安全方式：内置 base64 没有，最好使用可访问的公开音频，但确保可靠性：我生成一个简单的 Audio 元素，指向一个公开授权音乐？
-    // 风险：跨域或链接失效。提供一个轻量旋律的 mic ？不用；干脆用 HTMLAudioElement 播放一段内置的短音乐（无中生有不可能）。优雅用法：使用 Web Audio API 生成柔和的纯音（类似钢琴音符循环），完全无网络开销，且灵动。
-    // 这样用户点击播放就开启一个舒缓的氛围琶音，符合“备忘录音乐”轻灵感。
-    let audioCtx = null;
-    let isPlaying = false;
-    let currentOsc = null;
-    let gainNode = null;
-    let musicInterval = null;
-    const musicBtn = document.getElementById('musicToggleBtn');
-    
-    function initAudio() {
-        if(audioCtx) return;
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        gainNode = audioCtx.createGain();
-        gainNode.gain.value = 0.25;
-        gainNode.connect(audioCtx.destination);
-    }
-    
-    // 播放很灵动的氛围旋律 (轻微爵士钢琴风格循环 简单和声)
-    function playAmbientMusic() {
-        if(!audioCtx) initAudio();
-        if(audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-        if(isPlaying) return;
-        isPlaying = true;
-        musicBtn.innerHTML = '⏸️ 暂停';
-        // 每隔3.5秒播放一组柔和音符
-        let notes = [
-            {freq: 523.25, dur: 0.8},  // C5
-            {freq: 659.25, dur: 0.6},  // E5
-            {freq: 783.99, dur: 0.9},  // G5
-            {freq: 587.33, dur: 0.7},  // D5
-            {freq: 493.88, dur: 1.0},  // B4
-            {freq: 392.00, dur: 0.8},  // G4
-        ];
-        let noteIndex = 0;
-        function playNote() {
-            if(!isPlaying) return;
-            const now = audioCtx.currentTime;
-            const note = notes[noteIndex % notes.length];
-            const osc = audioCtx.createOscillator();
-            const noteGain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.value = note.freq;
-            noteGain.gain.value = 0.2;
-            osc.connect(noteGain);
-            noteGain.connect(gainNode);
-            osc.start();
-            noteGain.gain.exponentialRampToValueAtTime(0.0001, now + note.dur);
-            osc.stop(now + note.dur);
-            noteIndex++;
-            musicInterval = setTimeout(() => {
-                if(isPlaying) playNote();
-            }, 2200);
-        }
-        playNote();
-    }
-    
-    function stopAmbientMusic() {
-        if(musicInterval) {
-            clearTimeout(musicInterval);
-            musicInterval = null;
-        }
-        isPlaying = false;
-        musicBtn.innerHTML = '▶️ 播放';
-    }
-    
-    musicBtn.addEventListener('click', async (e) => {
+    copyBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if(!audioCtx) initAudio();
-        if(audioCtx.state === 'suspended') {
-            await audioCtx.resume();
-        }
-        if(isPlaying) {
-            stopAmbientMusic();
-        } else {
-            playAmbientMusic();
-        }
-        // 涟漪反馈
-        const rect = musicBtn.getBoundingClientRect();
-        addRipple(rect.left + rect.width/2, rect.top + rect.height/2, '#d4e6b0');
+        handleCopy();
     });
-    
-    // 让所有可点击都有涟漪（body代理）
-    document.body.addEventListener('click', function(e) {
-        let target = e.target;
-        if(target.closest('.memo-card') || target.closest('.music-btn') || target.closest('.unlock-btn')) {
-            // 已单独处理，避免重复
-            return;
-        }
-        // 其他区域轻灵但不影响
-        const rect = e.target.getBoundingClientRect();
-        if(rect.width > 0 && rect.height > 0)
-            addRipple(e.clientX, e.clientY, '#e6efcf');
-    }, false);
-    
-    // 自动调节卡片在移动端滑动手感（顺畅）
-    let startY = 0;
-    memoCard.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, {passive: true});
-    // 没有任何冲突
-    
-    // 添加灵动 hover 或 active 提升质感
-    const styleSheet = document.createElement("style");
-    styleSheet.textContent = `
-        .memo-card {
-            transition: all 0.5s cubic-bezier(0.2, 0.85, 0.3, 1.05);
-        }
-        .memo-card.expanded {
-            background: rgba(255, 255, 245, 0.85);
-            box-shadow: 0 28px 44px -16px rgba(0, 0, 0, 0.3);
-        }
-        .unlock-btn:active { transform: scale(0.94); background: #f5ac4a; }
-        .code-section input:focus { background: rgba(250,255,200,0.4); border-radius: 60px; }
-    `;
-    document.head.appendChild(styleSheet);
-    
-    // 控制台作者印记
-    console.log("🍃 清·三点水 | 炽热灵动设计 78没事干 | 沙鸡龙卡片 已搭载氛围音乐+涟漪");
+    closeDetailBtn.addEventListener('click', () => {
+        closeDetail();
+    });
+    detailOverlay.addEventListener('click', (e) => {
+        if (e.target === detailOverlay) closeDetail();
+    });
+    secretCodeInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleUnlock();
+    });
+
+    // 初始化
+    buildAlphabet();
+    bindLanguageSwitcher();
+    updateUILanguage();
 </script>
 </body>
 </html>
