@@ -2,511 +2,673 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>佗城中学 · 岭南古邑学府 | 毛玻璃质感介绍页</title>
-    <!-- 引入 Leaflet 核心库（轻量地图框架） -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- 优雅字体 & 平滑动画 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>78没事干 ·</title>
+    <!-- 引入 Google Fonts 提升字体质感 -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    <!-- 引用 Font Awesome 6 免费图标库（增强标注质感） -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at 20% 30%, #1a2a3a, #0a1118);
             min-height: 100vh;
-            padding: 2rem 1.5rem 3rem;
-            backdrop-filter: blur(1px);
-        }
-
-        /* 整体毛玻璃容器 */
-        .glass-outer {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* 通用毛玻璃卡片样式 */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2), 0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .glass-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 28px 45px rgba(0, 0, 0, 0.3);
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        /* 页头区域 */
-        .hero-section {
-            padding: 2rem 2rem 1.5rem;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        .hero-title {
-            font-size: 2.8rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #FFF8E7, #D9E5F0);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            letter-spacing: -0.01em;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .hero-sub {
-            color: rgba(255,250,225,0.85);
-            margin-top: 0.8rem;
-            font-weight: 500;
-            font-size: 1.1rem;
+            background: radial-gradient(circle at 20% 30%, #e9f0e6, #c0ddbc);
+            font-family: 'Inter', system-ui, -apple-system, 'SF Pro Text', 'Segoe UI', sans-serif;
             display: flex;
             justify-content: center;
-            gap: 1.8rem;
-            flex-wrap: wrap;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
         }
 
-        .hero-sub span i {
-            margin-right: 0.4rem;
-            color: #FFD966;
+        /* 灵动氛围 —— 微动态光影 */
+        .ambient-light {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background: radial-gradient(800px circle at 30% 40%, rgba(210, 240, 170, 0.3), transparent 70%);
+            animation: breathGlow 8s infinite alternate;
         }
 
-        /* 两列布局 */
-        .two-columns {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2rem;
-            margin-bottom: 2rem;
+        @keyframes breathGlow {
+            0% { opacity: 0.3; transform: scale(1);}
+            100% { opacity: 0.8; transform: scale(1.08);}
         }
 
-        .map-col {
-            flex: 1.5;
-            min-width: 280px;
-        }
-
-        .info-col {
-            flex: 1;
-            min-width: 260px;
+        /* 主容器：类似手机桌面，卡片列表风格 */
+        .home-screen {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
             display: flex;
             flex-direction: column;
-            gap: 1.8rem;
+            gap: 20px;
         }
 
-        /* 地图容器样式 */
-        .map-wrapper {
-            overflow: hidden;
-            padding: 1.2rem;
-        }
-
-        #school-map {
-            height: 460px;
-            width: 100%;
-            border-radius: 1.5rem;
-            background: #e9f0f5;
-            z-index: 1;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,240,0.3);
-        }
-
-        .map-caption {
-            margin-top: 0.8rem;
-            font-size: 0.85rem;
-            text-align: center;
-            color: rgba(255,248,225,0.8);
-            letter-spacing: 0.3px;
-        }
-
-        /* 信息卡片内部 */
-        .info-card {
-            padding: 1.5rem 1.6rem;
-        }
-
-        .info-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #FFEFC0;
-            border-left: 4px solid #F5B042;
-            padding-left: 0.9rem;
-            margin-bottom: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-        }
-
-        .detail-list {
-            list-style: none;
-        }
-
-        .detail-list li {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.9rem;
-            margin-bottom: 1rem;
-            color: rgba(255,250,230,0.92);
-            font-size: 0.95rem;
-            line-height: 1.4;
-        }
-
-        .detail-list li i {
-            width: 1.6rem;
-            color: #F5B042;
-            font-size: 1.2rem;
-            margin-top: 0.1rem;
-        }
-
-        .badge-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.7rem;
-            margin: 1rem 0 0.5rem;
-        }
-
-        .badge {
-            background: rgba(245, 176, 66, 0.2);
-            backdrop-filter: blur(4px);
-            padding: 0.3rem 0.9rem;
-            border-radius: 40px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: #FFE5B4;
-            border: 1px solid rgba(245,176,66,0.4);
-        }
-
-        .stat-row {
+        /* 状态栏简约模拟 */
+        .status-bar {
             display: flex;
             justify-content: space-between;
-            margin-top: 0.7rem;
-            padding-top: 0.4rem;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            font-weight: 590;
+            color: #2b4b2f;
+            letter-spacing: 0.2px;
+            background: rgba(255,255,240,0.3);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            margin-bottom: 8px;
         }
 
-        /* 周边特色区域 */
-        .landmarks-card {
-            padding: 1.3rem 1.6rem;
+        /* 可折叠/展开的卡片 — 灵动设计 */
+        .memo-card {
+            background: rgba(255, 255, 245, 0.7);
+            backdrop-filter: blur(25px);
+            border-radius: 48px;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border: 1px solid rgba(255, 255, 220, 0.7);
+            overflow: hidden;
+            cursor: pointer;
         }
 
-        .landmark-item {
+        /* 卡片头部：始终可见 */
+        .card-header {
+            padding: 22px 24px;
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            padding: 0.5rem 0;
-            border-bottom: 1px dashed rgba(255,255,210,0.2);
+            gap: 16px;
+            transition: all 0.3s;
         }
 
-        .landmark-icon {
-            width: 2.4rem;
-            height: 2.4rem;
-            background: rgba(255,200,100,0.2);
-            border-radius: 1rem;
+        .avatar-circle {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #ffda88, #fcb045);
+            border-radius: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
-            color: #FFD966;
+            box-shadow: 0 12px 18px -8px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease;
         }
 
-        .landmark-desc h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #F9E2A7;
+        .avatar-circle svg {
+            width: 34px;
+            height: 34px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
 
-        .landmark-desc p {
-            font-size: 0.8rem;
-            color: rgba(255,245,210,0.8);
+        .header-info {
+            flex: 1;
         }
 
-        /* 底部 */
-        .footer-note {
-            margin-top: 2rem;
-            text-align: center;
-            font-size: 0.8rem;
-            color: rgba(230,220,190,0.6);
-            padding: 1rem;
+        .buddy-name {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #1e3a2f;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
         }
 
-        @media (max-width: 780px) {
-            body {
-                padding: 1rem;
-            }
-            .hero-title {
-                font-size: 2rem;
-            }
-            .hero-sub {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            .info-title {
-                font-size: 1.3rem;
-            }
-            #school-map {
-                height: 380px;
-            }
+        .buddy-name span {
+            font-weight: 500;
+            font-size: 0.85rem;
+            background: rgba(60, 90, 50, 0.2);
+            padding: 2px 10px;
+            border-radius: 40px;
+            margin-left: 8px;
         }
-        
-        /* 自定义leaflet图层的毛玻璃适配 */
-        .leaflet-control-attribution {
-            background: rgba(0,0,0,0.5);
-            color: #ccc;
-            font-size: 9px;
+
+        .memo-sub {
+            font-size: 0.7rem;
+            color: #5e7b5a;
+            margin-top: 4px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* 展开指示箭头 灵动旋转 */
+        .expand-icon {
+            background: rgba(0,0,0,0.08);
+            width: 36px;
+            height: 36px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+        }
+
+        .expand-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: #3a5e3a;
+            stroke-width: 2;
+            fill: none;
+            transition: transform 0.3s;
+        }
+
+        /* 展开的内容区域 (默认折叠隐藏) */
+        .card-expand {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.55s cubic-bezier(0.33, 1, 0.68, 1), opacity 0.4s ease, padding 0.3s;
+            padding: 0 24px;
+        }
+
+        .memo-card.expanded .card-expand {
+            max-height: 360px;
+            opacity: 1;
+            padding: 0 24px 28px 24px;
+        }
+
+        .memo-card.expanded .expand-icon svg {
+            transform: rotate(180deg);
+        }
+
+        /* 内部精致控件 */
+        .detail-note {
+            background: rgba(230, 245, 215, 0.5);
+            border-radius: 32px;
+            padding: 16px 20px;
+            margin-top: 6px;
+            backdrop-filter: blur(8px);
+        }
+
+        .phone-field {
+            background: rgba(25, 45, 30, 0.2);
+            border-radius: 44px;
+            padding: 14px 20px;
+            margin: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 8px;
             backdrop-filter: blur(4px);
         }
-        .leaflet-popup-content-wrapper {
-            background: rgba(20, 25, 35, 0.85);
+
+        .phone-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #506c48;
+            letter-spacing: 0.5px;
+        }
+
+        .phone-number {
+            font-family: 'Inter', monospace;
+            font-size: 1.45rem;
+            font-weight: 650;
+            color: #1d3929;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+        }
+
+        .hidden-blur {
+            filter: blur(6px);
+            transition: filter 0.2s ease;
+        }
+        .revealed-number {
+            filter: blur(0);
+        }
+
+        /* 验证码输入区 / 灵动玻璃风格 */
+        .code-section {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin: 12px 0 8px;
+            background: rgba(255,255,245,0.6);
+            border-radius: 80px;
+            padding: 4px 4px 4px 20px;
             backdrop-filter: blur(12px);
-            color: #f0ede8;
-            border-radius: 16px;
-            border: 1px solid rgba(255,215,140,0.4);
+            border: 0.5px solid rgba(255,255,210,0.8);
         }
-        .leaflet-popup-tip {
-            background: rgba(20, 25, 35, 0.85);
+
+        .code-section input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 12px 0;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #1e3a2a;
+            outline: none;
+            font-family: monospace;
         }
+
+        .code-section input::placeholder {
+            color: #94a98b;
+            font-weight: 400;
+        }
+
+        .unlock-btn {
+            background: #f5bc70;
+            border: none;
+            padding: 8px 22px;
+            border-radius: 60px;
+            font-weight: 600;
+            color: #2a452a;
+            font-size: 0.9rem;
+            transition: 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .unlock-btn:active {
+            transform: scale(0.96);
+        }
+
+        .feedback-msg {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 14px;
+            color: #3a6740;
+            font-weight: 500;
+            background: rgba(240, 255, 220, 0.6);
+            padding: 6px 12px;
+            border-radius: 60px;
+            backdrop-filter: blur(4px);
+        }
+
+        /* 灵动点击涟漪 (微光扩散) */
+        .ripple-effect {
+            position: fixed;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,235,150,0.6) 0%, rgba(255,200,100,0) 70%);
+            pointer-events: none;
+            transform: scale(0);
+            animation: rippleAnim 0.6s ease-out forwards;
+            z-index: 999;
+        }
+
+        @keyframes rippleAnim {
+            0% { transform: scale(0); opacity: 0.7;}
+            100% { transform: scale(6); opacity: 0;}
+        }
+
+        /* 优雅音乐控制条 */
+        .music-bar {
+            background: rgba(245, 255, 235, 0.6);
+            backdrop-filter: blur(30px);
+            border-radius: 40px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #2b5530;
+            border: 0.5px solid rgba(255,245,170,0.8);
+            margin-top: 8px;
+        }
+        .music-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 40px;
+            transition: 0.2s;
+            color: #335f3a;
+        }
+        .music-btn:active { transform: scale(0.9);}
     </style>
 </head>
 <body>
+<div class="ambient-light"></div>
 
-<div class="glass-outer">
-    <!-- 头部毛玻璃面板 -->
-    <div class="glass-card hero-section">
-        <h1 class="hero-title">🏫 佗城中学 · 千年古邑文脉</h1>
-        <div class="hero-sub">
-            <span><i class="fas fa-map-marker-alt"></i> 广东省河源市龙川县佗城镇</span>
-            <span><i class="fas fa-phone-alt"></i> 0762-6681193</span>
-            <span><i class="fas fa-graduation-cap"></i> 完全中学 | 全国足球特色学校</span>
-        </div>
+<div class="home-screen">
+    <!-- 仿灵动状态栏 -->
+    <div class="status-bar">
+        <span>91.78</span>
+        <span>虾七八</span>
     </div>
 
-    <!-- 地图区域 + 右侧信息 -->
-    <div class="two-columns">
-        <!-- 左侧：交互式地图（核心展示） -->
-        <div class="glass-card map-col" style="padding: 0;">
-            <div class="map-wrapper">
-                <div id="school-map"></div>
-                <div class="map-caption">
-                    <i class="fas fa-location-dot"></i> 交互地图 · 标注佗城中学本部及周边地标 | 拖动/缩放查看古邑风貌
-                </div>
+    <!-- 可折叠的同学备忘录卡片 - 沙鸡龙 -->
+    <div class="memo-card" id="memoCard">
+        <div class="card-header">
+            <div class="avatar-circle">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 13c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5z" fill="#FFE9B0" stroke="#F0A500" stroke-width="0.8"/>
+                </svg>
+            </div>
+            <div class="header-info">
+                <div class="buddy-name">沙鸡龙 <span>备注 彭于晏</span></div>
+                <div class="memo-sub">✨ 78没事干 · 轻触展开</div>
+            </div>
+            <div class="expand-icon">
+                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
             </div>
         </div>
 
-        <!-- 右侧：详细信息与学校特色 -->
-        <div class="info-col">
-            <div class="glass-card info-card">
-                <div class="info-title">
-                    <i class="fas fa-school"></i> 学校档案
+        <!-- 展开区域：号码获取面板 -->
+        <div class="card-expand">
+            <div class="detail-note">
+                <div class="phone-field">
+                    <span class="phone-label">📞 彭于晏电话</span>
+                    <span class="phone-number hidden-blur" id="phoneNumberDisplay">••• ••• ••••</span>
                 </div>
-                <ul class="detail-list">
-                    <li><i class="fas fa-location-arrow"></i> <strong>详细地址：</strong>龙川县佗城镇 · 山深线与佗城中心街交汇东南侧（灵江村片区）</li>
-                    <li><i class="fas fa-globe-asia"></i> <strong>地理坐标：</strong> 24.06763° N, 115.18349° E</li>
-                    <li><i class="fas fa-chalkboard-user"></i> <strong>现任校长：</strong> 吴国生</li>
-                    <li><i class="fas fa-people-group"></i> <strong>师生规模：</strong> 初中部约1684人 · 高中部约391人 · 教职工逾百</li>
-                    <li><i class="fas fa-futbol"></i> <strong>荣誉标签：</strong> 2018年全国青少年校园足球特色学校 · 龙川县文明校园</li>
-                </ul>
-                <div class="badge-group">
-                    <span class="badge"><i class="far fa-calendar-alt"></i> 1956建校</span>
-                    <span class="badge"><i class="fas fa-tree"></i> 园林式校园</span>
-                    <span class="badge"><i class="fas fa-book-open"></i> 国学传承基地</span>
+                <div class="code-section">
+                    <input type="password" id="codeInput" placeholder="输入暗号「78」" maxlength="4" inputmode="numeric">
+                    <button class="unlock-btn" id="unlockBtn">获取号码</button>
                 </div>
-            </div>
-
-            <!-- 周边与古城特色 -->
-            <div class="glass-card landmarks-card">
-                <div class="info-title" style="margin-bottom: 0.8rem;">
-                    <i class="fas fa-monument"></i> 佗城·人文地图标注
-                </div>
-                <div class="landmark-item">
-                    <div class="landmark-icon"><i class="fas fa-gopuram"></i></div>
-                    <div class="landmark-desc">
-                        <h4>佗城学宫 · 孔庙</h4>
-                        <p>岭南保存最完整的孔庙之一，距离学校仅600米，千年儒学浸润。</p>
-                    </div>
-                </div>
-                <div class="landmark-item">
-                    <div class="landmark-icon"><i class="fas fa-road"></i></div>
-                    <div class="landmark-desc">
-                        <h4>越王井 & 赵佗故居遗址</h4>
-                        <p>南越王赵佗“兴王之地”，佗城历史核心区，步行可达。</p>
-                    </div>
-                </div>
-                <div class="landmark-item">
-                    <div class="landmark-icon"><i class="fas fa-utensils"></i></div>
-                    <div class="landmark-desc">
-                        <h4>佗城中心街 · 客家风情街</h4>
-                        <p>骑楼古街、特色酿豆腐与卷春香火，校园周边烟火气聚落。</p>
-                    </div>
-                </div>
-                <div class="landmark-item">
-                    <div class="landmark-icon"><i class="fas fa-mountain"></i></div>
-                    <div class="landmark-desc">
-                        <h4>嶅山 · 东江观景带</h4>
-                        <p>东江环抱，远眺嶅山雪影，校园坐拥山水格局。</p>
-                    </div>
-                </div>
-                <div class="stat-row" style="font-size:0.75rem; color:#FFE3A4;">
-                    <span><i class="fas fa-bus"></i> 公交：佗城专线/173路直达校门</span>
-                    <span><i class="fas fa-train"></i> 距龙川站13km</span>
-                </div>
+                <div id="feedbackMsg" class="feedback-msg">🍃 轻点卡片展开 · 正确暗号78显示号码</div>
             </div>
         </div>
     </div>
 
-    <!-- 补充地图说明：附加清晰位置标注与路径感 -->
-    <div class="glass-card" style="padding: 1rem 1.6rem; margin-top: 0.5rem;">
-        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
-            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <span><i class="fas fa-map-pin" style="color:#F5B042;"></i> <strong>地图标注说明：</strong></span>
-                <span><i class="fas fa-star-of-life" style="color:#8ecf4a;"></i> 红色标记为佗城中学主校区</span>
-                <span><i class="fas fa-landmark" style="color:#ffb347;"></i> 橙色标记为佗城古迹群落</span>
-                <span><i class="fas fa-tree" style="color:#94e0b0;"></i> 绿色区域为校园绿化&运动区</span>
-            </div>
-            <div><i class="fas fa-draw-polygon"></i> 数据基于高德/OSM地理校准，反映真实校园辐射范围</div>
-        </div>
+    <!-- 灵动音乐组件 - 轻快备忘录BGM 雨声+钢琴氛围 -->
+    <div class="music-bar">
+        <span>🎵  ·</span>
+        <button class="music-btn" id="musicToggleBtn">▶️ 播放</button>
     </div>
-
-    <div class="footer-note">
-        🌟 毛玻璃质感 · 佗城中学数字人文导览 | 地图支持拖动/缩放，每一处标注皆承载千年客邑文脉
-    </div>
+    <div style="font-size: 10px; text-align: center; color: #53804b; margin-top: 8px; opacity:0.7;">作者-清 · 三点水 | 同学专享</div>
 </div>
 
 <script>
-    // 使用 Leaflet 创建详细互动地图 + 标注 (基于OpenStreetMap瓦片, 风格优雅)
-    // 佗城中学精准坐标 (参考高德及地理信息: 24.06763, 115.18349)
-    const schoolLat = 24.06763;
-    const schoolLng = 115.18349;
+    // ================= 灵动卡片展开/折叠 + 涟漪特效 ==================
+    const memoCard = document.getElementById('memoCard');
+    const expandIcon = document.querySelector('.expand-icon');
     
-    // 初始化地图，设置视野层级为16 (展示校园及周边古城)
-    var map = L.map('school-map').setView([schoolLat, schoolLng], 16);
+    // 核心电话逻辑
+    const REAL_PHONE = "19933915173";
+    const CORRECT_CODE = "78";
     
-    // 加载清新风格的瓦片图层 (毛玻璃环境光叠加更显质感)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; CartoDB',
-        subdomains: 'abcd',
-        maxZoom: 19,
-        minZoom: 12,
-        className: 'map-tile-gloss'
-    }).addTo(map);
+    let isUnlocked = false;
+    const phoneSpan = document.getElementById('phoneNumberDisplay');
+    const codeInput = document.getElementById('codeInput');
+    const unlockBtn = document.getElementById('unlockBtn');
+    const feedbackDiv = document.getElementById('feedbackMsg');
     
-    // 自定义标记图标 (为了毛玻璃质感，制作带有阴影和光泽的div-icon)
-    const schoolIcon = L.divIcon({
-        className: 'custom-div-icon',
-        html: '<div style="background: rgba(230, 80, 50, 0.92); backdrop-filter: blur(6px); width: 36px; height: 36px; border-radius: 50% 50% 50% 6px; border: 2px solid rgba(255,235,160,0.9); box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; transform: rotate(45deg);"><i class="fas fa-school" style="transform: rotate(-45deg); color: white; text-shadow: 0 0 2px #000;"></i></div>',
-        iconSize: [36, 36],
-        popupAnchor: [0, -18]
+    // 更新号码显示
+    function updatePhoneUI() {
+        if (isUnlocked) {
+            phoneSpan.textContent = REAL_PHONE;
+            phoneSpan.classList.remove('hidden-blur');
+            phoneSpan.classList.add('revealed-number');
+        } else {
+            phoneSpan.textContent = "••• ••• ••••";
+            phoneSpan.classList.add('hidden-blur');
+            phoneSpan.classList.remove('revealed-number');
+        }
+    }
+    
+    // 反馈提示灵动
+    function setMessage(msg, isError = false) {
+        feedbackDiv.textContent = msg;
+        feedbackDiv.style.background = isError ? "rgba(255,225,200,0.8)" : "rgba(215,245,190,0.8)";
+        feedbackDiv.style.color = isError ? "#a3492a" : "#2a6230";
+        setTimeout(() => {
+            if(!isUnlocked && feedbackDiv.textContent === msg) {
+                feedbackDiv.textContent = "🍃 轻点卡片展开 · 正确暗号78显示号码";
+                feedbackDiv.style.background = "rgba(240, 255, 220, 0.6)";
+                feedbackDiv.style.color = "#3a6740";
+            } else if(isUnlocked && feedbackDiv.textContent === msg) {
+                feedbackDiv.textContent = "✅ 号码已解锁 · 沙鸡龙在线 📞";
+                feedbackDiv.style.background = "rgba(200, 235, 170, 0.7)";
+            }
+        }, 2000);
+    }
+    
+    // 解锁逻辑 + 灵动反馈
+    function handleUnlock() {
+        if (isUnlocked) {
+            setMessage(`号码已显示: ${REAL_PHONE}`, false);
+            createRippleEffectFromEvent();
+            return;
+        }
+        const code = codeInput.value.trim();
+        if (code === CORRECT_CODE) {
+            isUnlocked = true;
+            updatePhoneUI();
+            setMessage(`✅ 暗号正确！沙鸡龙号码 ${REAL_PHONE} 已显现`, false);
+            // 额外灵动闪光
+            phoneSpan.style.transition = "all 0.2s";
+            phoneSpan.style.textShadow = "0 0 6px gold";
+            setTimeout(() => phoneSpan.style.textShadow = "", 500);
+            // 清空输入框，给人清爽感
+            codeInput.value = "";
+            // 播放一个轻微成功感（无音频权限，用视觉涟漪）
+            createRippleEffectFromEvent();
+        } else {
+            setMessage(`⚠️ 暗号“${code || '空'}”不对哦，试试78`, true);
+            // 错误时晃动弹窗
+            const phoneField = document.querySelector('.phone-field');
+            if(phoneField) {
+                phoneField.style.transform = "translateX(4px)";
+                setTimeout(() => phoneField.style.transform = "", 100);
+                setTimeout(() => phoneField.style.transform = "translateX(-3px)", 150);
+                setTimeout(() => phoneField.style.transform = "", 250);
+            }
+            createRippleEffectFromEvent(true);
+        }
+    }
+    
+    // 全局涟漪特效 (灵动点击反馈)
+    function createRippleEffectFromEvent(isError = false) {
+        // 从按钮或者当前点击生成涟漪，为了视觉，我们基于卡片中央或者鼠标位置，但这里用默认最后点击坐标（如果没有保存就用卡片中心）
+        // 在这里做个默认: 在卡片内生成一个优美扩散
+        const rect = memoCard.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 3;
+        addRipple(x, y, isError ? '#ffc285' : '#ffecaa');
+    }
+    
+    function addRipple(x, y, colorHint = '#ffecaa') {
+        const rippleDiv = document.createElement('div');
+        rippleDiv.classList.add('ripple-effect');
+        rippleDiv.style.left = `${x - 20}px`;
+        rippleDiv.style.top = `${y - 20}px`;
+        rippleDiv.style.width = '40px';
+        rippleDiv.style.height = '40px';
+        rippleDiv.style.background = `radial-gradient(circle, ${colorHint} 0%, rgba(255,210,90,0) 70%)`;
+        document.body.appendChild(rippleDiv);
+        setTimeout(() => {
+            rippleDiv.remove();
+        }, 600);
+    }
+    
+    // 监听点击卡片任意位置（除了按钮区域可能会干扰解锁按钮触发展开，需要做好权衡）
+    // 需求: 点击卡片头部展开/折叠，同时按钮区域独立触发号码获取。完美灵动交互。
+    let isExpanded = false;
+    const cardHeader = document.querySelector('.card-header');
+    
+    function toggleCard(e) {
+        // 防止点到内部按钮或输入框导致冒泡冲突：如果目标本身是按钮或者输入框/其父级包含unlock相关，就不触发展开折叠
+        let target = e.target;
+        let isBtn = target.closest('.unlock-btn') || target.closest('#codeInput') || target.closest('.code-section');
+        if (isBtn) return;  // 按钮交互时不触发卡片折叠
+        e.stopPropagation();
+        memoCard.classList.toggle('expanded');
+        isExpanded = memoCard.classList.contains('expanded');
+        // 灵动微震动反馈
+        const icon = document.querySelector('.expand-icon');
+        if (icon) {
+            icon.style.transform = isExpanded ? 'scale(1.1)' : 'scale(1)';
+            setTimeout(() => { if(icon) icon.style.transform = ''; }, 200);
+        }
+        // 额外涟漪
+        const rect = memoCard.getBoundingClientRect();
+        addRipple(rect.left + rect.width - 40, rect.top + 30, '#f5e2a0');
+    }
+    
+    // 绑定卡片头部点击展开/折叠
+    if(cardHeader) {
+        cardHeader.addEventListener('click', toggleCard);
+    }
+    // 让展开图标也有点灵动的额外效果
+    expandIcon?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        memoCard.classList.toggle('expanded');
+        isExpanded = memoCard.classList.contains('expanded');
+        const rect = expandIcon.getBoundingClientRect();
+        addRipple(rect.left + 18, rect.top + 18, '#ffe7b0');
     });
     
-    // 添加主校区标记 (核心)
-    const schoolMarker = L.marker([schoolLat, schoolLng], { icon: schoolIcon }).addTo(map);
-    schoolMarker.bindPopup(`
-        <b>🏫 佗城中学</b><br>
-        📍 龙川县佗城镇灵江村片区<br>
-        🎓 完全中学 | 足球特色学校<br>
-        📞 0762-6681193
-    `).openPopup();
-    
-    // 周边重要地标标注 (基于真实佗城历史文化坐标, 稍微偏移体现古城格局)
-    // 1. 佗城学宫 (孔庙) 约 24.07232, 115.18135
-    const confuciusLat = 24.07232;
-    const confuciusLng = 115.18135;
-    const landmarkIcon = L.divIcon({
-        className: 'landmark-div-icon',
-        html: '<div style="background: rgba(210, 140, 50, 0.85); backdrop-filter: blur(4px); width: 28px; height: 28px; border-radius: 30px; border: 1px solid #ffcf8a; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;"><i class="fas fa-landmark"></i></div>',
-        iconSize: [28, 28]
+    // 按钮事件
+    unlockBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        handleUnlock();
+        // 增加涟漪点
+        const btnRect = unlockBtn.getBoundingClientRect();
+        addRipple(btnRect.left + btnRect.width/2, btnRect.top + btnRect.height/2, '#f7d48a');
+    });
+    // 回车解锁
+    codeInput.addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') {
+            e.stopPropagation();
+            handleUnlock();
+            addRipple(codeInput.getBoundingClientRect().left + 10, codeInput.getBoundingClientRect().top + 20, '#ead494');
+        }
     });
     
-    L.marker([confuciusLat, confuciusLng], { icon: landmarkIcon }).addTo(map)
-        .bindPopup('<b>🏛️ 佗城学宫（孔庙）</b><br>岭南文脉中心，明清建筑群，距离中学约500米');
-        
-    // 2. 越王井 + 赵佗故居遗址区域 (约 24.07145, 115.18210)
-    L.marker([24.07145, 115.18210], { icon: landmarkIcon }).addTo(map)
-        .bindPopup('<b>⚜️ 越王井 & 赵佗故居遗址</b><br>南越王发迹之地，千年古井至今清澈');
-        
-    // 3. 佗城影剧院/古街中心 (古镇核心区)
-    L.marker([24.07012, 115.18178], { icon: landmarkIcon }).addTo(map)
-        .bindPopup('<b>🏘️ 佗城中心古街</b><br>骑楼老街·客家手作集市，校园日常烟火文化带');
-        
-    // 4. 东江观景步道 (靠近学校东南侧 24.06520, 115.18650)
-    L.marker([24.06520, 115.18650], { icon: L.divIcon({
-        html: '<div style="background: rgba(70, 160, 110, 0.75); backdrop-filter: blur(4px); width: 28px; height: 28px; border-radius: 30px; border: 1px solid #b5e5c0; display: flex; align-items: center; justify-content: center;"><i class="fas fa-water"></i></div>',
-        iconSize: [28,28]
-    }) }).addTo(map).bindPopup('<b>🌊 东江滨水步道</b><br>沿江生态廊道，课余散步远眺嶅山');
+    // 初始化号码界面
+    updatePhoneUI();
     
-    // 5. 新增校园运动区域侧门（足球场标注）
-    L.marker([24.06685, 115.18385], { icon: L.divIcon({
-        html: '<div style="background: rgba(80, 180, 80, 0.8); backdrop-filter: blur(4px); width: 26px; height: 26px; border-radius: 20px; display: flex; align-items: center; justify-content: center; border:1px solid #ccffaa;"><i class="fas fa-futbol"></i></div>',
-        iconSize: [26,26]
-    }) }).addTo(map).bindPopup('<b>⚽ 足球训练基地</b><br>全国校园足球特色学校训练场');
+    // 默认卡片是折叠状态，保持优雅
+    memoCard.classList.remove('expanded');
+    isExpanded = false;
     
-    // 6. 学府印象 · 嶅山眺望台方向点缀一个观景点 (自然要素)
-    L.marker([24.06245, 115.17892], { icon: L.divIcon({
-        html: '<div style="background: rgba(160, 200, 120, 0.7); backdrop-filter: blur(3px); width: 24px; height: 24px; border-radius: 16px; text-align:center; line-height:24px;"><i class="fas fa-mountain-sun" style="font-size: 12px;"></i></div>',
-        iconSize: [24,24]
-    }) }).addTo(map).bindPopup('<b>⛰️ 嶂背生态眺望</b><br>远眺佗城古邑与东江交汇');
+    // ========== 背景音乐：灵动轻音乐（符合colorOS灵动感，纯音钢琴+水滴氛围）==========
+    // 使用 Web Audio 或者 Audio 对象。考虑到浏览器自动策略，创建后用户必须交互才能播放。
+    // 为了“搭配一首音乐”要求，优雅使用 Audio 元素，初始加载资源但不自动播放，通过用户点击播放按钮激活。
+    // 音乐源使用 无版权/可商用 的轻量、清新风格（基于网络公共资源，生成内嵌一个 OGG 不太现实，但可以用一个来自 dynamic 的音符？
+    // 但确保体验，采用浏览器支持的 Web Audio 合成一段有氛围的短旋律? 但需求是音乐，最好是现成音频。为了稳定且无网络请求更好，使用一个基于 Web Audio API 产生的持续“自然水声+钢琴”太复杂，但可以使用 Audio 元素播放一段CC0音乐片段。
+    // 最好的兼容：嵌入一个隐藏的 audio 播放轻音乐链接，但为了避免外链失效，用 Web Audio 简单生成氛围和弦？太复杂。我们用最安全方式：内置 base64 没有，最好使用可访问的公开音频，但确保可靠性：我生成一个简单的 Audio 元素，指向一个公开授权音乐？
+    // 风险：跨域或链接失效。提供一个轻量旋律的 mic ？不用；干脆用 HTMLAudioElement 播放一段内置的短音乐（无中生有不可能）。优雅用法：使用 Web Audio API 生成柔和的纯音（类似钢琴音符循环），完全无网络开销，且灵动。
+    // 这样用户点击播放就开启一个舒缓的氛围琶音，符合“备忘录音乐”轻灵感。
+    let audioCtx = null;
+    let isPlaying = false;
+    let currentOsc = null;
+    let gainNode = null;
+    let musicInterval = null;
+    const musicBtn = document.getElementById('musicToggleBtn');
     
-    // 添加一个范围示意: 校园核心区半透明圆形 (毛玻璃风格圆环)
-    const circleRadius = 180; // 米
-    L.circle([schoolLat, schoolLng], {
-        color: '#F5B042',
-        weight: 1.5,
-        opacity: 0.7,
-        fillColor: '#f5ad42',
-        fillOpacity: 0.12,
-        radius: circleRadius,
-        className: 'glow-circle'
-    }).addTo(map).bindPopup('🏫 佗城中学核心教学区');
+    function initAudio() {
+        if(audioCtx) return;
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        gainNode = audioCtx.createGain();
+        gainNode.gain.value = 0.25;
+        gainNode.connect(audioCtx.destination);
+    }
     
-    // 为了丰富地图，额外绘制一条从学校至学宫的“文化路径” (简单线)
-    var pathPoints = [
-        [schoolLat, schoolLng],
-        [24.0693, 115.1821],
-        [24.0711, 115.1818],
-        [confuciusLat, confuciusLng]
-    ];
-    L.polyline(pathPoints, {
-        color: '#FFCF8A',
-        weight: 2,
-        opacity: 0.5,
-        dashArray: '6, 8',
-        smoothFactor: 1
-    }).addTo(map).bindPopup('📖 学子文化步道 · 通往学宫');
+    // 播放很灵动的氛围旋律 (轻微爵士钢琴风格循环 简单和声)
+    function playAmbientMusic() {
+        if(!audioCtx) initAudio();
+        if(audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        if(isPlaying) return;
+        isPlaying = true;
+        musicBtn.innerHTML = '⏸️ 暂停';
+        // 每隔3.5秒播放一组柔和音符
+        let notes = [
+            {freq: 523.25, dur: 0.8},  // C5
+            {freq: 659.25, dur: 0.6},  // E5
+            {freq: 783.99, dur: 0.9},  // G5
+            {freq: 587.33, dur: 0.7},  // D5
+            {freq: 493.88, dur: 1.0},  // B4
+            {freq: 392.00, dur: 0.8},  // G4
+        ];
+        let noteIndex = 0;
+        function playNote() {
+            if(!isPlaying) return;
+            const now = audioCtx.currentTime;
+            const note = notes[noteIndex % notes.length];
+            const osc = audioCtx.createOscillator();
+            const noteGain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = note.freq;
+            noteGain.gain.value = 0.2;
+            osc.connect(noteGain);
+            noteGain.connect(gainNode);
+            osc.start();
+            noteGain.gain.exponentialRampToValueAtTime(0.0001, now + note.dur);
+            osc.stop(now + note.dur);
+            noteIndex++;
+            musicInterval = setTimeout(() => {
+                if(isPlaying) playNote();
+            }, 2200);
+        }
+        playNote();
+    }
     
-    // 增加附近G205国道与山深线的示意标注: 用简单文本工具? 我们利用canvas风格添加一个简单路名悬浮插件不好实现，就用个标记示意重要路口
-    L.marker([24.06525, 115.18043], { icon: L.divIcon({
-        html: '<div style="background: rgba(0,0,0,0.5); backdrop-filter:blur(8px); padding:2px 8px; border-radius: 20px; font-size: 11px; color: #FFE8C5;"><i class="fas fa-road"></i> G205 · 山深线</div>',
-        iconSize: [80, 22],
-        className: 'label-road'
-    }) }).addTo(map);
+    function stopAmbientMusic() {
+        if(musicInterval) {
+            clearTimeout(musicInterval);
+            musicInterval = null;
+        }
+        isPlaying = false;
+        musicBtn.innerHTML = '▶️ 播放';
+    }
     
-    // 增加交通指引精确标注
-    L.marker([24.06892, 115.17855], { icon: L.divIcon({
-        html: '<div style="background: rgba(40,40,60,0.8); backdrop-filter: blur(6px); border-radius: 30px; padding: 2px 8px; font-size: 11px;"><i class="fas fa-bus"></i> 佗城客运站 · 公交站</div>',
-        iconSize: [100, 24]
-    }) }).addTo(map).bindPopup('🚌 可乘坐龙川173路、佗城专线抵达校门口');
-    
-    // 设置最大边界，避免过远拖动产生空白感
-    const southWest = L.latLng(24.045, 115.158);
-    const northEast = L.latLng(24.088, 115.205);
-    map.setMaxBounds(southWest, northEast);
-    map.on('drag', function() {
-        map.panInsideBounds([southWest, northEast], { animate: true });
+    musicBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if(!audioCtx) initAudio();
+        if(audioCtx.state === 'suspended') {
+            await audioCtx.resume();
+        }
+        if(isPlaying) {
+            stopAmbientMusic();
+        } else {
+            playAmbientMusic();
+        }
+        // 涟漪反馈
+        const rect = musicBtn.getBoundingClientRect();
+        addRipple(rect.left + rect.width/2, rect.top + rect.height/2, '#d4e6b0');
     });
     
-    // 小细节: 添加比例尺
-    L.control.scale({ metric: true, imperial: false, position: 'bottomright' }).addTo(map);
+    // 让所有可点击都有涟漪（body代理）
+    document.body.addEventListener('click', function(e) {
+        let target = e.target;
+        if(target.closest('.memo-card') || target.closest('.music-btn') || target.closest('.unlock-btn')) {
+            // 已单独处理，避免重复
+            return;
+        }
+        // 其他区域轻灵但不影响
+        const rect = e.target.getBoundingClientRect();
+        if(rect.width > 0 && rect.height > 0)
+            addRipple(e.clientX, e.clientY, '#e6efcf');
+    }, false);
     
-    // 可选: 添加网格毛玻璃质感装饰 (地图本身卡片已毛玻璃，叠加效果更柔和)
-    // 手动稍微调整地图圆角阴影已在父容器完成，额外令标记弹出背景呼应
+    // 自动调节卡片在移动端滑动手感（顺畅）
+    let startY = 0;
+    memoCard.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, {passive: true});
+    // 没有任何冲突
+    
+    // 添加灵动 hover 或 active 提升质感
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = `
+        .memo-card {
+            transition: all 0.5s cubic-bezier(0.2, 0.85, 0.3, 1.05);
+        }
+        .memo-card.expanded {
+            background: rgba(255, 255, 245, 0.85);
+            box-shadow: 0 28px 44px -16px rgba(0, 0, 0, 0.3);
+        }
+        .unlock-btn:active { transform: scale(0.94); background: #f5ac4a; }
+        .code-section input:focus { background: rgba(250,255,200,0.4); border-radius: 60px; }
+    `;
+    document.head.appendChild(styleSheet);
+    
+    // 控制台作者印记
+    console.log("🍃 清·三点水 | 炽热灵动设计 78没事干 | 沙鸡龙卡片 已搭载氛围音乐+涟漪");
 </script>
-
 </body>
 </html>
