@@ -387,7 +387,7 @@
     const expandIcon = document.querySelector('.expand-icon');
     
     // 核心电话逻辑
-    const REAL_PHONE = "19933915173";
+    const REAL_PHONE = "不知道";
     const CORRECT_CODE = "78";
     
     let isUnlocked = false;
@@ -420,7 +420,7 @@
                 feedbackDiv.style.background = "rgba(240, 255, 220, 0.6)";
                 feedbackDiv.style.color = "#3a6740";
             } else if(isUnlocked && feedbackDiv.textContent === msg) {
-                feedbackDiv.textContent = "✅ 号码已解锁 · 沙鸡龙在线 📞";
+                feedbackDiv.textContent = "✅ 号码已解锁 · 买鸡 📞";
                 feedbackDiv.style.background = "rgba(200, 235, 170, 0.7)";
             }
         }, 2000);
