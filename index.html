@@ -1,798 +1,484 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>三点水</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>零基础中考营 · 从0分到及格</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: radial-gradient(circle at 20% 30%, #cbe5cf, #9bc09b);
-            font-family: system-ui, -apple-system, 'Segoe UI', 'SF Pro Text', 'Inter', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #1a2a3a 0%, #0f1e2a 100%);
+            font-family: 'Segoe UI', 'Roboto', 'Poppins', system-ui, sans-serif;
+            padding: 16px 12px 40px;
+            color: #f0f3f5;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 天数选择器 */
+        .day-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
+            padding: 16px 18px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .day-control {
             display: flex;
-            justify-content: center;
+ align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .day-buttons {
+            display: flex;
             align-items: center;
-            min-height: 100vh;
+            gap: 15px;
+            background: rgba(0,0,0,0.3);
+            padding: 6px 18px;
+            border-radius: 50px;
+        }
+        .day-buttons button {
+            background: #ffb347;
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 30px;
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #1e2a32;
+            cursor: pointer;
+        }
+        .day-buttons span {
+            font-size: 1.8rem;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+        input[type="range"] {
+            flex: 1;
+            min-width: 160px;
+            accent-color: #ffb347;
+        }
+        .tip-text {
+            background: #2a3e4a;
+            border-radius: 24px;
+            padding: 12px 16px;
+            margin-top: 12px;
+            font-size: 0.85rem;
+            border-left: 5px solid #ffb347;
+        }
+
+        /* 通用卡片 */
+        .card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(8px);
+            border-radius: 36px;
             padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.15);
         }
-
-        /* 液态玻璃整体容器 */
-        .phone-app {
-            max-width: 420px;
-            width: 100%;
-            height: 700px;
-            background: rgba(248, 252, 240, 0.45);
-            backdrop-filter: blur(28px) saturate(180%);
-            -webkit-backdrop-filter: blur(28px) saturate(180%);
-            border-radius: 52px;
-            box-shadow: 0 30px 50px -12px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 245, 0.7);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            transition: transform 0.2s cubic-bezier(0.2, 1.2, 0.4, 1);
-        }
-
-        .phone-app:active {
-            transform: scale(0.99);
-        }
-
-        /* 状态栏占位（无时间电量） */
-        .status-spacer {
-            height: 10px;
-            background: transparent;
-        }
-
-        /* 头部 */
-        .contacts-header {
-            padding: 20px 20px 8px 20px;
-        }
-
-        .title-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-        }
-
-        .page-title {
-            font-size: 32px;
-            font-weight: 700;
-            color: #1D3A26;
-            letter-spacing: -0.5px;
-        }
-
-        /* 右侧字母索引条 (A–Z 滑动) */
-        .alphabet-scroll {
-            position: absolute;
-            right: 6px;
-            top: 100px;
-            bottom: 70px;
-            width: 24px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 4px;
-            z-index: 20;
-            background: rgba(220, 235, 190, 0.3);
-            backdrop-filter: blur(16px);
-            border-radius: 60px;
-            padding: 8px 0;
-            user-select: none;
-        }
-
-        .alphabet-item {
-            font-size: 11px;
+        .card-title {
+            font-size: 1.4rem;
             font-weight: 600;
-            color: #3A6B3A;
-            text-align: center;
-            width: 22px;
-            cursor: pointer;
-            transition: all 0.1s ease;
-            border-radius: 30px;
-        }
-
-        .alphabet-item:active {
-            transform: scale(1.2);
-            background: #e9da9e;
-            color: #2b542b;
-        }
-
-        /* 联系人列表区域 */
-        .contacts-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px 20px 20px 20px;
-            scroll-behavior: smooth;
-        }
-
-        .contacts-list::-webkit-scrollbar {
-            width: 0;
-            background: transparent;
-        }
-
-        /* 分组标题 (只显示 S 组) */
-        .section-title {
-            font-size: 17px;
-            font-weight: 600;
-            color: #4C7A4A;
-            padding: 16px 0 6px 0;
-            letter-spacing: -0.2px;
-            background: transparent;
-        }
-
-        /* 单个联系人条目 — Q 弹卡片 */
-        .contact-row {
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 14px 12px;
-            margin: 6px 0;
-            background: rgba(245, 250, 230, 0.45);
-            backdrop-filter: blur(12px);
-            border-radius: 80px;
-            border: 0.5px solid rgba(255, 250, 180, 0.5);
-            transition: all 0.28s cubic-bezier(0.34, 1.3, 0.64, 1);
-            cursor: pointer;
-        }
-
-        .contact-row:active {
-            transform: scale(0.96);
-            background: rgba(235, 240, 200, 0.7);
-            box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.2);
-        }
-
-        .avatar-bubble {
-            width: 52px;
-            height: 52px;
-            background: linear-gradient(145deg, #ffdd99, #f5bc70);
-            border-radius: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 14px -6px rgba(0, 0, 0, 0.2);
-            transition: transform 0.2s;
-        }
-
-        .contact-name {
-            font-size: 18px;
-            font-weight: 590;
-            color: #1C3A26;
-        }
-
-        /* 详情弹窗 (Q弹进入动画) */
-        .detail-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(30, 45, 28, 0.55);
-            backdrop-filter: blur(15px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            visibility: hidden;
-            opacity: 0;
-            transition: visibility 0.2s, opacity 0.25s ease;
-        }
-
-        .detail-overlay.active {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .detail-card {
-            width: 330px;
-            background: rgba(250, 252, 238, 0.92);
-            backdrop-filter: blur(40px);
-            border-radius: 64px;
-            padding: 32px 24px 36px;
-            border: 1px solid rgba(255, 245, 180, 0.7);
-            box-shadow: 0 30px 50px -15px black;
-            transform: scale(0.88) translateY(20px);
-            transition: transform 0.45s cubic-bezier(0.34, 1.3, 0.55, 1), opacity 0.3s;
-            opacity: 0;
-        }
-
-        .detail-overlay.active .detail-card {
-            transform: scale(1) translateY(0);
-            opacity: 1;
-        }
-
-        .detail-avatar {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 12px;
-        }
-
-        .big-avatar {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #ffdd99, #fcb35c);
-            border-radius: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.2);
-        }
-
-        .detail-name {
-            font-size: 28px;
-            font-weight: 700;
-            text-align: center;
-            color: #2B4D2A;
-            margin: 12px 0 20px 0;
-        }
-
-        .phone-panel {
-            background: rgba(195, 215, 160, 0.4);
-            border-radius: 60px;
-            padding: 16px 20px;
-            text-align: center;
-            backdrop-filter: blur(8px);
-            margin-bottom: 18px;
-        }
-
-        .phone-label-mini {
-            font-size: 11px;
-            color: #56784A;
-            font-weight: 500;
-        }
-
-        .phone-number {
-            font-size: 22px;
-            font-weight: 700;
-            font-family: monospace;
-            letter-spacing: 0.8px;
-            color: #1F4028;
-            margin-top: 6px;
-            transition: all 0.2s;
-        }
-
-        .blur-phone {
-            filter: blur(6px);
-        }
-
-        .code-row {
-            display: flex;
             gap: 10px;
-            background: rgba(230, 240, 200, 0.7);
-            border-radius: 60px;
-            padding: 4px 4px 4px 20px;
-            margin: 14px 0 18px;
-            align-items: center;
+            border-left: 4px solid #ffb347;
+            padding-left: 14px;
         }
 
-        .code-row input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            padding: 12px 0;
-            font-size: 16px;
-            font-family: monospace;
-            outline: none;
-            color: #2D542A;
-            font-weight: 500;
-        }
-
-        .unlock-glass {
-            background: #F9CF7C;
-            border: none;
-            padding: 8px 22px;
-            border-radius: 60px;
-            font-weight: 600;
-            color: #2D542A;
-            transition: 0.12s linear;
-            cursor: pointer;
-        }
-
-        .unlock-glass:active {
-            transform: scale(0.94);
-            background: #F5BC54;
-        }
-
-        .action-group {
+        /* 多科目网格 */
+        .subjects-grid {
             display: flex;
-            gap: 14px;
-            margin: 8px 0 12px;
+            flex-direction: column;
+            gap: 16px;
         }
-
-        .action-glass {
-            flex: 1;
-            background: rgba(185, 205, 140, 0.6);
-            backdrop-filter: blur(8px);
-            border: none;
-            padding: 12px 0;
-            border-radius: 60px;
-            font-weight: 590;
-            font-size: 15px;
-            color: #2E562A;
-            cursor: pointer;
-            transition: 0.12s;
+        .subject-box {
+            background: rgba(0,0,0,0.25);
+            border-radius: 24px;
+            padding: 14px 16px;
         }
-
-        .action-glass:active {
-            transform: scale(0.95);
-            background: #e0cd8a;
+        .subject-math { border-left: 5px solid #5dade2; }
+        .subject-physics { border-left: 5px solid #52be80; }
+        .subject-english { border-left: 5px solid #f5b041; }
+        .subject-chemistry { border-left: 5px solid #c39bd3; }
+        .sub-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-
-        .close-detail-glass {
-            width: 100%;
-            background: rgba(110, 120, 80, 0.45);
-            border: none;
-            padding: 10px;
-            border-radius: 50px;
-            color: #3D623A;
-            font-weight: 500;
+        .sub-content {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+        .memory-tip {
+            background: #f9e79f;
+            color: #5e3a1c;
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.75rem;
             margin-top: 8px;
-            transition: 0.1s;
         }
 
-        .close-detail-glass:active {
-            transform: scale(0.96);
+        /* 练习题区 */
+        .question-area {
+            background: #0f2a2a;
+            border-radius: 28px;
+            padding: 18px;
+            margin: 12px 0;
         }
-
-        /* 底部极简三语 + 作者 */
-        .bottom-micro {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 20px 16px;
-            background: rgba(215, 230, 180, 0.25);
-            backdrop-filter: blur(12px);
-            border-top: 0.5px solid rgba(210, 225, 150, 0.5);
+        .question-step {
+            background: #1e3e3e;
+            border-radius: 20px;
+            padding: 14px;
+            margin-top: 12px;
         }
-
-        .lang-micro {
-            display: flex;
-            gap: 8px;
-        }
-
-        .lang-micro span {
-            font-size: 11px;
-            font-weight: 500;
-            padding: 3px 10px;
-            border-radius: 30px;
-            background: rgba(145, 170, 100, 0.35);
+        button {
+            background: #ffb347;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 44px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #1e2a32;
+            width: 100%;
             cursor: pointer;
-            transition: 0.1s;
-            color: #2F5230;
+            margin-top: 10px;
         }
-
-        .lang-micro span.active {
-            background: #EDD494;
-            color: #1D3A1D;
+        .score-area {
+            background: #2c4a3e;
+            border-radius: 24px;
+            padding: 14px;
+            margin-top: 14px;
+            text-align: center;
+            display: none;
         }
-
-        .author-micro {
-            font-size: 10px;
-            color: #5F8257;
-            opacity: 0.75;
-            letter-spacing: 0.3px;
+        .timer-display {
+            background: #00000055;
+            font-size: 2.6rem;
+            text-align: center;
+            font-family: monospace;
+            padding: 12px;
+            border-radius: 50px;
+            letter-spacing: 6px;
         }
-
-        /* 涟漪 Q弹特效 */
-        .ripple-bubble {
-            position: fixed;
-            border-radius: 50%;
-            pointer-events: none;
-            background: radial-gradient(circle, rgba(255, 240, 140, 0.7), rgba(200, 225, 120, 0));
-            transform: scale(0);
-            animation: popRipple 0.55s ease-out forwards;
-            z-index: 1100;
+        .timer-row {
+            display: flex;
+            gap: 12px;
+            margin: 12px 0;
         }
-
-        @keyframes popRipple {
-            0% { transform: scale(0); opacity: 0.7; }
-            100% { transform: scale(5); opacity: 0; }
+        .small-note {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            text-align: center;
+            margin-top: 10px;
+        }
+        hr {
+            border-color: rgba(255,255,255,0.2);
+            margin: 10px 0;
         }
     </style>
 </head>
 <body>
-
-<div class="phone-app">
-    <div class="status-spacer"></div>
-    <div class="contacts-header">
-        <div class="title-row">
-            <span class="page-title">联系人</span>
-        </div>
-    </div>
-
-    <!-- 右侧字母滑动条 (A-Z 含S) -->
-    <div class="alphabet-scroll" id="alphabetScroll">
-        <!-- 动态生成 A-Z -->
-    </div>
-
-    <!-- 联系人列表: 只展示沙鸡龙，位于 S 组 -->
-    <div class="contacts-list" id="contactsList">
-        <div class="section-title" id="sectionS">S</div>
-        <div class="contact-row" id="contactShajilong">
-            <div class="avatar-bubble">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3D5C3A" stroke-width="1.2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                </svg>
+<div class="container">
+    <!-- 天数选择器 + 零基础激励 -->
+    <div class="day-card">
+        <div class="day-control">
+            <div class="day-buttons">
+                <button id="dayMinus">−</button>
+                <span id="currentDayShow">1</span>
+                <button id="dayPlus">+</button>
             </div>
-            <span class="contact-name" id="contactNameLabel">沙鸡龙</span>
+            <input type="range" id="daySlider" min="1" max="30" value="1" step="1">
+            <span style="font-size:0.8rem;">/30天</span>
+        </div>
+        <div class="tip-text">
+            🌟 零基础大将，你好！不要怕，每一个学霸都是从“啥也不会”开始的。<br>
+            📖 每天只学一点点，重复就是力量！看不懂就多看两遍步骤。
         </div>
     </div>
 
-    <!-- 底部：三语切换极小 + 作者 -->
-    <div class="bottom-micro">
-        <div class="lang-micro" id="langGroup">
-            <span data-lang="zh">简</span>
-            <span data-lang="en">En</span>
-            <span data-lang="yue">粤</span>
+    <!-- 今日学习内容（4大科目，每个都从零讲起） -->
+    <div class="card">
+        <div class="card-title">📚 今日·零基础课堂</div>
+        <div id="subjectsContainer" class="subjects-grid">
+            <!-- 动态加载4科内容 -->
         </div>
-        <div class="author-micro">清 · 三点水</div>
     </div>
-</div>
 
-<!-- 详情浮层 -->
-<div id="detailOverlay" class="detail-overlay">
-    <div class="detail-card">
-        <div class="detail-avatar">
-            <div class="big-avatar">
-                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#4A663A" stroke-width="1.2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                </svg>
-            </div>
+    <!-- 今日练习题 + 手把手答案 -->
+    <div class="card">
+        <div class="card-title">✍️ 今日练习（做不对没关系）</div>
+        <div class="question-area">
+            <div id="dailyQuestion" style="font-size:1rem; margin-bottom:8px;">加载中...</div>
+            <button id="showAnswerBtn">🔍 老师，教我做这道题（超详细步骤）</button>
+            <div id="stepByStep" class="question-step" style="display:none;"></div>
         </div>
-        <div class="detail-name" id="detailBuddyName">沙鸡龙</div>
-        <div class="phone-panel">
-            <div class="phone-label-mini">📞彭于晏 </div>
-            <div class="phone-number blur-phone" id="detailPhoneSpan">???????</div>
+    </div>
+
+    <!-- 每日即时测评（针对今天这4科内容，超级简单） -->
+    <div class="card">
+        <div class="card-title">🎯 每日测一测 · 看看记住没</div>
+        <button id="startQuizBtn">📝 开始评测（5道超基础题）</button>
+        <div id="quizResult" class="score-area"></div>
+        <div class="small-note">✅ 哪怕只对1道也是进步！做错就回到上面再看一遍知识点。</div>
+    </div>
+
+    <!-- 专注计时器 + 脑力恢复 -->
+    <div class="card">
+        <div class="card-title">⏱️ 番茄钟 · 告别脑子浑浊</div>
+        <div class="timer-display" id="timerText">25:00</div>
+        <div class="timer-row">
+            <button id="focus25">📖 专注25分钟</button>
+            <button id="rest5">🧘 休息5分钟</button>
+            <button id="stopTimer">⏹️ 停</button>
         </div>
-        <div class="code-row">
-            <input type="password" id="secretCode" placeholder="验证码 78" maxlength="4" inputmode="numeric">
-            <button class="unlock-glass" id="unlockPhoneBtn">获取号码</button>
+        <div class="tip-text" style="margin-top:12px;">
+            🧠 脑子浑浊立刻做：闭上眼，用鼻子吸气4秒→憋气7秒→嘴巴呼气8秒，做3组！
         </div>
-        <div class="action-group">
-            <button class="action-glass" id="copyPhoneBtn">📋 复制号码</button>
-        </div>
-        <button class="close-detail-glass" id="closeDetailBtn">关闭</button>
     </div>
 </div>
 
 <script>
-    // ======================= 真实号码配置 =======================
-    const REAL_PHONE = "不知道";
-    let isNumberRevealed = false;     // 号码是否已解锁
-    let currentLang = 'zh';
-
-    // 多语言词库 (只保留必要字段)
-    const langDict = {
-        zh: {
-            pageTitle: "联系人",
-            contactName: "沙鸡龙",
-            detailName: "沙鸡龙",
-            phoneLabel: "📞 同学专线",
-            hiddenNum: "????????",
-            placeholderCode: "验证码 78",
-            getBtn: "获取号码",
-            copyBtn: "📋 复制号码",
-            closeBtn: "关闭",
-            copyToastPre: "✅ 号码已复制: ",
-            wrongCode: "❌ 暗号错误，试试 78",
-            successMsg: "🔓 号码已显示",
-            sectionS: "S"
-        },
-        en: {
-            pageTitle: "Contacts",
-            contactName: "Sha Jilong",
-            detailName: "Sha Jilong",
-            phoneLabel: "📞 Class Line",
-            hiddenNum: "????????",
-            placeholderCode: "Code 78",
-            getBtn: "Reveal",
-            copyBtn: "📋 Copy Number",
-            closeBtn: "Close",
-            copyToastPre: "✅ Copied: ",
-            wrongCode: "❌ Wrong code, try 78",
-            successMsg: "🔓 Number revealed",
-            sectionS: "S"
-        },
-        yue: {
-            pageTitle: "聯絡人",
-            contactName: "沙雞龍",
-            detailName: "沙雞龍",
-            phoneLabel: "📞 同學專線",
-            hiddenNum: "????????",
-            placeholderCode: "密碼 78",
-            getBtn: "攞號碼",
-            copyBtn: "📋 複製號碼",
-            closeBtn: "閂閉",
-            copyToastPre: "✅ 號碼已複製: ",
-            wrongCode: "❌ 暗號錯咗，試下78",
-            successMsg: "🔓 號碼顯示咗",
-            sectionS: "S"
-        }
-    };
-
-    // DOM 元素
-    const pageTitleSpan = document.querySelector('.page-title');
-    const contactNameSpan = document.getElementById('contactNameLabel');
-    const sectionSElem = document.getElementById('sectionS');
-    const detailBuddyNameSpan = document.getElementById('detailBuddyName');
-    const detailPhoneSpan = document.getElementById('detailPhoneSpan');
-    const secretCodeInput = document.getElementById('secretCode');
-    const unlockBtn = document.getElementById('unlockPhoneBtn');
-    const copyBtn = document.getElementById('copyPhoneBtn');
-    const closeDetailBtn = document.getElementById('closeDetailBtn');
-    const detailOverlay = document.getElementById('detailOverlay');
-    const alphabetContainer = document.getElementById('alphabetScroll');
-
-    // 更新全部UI文字
-    function updateUILanguage() {
-        const dict = langDict[currentLang];
-        pageTitleSpan.innerText = dict.pageTitle;
-        contactNameSpan.innerText = dict.contactName;
-        sectionSElem.innerText = dict.sectionS;
-        detailBuddyNameSpan.innerText = dict.detailName;
-        secretCodeInput.placeholder = dict.placeholderCode;
-        unlockBtn.innerText = dict.getBtn;
-        copyBtn.innerText = dict.copyBtn;
-        closeDetailBtn.innerText = dict.closeBtn;
-        // 号码显示（未解锁时根据语言显示问号占位）
-        if (!isNumberRevealed) {
-            detailPhoneSpan.innerText = dict.hiddenNum;
-            detailPhoneSpan.classList.add('blur-phone');
+    // ======================= 零基础大补丸·每课4科都从0讲起 =======================
+    // 第1-30天，极度简单，拒绝复杂术语
+    const courseData = [];
+    
+    // 生成30天内容，每天数学、物理、英语、化学各一个最基础的知识点 + 生活化比喻
+    for (let d = 1; d <= 30; d++) {
+        // 根据天数循环不同基础模块
+        const mathIdx = (d-1) % 8;
+        const physicsIdx = (d-1) % 6;
+        const englishIdx = (d-1) % 7;
+        const chemIdx = (d-1) % 5;
+        
+        const mathContent = [
+            {title:"🔢 数字是什么", content:"数字就是用来数数的：1个苹果、2本书。没有东西就用0表示。", example:"例：你有0块钱 → 就是没钱", tip:"记住：0表示没有"},
+            {title:"➕ 正数和负数", content:"正数：比0大的数（1,2,3...）；负数：比0小的数，前面有−号，表示欠钱或温度零下。", example:"例：-5°C比0°C冷", tip:"负数就是'少了'的意思"},
+            {title:"|绝对值|", content:"绝对值就是'距离'，不管方向只看远近。|−3| = 3，因为−3离0有3步。", example:"|5| = 5，|−2| = 2", tip:"把负号扔了就对了"},
+            {title:"➕ 加法", content:"把两个数合并在一起。2+3=5，可以数手指。", example:"你有2颗糖，妈妈给3颗，一共5颗", tip:"加法就是越来越多"},
+            {title:"➖ 减法", content:"拿走一些。5−2=3，原来5个，拿走2个剩3个。", example:"5块钱花掉2块剩3块", tip:"减法就是越来越少"},
+            {title:"✖️ 乘法", content:"相同的数加很多次。3×4 = 3+3+3+3 = 12", example:"一包辣条3元，买4包就是12元", tip:"乘法是加法的快捷方式"},
+            {title:"➗ 除法", content:"平均分。8÷2=4，把8个苹果平均分给2个人，每人4个。", example:"10÷5=2", tip:"除法就是平均分"},
+            {title:"分数入门", content:"把一块蛋糕切成4块，取其中1块就是1/4。分子在上，分母在下。", example:"1/2就是一半", tip:"分母表示切几份，分子表示拿几份"}
+        ];
+        const physicsContent = [
+            {title:"📏 长度单位", content:"米(m)、厘米(cm)。1米=100厘米，大概你张双臂那么宽。", example:"你的课桌高约70cm", tip:"记住1m=100cm"},
+            {title:"⚡ 速度", content:"速度 = 路程 ÷ 时间。走路1分钟走60米，速度就是60米/分。", example:"汽车速度60km/h意思是1小时跑60公里", tip:"速度就是跑多快"},
+            {title:"🎵 声音", content:"声音由物体振动产生，通过空气传播。没有空气（真空）听不到声音。", example:"敲桌子，手会感觉震动", tip:"震动才有声音"},
+            {title:"💡 光", content:"光沿直线传播，光速超级快。影子就是光被挡住形成的。", example:"手影游戏", tip:"光是直的"},
+            {title:"⚙️ 质量", content:"质量表示物体有多重（多少千克kg）。1个鸡蛋约50克。", example:"你的书包质量约5kg", tip:"质量=重量感"},
+            {title:"🌊 密度", content:"密度=质量÷体积。铁比木头重就是密度大。", example:"油浮在水上，因为油密度小", tip:"密度=沉不沉"}
+        ];
+        const englishContent = [
+            {title:"🇬🇧 be动词：am/is/are", content:"我是I am，你是You are，他是He is，她是She is，它是It is。", example:"I am a student.", tip:"口诀：我用am，你用are，is连着他她它"},
+            {title:"👤 人称代词", content:"我(I)，你(you)，他(he)，她(she)，它(it)，我们(we)，你们(you)，他们(they)。", example:"He is my brother", tip:"主格做主语"},
+            {title:"🔤 一般现在时", content:"表示经常做的事。主语是he/she/it时，动词加s。", example:"She likes apples.", tip:"三单加s，其他用原形"},
+            {title:"📖 名词单复数", content:"一个苹果apple，多个加s apples。特殊：man→men。", example:"one book, two books", tip:"大多数加s"},
+            {title:"🚫 否定句", content:"在动词前加don't或doesn't。I don't like coffee.", example:"He doesn't play football.", tip:"doesn't用于三单"},
+            {title:"❓ 一般疑问句", content:"把am/is/are 或者do/does 放句首。", example:"Are you a student?", tip:"问句动词提前"},
+            {title:"📍 常见介词", content:"in (在里面)，on (在上面)，under (在下面)。", example:"The book is on the desk.", tip:"in/on/under表示位置"}
+        ];
+        const chemistryContent = [
+            {title:"🧪 物理变化", content:"没有新物质生成，只是形状或状态变了。比如水结冰、撕碎纸。", example:"把纸撕碎还是纸", tip:"没变成别的东西"},
+            {title:"🔥 化学变化", content:"生成了新物质。比如木头燃烧变成灰和烟，铁生锈。", example:"鸡蛋煮熟", tip:"彻底变了样"},
+            {title:"💧 水", content:"水化学式H₂O，表示2个氢原子+1个氧原子。", example:"我们喝的水", tip:"H₂O"},
+            {title:"🌬️ 氧气", content:"氧气能支持燃烧，人呼吸需要氧气。", example:"蜡烛在氧气中烧得更旺", tip:"氧气助燃"},
+            {title:"🧂 食盐", content:"食盐化学名氯化钠(NaCl)，咸味。", example:"炒菜放盐", tip:"NaCl"}
+        ];
+        
+        const math = mathContent[mathIdx];
+        const physics = physicsContent[physicsIdx];
+        const eng = englishContent[englishIdx];
+        const chem = chemistryContent[chemIdx];
+        
+        // 每日综合题目（简单）
+        let question = "";
+        let answerSteps = "";
+        if (d % 4 === 1) {
+            question = "① 计算：| -7 | = ?   ② 用am/is/are填空：I ___ a student.   ③ 物理：声音靠什么传播？";
+            answerSteps = "【第1题】绝对值就是去掉负号 → 7 \n【第2题】I 后面用am → I am a student. \n【第3题】声音需要介质，通常靠空气传播。答案：空气";
+        } else if (d % 4 === 2) {
+            question = "① 3 × 4 = ?   ② She ___ (like) apples. 用like的正确形式。   ③ 铁生锈是什么变化？";
+            answerSteps = "【第1题】3×4就是3个4相加=12 \n【第2题】She是三单，like加s → likes \n【第3题】铁生锈有新物质，属于化学变化";
+        } else if (d % 4 === 3) {
+            question = "① 8 ÷ 2 = ?   ② 速度公式是什么？   ③ 水的化学式？";
+            answerSteps = "【第1题】8除以2等于4（平均分成2份每份4）\n【第2题】v = s/t （路程除以时间）\n【第3题】水是H₂O";
         } else {
-            detailPhoneSpan.innerText = REAL_PHONE;
-            detailPhoneSpan.classList.remove('blur-phone');
+            question = "① 5 - 2 = ?   ② 翻译：她是一名老师。   ③ 影子形成是因为光的什么性质？";
+            answerSteps = "【第1题】5减2等于3 \n【第2句】She is a teacher. \n【第3题】光是沿直线传播，被挡住形成影子";
         }
+        
+        courseData.push({
+            day: d,
+            math: math,
+            physics: physics,
+            english: eng,
+            chemistry: chem,
+            question: question,
+            answer: answerSteps
+        });
     }
-
-    // 涟漪特效 (Q弹)
-    function addRipple(x, y) {
-        const ripple = document.createElement('div');
-        ripple.className = 'ripple-bubble';
-        ripple.style.left = (x - 24) + 'px';
-        ripple.style.top = (y - 24) + 'px';
-        ripple.style.width = '48px';
-        ripple.style.height = '48px';
-        document.body.appendChild(ripple);
-        setTimeout(() => ripple.remove(), 550);
-    }
-
-    // 显示浮层并重置解锁状态 (号码显示问号)
-    function openDetail() {
-        const dict = langDict[currentLang];
-        isNumberRevealed = false;
-        detailPhoneSpan.innerText = dict.hiddenNum;
-        detailPhoneSpan.classList.add('blur-phone');
-        secretCodeInput.value = '';
-        detailOverlay.classList.add('active');
-
-        // 让卡片从内部产生弹性涟漪 (更有Q弹感)
-        const cardRect = document.querySelector('.detail-card')?.getBoundingClientRect();
-        if (cardRect) addRipple(cardRect.left + cardRect.width/2, cardRect.top + 40);
-    }
-
-    // 关闭浮层
-    function closeDetail() {
-        detailOverlay.classList.remove('active');
-        isNumberRevealed = false;   // 下次打开还是问号
-    }
-
-    // 解锁号码 (输入78)
-    function handleUnlock() {
-        const inputCode = secretCodeInput.value.trim();
-        const dict = langDict[currentLang];
-        if (inputCode === "78") {
-            isNumberRevealed = true;
-            detailPhoneSpan.innerText = REAL_PHONE;
-            detailPhoneSpan.classList.remove('blur-phone');
-            // 灵动成功提示 (非alert 更Q)
-            const tip = document.createElement('div');
-            tip.innerText = dict.successMsg;
-            tip.style.position = 'fixed';
-            tip.style.bottom = '30%';
-            tip.style.left = '50%';
-            tip.style.transform = 'translateX(-50%)';
-            tip.style.backgroundColor = 'rgba(60,90,50,0.85)';
-            tip.style.backdropFilter = 'blur(20px)';
-            tip.style.color = '#FFF3CF';
-            tip.style.padding = '6px 20px';
-            tip.style.borderRadius = '60px';
-            tip.style.fontSize = '14px';
-            tip.style.fontWeight = '500';
-            tip.style.zIndex = '1200';
-            tip.style.pointerEvents = 'none';
-            document.body.appendChild(tip);
-            setTimeout(() => tip.remove(), 1500);
+    
+    // 当前选择天数
+    let currentDay = 1;
+    
+    // 渲染当天完整内容
+    function renderDay(day) {
+        const data = courseData.find(c => c.day === day);
+        if (!data) return;
+        // 构建4科html
+        const html = `
+            <div class="subject-box subject-math">
+                <div class="sub-title">📐 ${data.math.title}</div>
+                <div class="sub-content">${data.math.content}<br><span class="memory-tip">⭐ 生活例：${data.math.example}</span><br><span class="memory-tip">📌 口诀/技巧：${data.math.tip}</span></div>
+            </div>
+            <div class="subject-box subject-physics">
+                <div class="sub-title">⚡ ${data.physics.title}</div>
+                <div class="sub-content">${data.physics.content}<br><span class="memory-tip">⭐ 例子：${data.physics.example}</span><br><span class="memory-tip">📌 记忆：${data.physics.tip}</span></div>
+            </div>
+            <div class="subject-box subject-english">
+                <div class="sub-title">🇬🇧 ${data.english.title}</div>
+                <div class="sub-content">${data.english.content}<br><span class="memory-tip">🔊 例句：${data.english.example}</span><br><span class="memory-tip">🎯 小口诀：${data.english.tip}</span></div>
+            </div>
+            <div class="subject-box subject-chemistry">
+                <div class="sub-title">🧪 ${data.chemistry.title}</div>
+                <div class="sub-content">${data.chemistry.content}<br><span class="memory-tip">💡 举例：${data.chemistry.example}</span><br><span class="memory-tip">🧠 一句话：${data.chemistry.tip}</span></div>
+            </div>
+        `;
+        document.getElementById("subjectsContainer").innerHTML = html;
+        document.getElementById("dailyQuestion").innerHTML = `📌 今日题目（别怕，不会就点答案）：<br>${data.question}`;
+        window.currentSteps = data.answer;
+        // 隐藏上次显示的步骤
+        document.getElementById("stepByStep").style.display = "none";
+        document.getElementById("stepByStep").innerHTML = "";
+        // 更新天数滑块显示
+        document.getElementById("currentDayShow").innerText = day;
+        document.getElementById("daySlider").value = day;
+        
+        // 之前测评成绩显示
+        const saved = localStorage.getItem(`quiz_score_day_${day}`);
+        const quizDiv = document.getElementById("quizResult");
+        if (saved !== null) {
+            quizDiv.style.display = "block";
+            quizDiv.innerHTML = `📊 上次本日评测得分：${saved}/5<br>继续加油，错了就回头看上面知识！`;
         } else {
-            // 错误时抖动 + 错误提示
-            const phonePanel = document.querySelector('.phone-panel');
-            if (phonePanel) {
-                phonePanel.classList.add('shake-animation');
-                setTimeout(() => phonePanel.classList.remove('shake-animation'), 400);
+            quizDiv.style.display = "none";
+        }
+    }
+    
+    // 显示详细解题步骤按钮
+    document.getElementById("showAnswerBtn").addEventListener("click", () => {
+        const stepDiv = document.getElementById("stepByStep");
+        stepDiv.style.display = "block";
+        stepDiv.innerHTML = `<strong>🧑‍🏫 零基础老师一步步教你：</strong><br><br>${(window.currentSteps || "暂无详细步骤").replace(/\n/g,'<br>')}<br><br>✨ 没看懂？再看一遍知识点，或者大声读出来！`;
+    });
+    
+    // 每日即时测评（基于当天4科知识点，5道超简单填空题/选择题）
+    function startDailyQuiz() {
+        const data = courseData.find(c => c.day === currentDay);
+        if (!data) return;
+        // 生成5个简单题目
+        let quizQuestions = [];
+        // 数学
+        quizQuestions.push({q: `${data.math.title}：${data.math.tip} 根据今天内容，绝对值|−4|等于？`, a: "4"});
+        quizQuestions.push({q: `物理：${data.physics.title} —— ${data.physics.content.substring(0,40)}... 速度的计算公式是？`, a: "v=s/t"});
+        quizQuestions.push({q: `英语：be动词填空： He ___ a boy.`, a: "is"});
+        quizQuestions.push({q: `化学：${data.chemistry.title} —— 水结冰是什么变化？(物理变化/化学变化)`, a: "物理变化"});
+        quizQuestions.push({q: `综合：今天学到的任何一个知识点，写出你能记住的一句话。`, a: "任意"});
+        
+        let score = 0;
+        for (let i = 0; i < quizQuestions.length; i++) {
+            let user = prompt(`📝 第${i+1}题（超基础）\n${quizQuestions[i].q}\n输入你的答案（不区分大小写）:`);
+            if (i === 4) {
+                if (user && user.trim().length > 1) score++;
+            } else {
+                if (user && user.trim().toLowerCase() === quizQuestions[i].a.toLowerCase()) score++;
             }
-            const errTip = document.createElement('div');
-            errTip.innerText = dict.wrongCode;
-            errTip.style.position = 'fixed';
-            errTip.style.bottom = '30%';
-            errTip.style.left = '50%';
-            errTip.style.transform = 'translateX(-50%)';
-            errTip.style.backgroundColor = 'rgba(160,70,50,0.85)';
-            errTip.style.backdropFilter = 'blur(20px)';
-            errTip.style.color = '#FFEED0';
-            errTip.style.padding = '6px 20px';
-            errTip.style.borderRadius = '60px';
-            errTip.style.fontSize = '14px';
-            errTip.style.zIndex = '1200';
-            document.body.appendChild(errTip);
-            setTimeout(() => errTip.remove(), 1500);
         }
-        // 增加涟漪反馈
-        const rectBtn = unlockBtn.getBoundingClientRect();
-        addRipple(rectBtn.left + rectBtn.width/2, rectBtn.top + rectBtn.height/2);
+        localStorage.setItem(`quiz_score_day_${currentDay}`, score);
+        const percent = (score/5)*100;
+        let advice = "";
+        if (score === 0) advice = "🥺 没关系！咱从零开始，今天再读两遍知识点，明天再测！";
+        else if (score <= 2) advice = "🌱 有进步！把错题对照上面步骤看一遍。";
+        else if (score <= 4) advice = "👍 不错！再巩固下错的那一科。";
+        else advice = "🎉 零基础大将今天很棒！继续坚持！";
+        const resultDiv = document.getElementById("quizResult");
+        resultDiv.style.display = "block";
+        resultDiv.innerHTML = `🎯 今日测评得分：${score}/5 （正确率${percent}%）<br>${advice}<br>❤️ 记住：每天对1题就是胜利！`;
     }
-
-    // 复制号码 (只有解锁后才能复制真实号码)
-    function handleCopy() {
-        const dict = langDict[currentLang];
-        if (!isNumberRevealed) {
-            const warnTip = document.createElement('div');
-            warnTip.innerText = dict.wrongCode;
-            warnTip.style.position = 'fixed';
-            warnTip.style.bottom = '30%';
-            warnTip.style.left = '50%';
-            warnTip.style.transform = 'translateX(-50%)';
-            warnTip.style.backgroundColor = 'rgba(150,70,50,0.9)';
-            warnTip.style.backdropFilter = 'blur(20px)';
-            warnTip.style.color = '#FFF2CF';
-            warnTip.style.padding = '8px 22px';
-            warnTip.style.borderRadius = '60px';
-            warnTip.style.fontSize = '13px';
-            warnTip.style.zIndex = '1200';
-            document.body.appendChild(warnTip);
-            setTimeout(() => warnTip.remove(), 1300);
-            // 抖动效果
-            const phonePanel = document.querySelector('.phone-panel');
-            if (phonePanel) {
-                phonePanel.classList.add('shake-animation');
-                setTimeout(() => phonePanel.classList.remove('shake-animation'), 400);
+    
+    // 天数切换
+    document.getElementById("dayMinus").addEventListener("click", () => {
+        if (currentDay > 1) currentDay--;
+        renderDay(currentDay);
+    });
+    document.getElementById("dayPlus").addEventListener("click", () => {
+        if (currentDay < 30) currentDay++;
+        renderDay(currentDay);
+    });
+    document.getElementById("daySlider").addEventListener("input", (e) => {
+        currentDay = parseInt(e.target.value);
+        renderDay(currentDay);
+    });
+    document.getElementById("startQuizBtn").addEventListener("click", startDailyQuiz);
+    
+    // 计时器逻辑（简单可靠）
+    let timerInterval = null;
+    let remain = 1500;
+    const timerEl = document.getElementById("timerText");
+    function updateTimer() {
+        let m = Math.floor(remain/60);
+        let s = remain % 60;
+        timerEl.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        if (remain <= 0 && timerInterval) {
+            clearInterval(timerInterval);
+            alert("⏰ 时间到！快站起来，喝口水，做深呼吸！");
+        }
+    }
+    function setTimer(seconds) {
+        if (timerInterval) clearInterval(timerInterval);
+        remain = seconds;
+        updateTimer();
+        timerInterval = setInterval(() => {
+            if (remain > 0) {
+                remain--;
+                updateTimer();
+            } else {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                alert("专注时间结束，休息一会儿吧！");
             }
-            return;
-        }
-        // 已解锁，复制号码
-        navigator.clipboard.writeText(REAL_PHONE).then(() => {
-            const toastMsg = dict.copyToastPre + REAL_PHONE;
-            const copyTip = document.createElement('div');
-            copyTip.innerText = toastMsg;
-            copyTip.style.position = 'fixed';
-            copyTip.style.bottom = '25%';
-            copyTip.style.left = '50%';
-            copyTip.style.transform = 'translateX(-50%)';
-            copyTip.style.backgroundColor = 'rgba(70,100,55,0.85)';
-            copyTip.style.backdropFilter = 'blur(20px)';
-            copyTip.style.color = '#FFF7DF';
-            copyTip.style.padding = '6px 22px';
-            copyTip.style.borderRadius = '60px';
-            copyTip.style.fontSize = '14px';
-            copyTip.style.zIndex = '1200';
-            document.body.appendChild(copyTip);
-            setTimeout(() => copyTip.remove(), 1500);
-            addRipple(event.clientX, event.clientY);
-        }).catch(() => {
-            alert("复制失败，请手动复制");
-        });
+        }, 1000);
     }
-
-    // 构建右侧字母索引 (A-Z)
-    function buildAlphabet() {
-        const letters = [];
-        for (let i = 65; i <= 90; i++) {
-            letters.push(String.fromCharCode(i));
-        }
-        alphabetContainer.innerHTML = '';
-        letters.forEach(letter => {
-            const span = document.createElement('div');
-            span.className = 'alphabet-item';
-            span.innerText = letter;
-            span.setAttribute('data-letter', letter);
-            span.addEventListener('click', (e) => {
-                e.stopPropagation();
-                // 只有 S 组实际存在联系人，但如果用户点击任意字母也可滚动到 S 的位置，增强交互
-                if (letter === 'S') {
-                    const sectionElem = document.getElementById('sectionS');
-                    if (sectionElem) {
-                        sectionElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                } else {
-                    // 其他字母因为没有实际联系人，让列表滚动到顶部并且给一个轻微震动提示
-                    const listContainer = document.querySelector('.contacts-list');
-                    if (listContainer) listContainer.scrollTop = 0;
-                    const tipNo = document.createElement('div');
-                    tipNo.innerText = `📭 暂无${letter}开头的联系人`;
-                    tipNo.style.position = 'fixed';
-                    tipNo.style.bottom = '30%';
-                    tipNo.style.left = '50%';
-                    tipNo.style.transform = 'translateX(-50%)';
-                    tipNo.style.backgroundColor = 'rgba(80,80,60,0.8)';
-                    tipNo.style.backdropFilter = 'blur(20px)';
-                    tipNo.style.padding = '6px 16px';
-                    tipNo.style.borderRadius = '40px';
-                    tipNo.style.fontSize = '12px';
-                    tipNo.style.color = '#F9EFCF';
-                    tipNo.style.zIndex = '1200';
-                    document.body.appendChild(tipNo);
-                    setTimeout(() => tipNo.remove(), 1000);
-                }
-                // 给触摸点加涟漪
-                addRipple(e.clientX, e.clientY);
-            });
-            alphabetContainer.appendChild(span);
-        });
-        // 高亮 S 的样式小提示但不强制
-        const sElement = Array.from(alphabetContainer.children).find(el => el.innerText === 'S');
-        if (sElement) sElement.style.fontWeight = '800';
-    }
-
-    // 三语切换绑定
-    function bindLanguageSwitcher() {
-        const langOptions = document.querySelectorAll('#langGroup span');
-        langOptions.forEach(opt => {
-            opt.addEventListener('click', (e) => {
-                const langVal = opt.getAttribute('data-lang');
-                if (langVal === 'zh') currentLang = 'zh';
-                else if (langVal === 'en') currentLang = 'en';
-                else if (langVal === 'yue') currentLang = 'yue';
-                updateUILanguage();
-                langOptions.forEach(o => o.classList.remove('active'));
-                opt.classList.add('active');
-                addRipple(e.clientX, e.clientY);
-                // 如果浮层开启且号码未解锁，同步占位文字
-                if (detailOverlay.classList.contains('active') && !isNumberRevealed) {
-                    detailPhoneSpan.innerText = langDict[currentLang].hiddenNum;
-                } else if (detailOverlay.classList.contains('active') && isNumberRevealed) {
-                    detailPhoneSpan.innerText = REAL_PHONE;
-                }
-            });
-        });
-        // 默认简体高亮
-        document.querySelector('#langGroup span[data-lang="zh"]').classList.add('active');
-    }
-
-    // 事件绑定
-    document.getElementById('contactShajilong').addEventListener('click', (e) => {
-        e.stopPropagation();
-        openDetail();
-        const rect = e.currentTarget.getBoundingClientRect();
-        addRipple(rect.left + rect.width/2, rect.top + rect.height/2);
+    document.getElementById("focus25").addEventListener("click", () => setTimer(1500));
+    document.getElementById("rest5").addEventListener("click", () => setTimer(300));
+    document.getElementById("stopTimer").addEventListener("click", () => {
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = null;
+        remain = 1500;
+        updateTimer();
     });
-    unlockBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        handleUnlock();
-    });
-    copyBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        handleCopy();
-    });
-    closeDetailBtn.addEventListener('click', () => {
-        closeDetail();
-    });
-    detailOverlay.addEventListener('click', (e) => {
-        if (e.target === detailOverlay) closeDetail();
-    });
-    secretCodeInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleUnlock();
-    });
-
-    // 初始化
-    buildAlphabet();
-    bindLanguageSwitcher();
-    updateUILanguage();
+    
+    // 初始化第1天
+    renderDay(1);
 </script>
 </body>
 </html>
