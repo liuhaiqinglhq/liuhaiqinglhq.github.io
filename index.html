@@ -1,10 +1,21 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>零基础中考营 · 从0分到及格</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 母亲节快乐 - 灵动气泡 🌸</title>
     <style>
+        :root {
+            --bg-start: #2d1b2e;
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --text-primary: #b04a6a;
+            --text-secondary: #c05565;
+            --accent-pink: #FF9AB2;
+            --accent-rose: #E8789A;
+            --accent-coral: #FF8C94;
+            --accent-peach: #FFB088;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,473 +23,870 @@
         }
 
         body {
-            background: linear-gradient(135deg, #1a2a3a 0%, #0f1e2a 100%);
-            font-family: 'Segoe UI', 'Roboto', 'Poppins', system-ui, sans-serif;
-            padding: 16px 12px 40px;
-            color: #f0f3f5;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Georgia', 'Noto Serif SC', 'KaiTi', '楷体', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            background: var(--bg-start);
+            cursor: default;
         }
 
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
+        /* 背景画布 */
+        canvas#bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
         }
 
-        /* 天数选择器 */
-        .day-card {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(12px);
-            border-radius: 40px;
-            padding: 16px 18px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        .day-control {
-            display: flex;
- align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 10px;
-        }
-        .day-buttons {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: rgba(0,0,0,0.3);
-            padding: 6px 18px;
-            border-radius: 50px;
-        }
-        .day-buttons button {
-            background: #ffb347;
-            border: none;
-            width: 42px;
-            height: 42px;
-            border-radius: 30px;
-            font-size: 1.6rem;
-            font-weight: bold;
-            color: #1e2a32;
-            cursor: pointer;
-        }
-        .day-buttons span {
-            font-size: 1.8rem;
-            font-weight: bold;
-            min-width: 60px;
-            text-align: center;
-        }
-        input[type="range"] {
-            flex: 1;
-            min-width: 160px;
-            accent-color: #ffb347;
-        }
-        .tip-text {
-            background: #2a3e4a;
-            border-radius: 24px;
-            padding: 12px 16px;
-            margin-top: 12px;
-            font-size: 0.85rem;
-            border-left: 5px solid #ffb347;
-        }
-
-        /* 通用卡片 */
-        .card {
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(8px);
-            border-radius: 36px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.15);
-        }
-        .card-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-left: 4px solid #ffb347;
-            padding-left: 14px;
-        }
-
-        /* 多科目网格 */
-        .subjects-grid {
+        /* 主场景 */
+        .main-scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
             display: flex;
             flex-direction: column;
-            gap: 16px;
-        }
-        .subject-box {
-            background: rgba(0,0,0,0.25);
-            border-radius: 24px;
-            padding: 14px 16px;
-        }
-        .subject-math { border-left: 5px solid #5dade2; }
-        .subject-physics { border-left: 5px solid #52be80; }
-        .subject-english { border-left: 5px solid #f5b041; }
-        .subject-chemistry { border-left: 5px solid #c39bd3; }
-        .sub-title {
-            font-weight: bold;
-            font-size: 1.1rem;
-            margin-bottom: 8px;
-            display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 1.2s ease;
         }
-        .sub-content {
-            font-size: 0.95rem;
-            line-height: 1.5;
-            opacity: 0.9;
-        }
-        .memory-tip {
-            background: #f9e79f;
-            color: #5e3a1c;
-            padding: 6px 12px;
-            border-radius: 20px;
-            display: inline-block;
-            font-size: 0.75rem;
-            margin-top: 8px;
+        .main-scene.visible {
+            opacity: 1;
+            pointer-events: auto;
         }
 
-        /* 练习题区 */
-        .question-area {
-            background: #0f2a2a;
-            border-radius: 28px;
-            padding: 18px;
-            margin: 12px 0;
-        }
-        .question-step {
-            background: #1e3e3e;
-            border-radius: 20px;
-            padding: 14px;
-            margin-top: 12px;
-        }
-        button {
-            background: #ffb347;
-            border: none;
-            padding: 12px 16px;
-            border-radius: 44px;
+        /* 顶部大标题 */
+        .hero-title {
+            font-size: clamp(2.2rem, 7vw, 4.5rem);
             font-weight: bold;
-            font-size: 0.9rem;
-            color: #1e2a32;
-            width: 100%;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .score-area {
-            background: #2c4a3e;
-            border-radius: 24px;
-            padding: 14px;
-            margin-top: 14px;
+            background: linear-gradient(135deg, #FF9AB2, #FFD1DC, #FFB3C6, #FFC2D1);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            animation: shimmer 3s ease-in-out infinite;
+            filter: drop-shadow(0 4px 15px rgba(255, 140, 170, 0.5));
+            letter-spacing: 0.08em;
+            margin-bottom: 0.5rem;
+            z-index: 12;
             text-align: center;
-            display: none;
         }
-        .timer-display {
-            background: #00000055;
-            font-size: 2.6rem;
+        @keyframes shimmer {
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        /* 副标题 */
+        .sub-hero {
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            color: #ffb8c9;
+            letter-spacing: 0.3em;
+            margin-bottom: 2rem;
+            z-index: 12;
+            text-shadow: 0 0 25px rgba(255, 150, 180, 0.6);
             text-align: center;
-            font-family: monospace;
-            padding: 12px;
-            border-radius: 50px;
-            letter-spacing: 6px;
         }
-        .timer-row {
+
+        /* 气泡容器 */
+        .bubbles-container {
+            position: relative;
+            width: 90vw;
+            max-width: 650px;
+            height: 55vh;
+            max-height: 500px;
+            z-index: 11;
+            pointer-events: none;
+        }
+
+        /* 气泡卡片 */
+        .bubble {
+            position: absolute;
+            background: var(--card-bg);
+            border-radius: 50%;
             display: flex;
-            gap: 12px;
-            margin: 12px 0;
-        }
-        .small-note {
-            font-size: 0.7rem;
-            opacity: 0.7;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            margin-top: 10px;
+            font-weight: bold;
+            color: var(--text-primary);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04),
+                inset 0 -4px 10px rgba(0, 0, 0, 0.03);
+            opacity: 0;
+            transform: scale(0);
+            pointer-events: auto;
+            cursor: default;
+            letter-spacing: 0.04em;
+            transition: box-shadow 0.4s ease;
+            border: 2px solid rgba(255, 200, 210, 0.6);
         }
-        hr {
-            border-color: rgba(255,255,255,0.2);
-            margin: 10px 0;
+        .bubble::after {
+            content: '';
+            position: absolute;
+            top: 8%;
+            left: 18%;
+            width: 30%;
+            height: 20%;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .bubble.show {
+            animation: bubbleAppear 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards,
+                bubbleFloat 5s ease-in-out infinite;
+            animation-delay: var(--bubble-delay, 0s),
+                calc(var(--bubble-delay, 0s) + 0.9s);
+        }
+
+        /* 气泡出现 - 从远处飘来 */
+        @keyframes bubbleAppear {
+            0% {
+                opacity: 0;
+                transform: translate(var(--bubble-start-x, 0), var(--bubble-start-y, 0)) scale(0);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+        }
+        /* 气泡轻柔浮动 */
+        @keyframes bubbleFloat {
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(8px, -12px) scale(1.04);
+            }
+            50% {
+                transform: translate(-5px, -6px) scale(0.98);
+            }
+            75% {
+                transform: translate(-10px, 8px) scale(1.02);
+            }
+        }
+
+        /* 气泡尺寸与颜色变体 */
+        .bubble-lg {
+            width: clamp(100px, 20vw, 150px);
+            height: clamp(100px, 20vw, 150px);
+            font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+        }
+        .bubble-md {
+            width: clamp(80px, 16vw, 120px);
+            height: clamp(80px, 16vw, 120px);
+            font-size: clamp(0.8rem, 2vw, 1.1rem);
+        }
+        .bubble-sm {
+            width: clamp(65px, 13vw, 95px);
+            height: clamp(65px, 13vw, 95px);
+            font-size: clamp(0.7rem, 1.8vw, 0.95rem);
+        }
+        .bubble-xs {
+            width: clamp(55px, 11vw, 80px);
+            height: clamp(55px, 11vw, 80px);
+            font-size: clamp(0.65rem, 1.6vw, 0.85rem);
+        }
+
+        .bubble-pink {
+            color: #E8789A;
+            border-color: rgba(255, 154, 178, 0.7);
+        }
+        .bubble-rose {
+            color: #D4687C;
+            border-color: rgba(232, 120, 154, 0.7);
+        }
+        .bubble-coral {
+            color: #FF6B6B;
+            border-color: rgba(255, 170, 165, 0.7);
+        }
+        .bubble-peach {
+            color: #C05565;
+            border-color: rgba(255, 176, 136, 0.7);
+        }
+        .bubble-blush {
+            color: #B04A6A;
+            border-color: rgba(255, 179, 179, 0.7);
+        }
+
+        /* 底部音乐提示 */
+        .music-hint {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            font-size: 0.85rem;
+            color: rgba(255, 200, 210, 0.8);
+            letter-spacing: 0.15em;
+            pointer-events: none;
+            text-shadow: 0 0 15px rgba(255, 150, 180, 0.5);
+            animation: softBlink 3s infinite;
+        }
+        @keyframes softBlink {
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* 信封层 */
+        .envelope-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(20, 10, 20, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: opacity 0.9s ease, visibility 0.9s ease;
+            cursor: pointer;
+        }
+        .envelope-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .envelope-wrapper {
+            position: relative;
+            width: min(330px, 80vw);
+            height: 230px;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 25px 40px rgba(0, 0, 0, 0.5));
+        }
+        .envelope-wrapper:hover {
+            transform: translateY(-8px);
+        }
+        .envelope-wrapper:active {
+            transform: scale(0.95);
+        }
+
+        .envelope-body {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80%;
+            background: #fef0e8;
+            border-radius: 14px 14px 22px 22px;
+            box-shadow: inset 0 -10px 20px rgba(0, 0, 0, 0.04);
+            z-index: 2;
+        }
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            background: #fadbd8;
+            border-radius: 14px 14px 42% 42%;
+            transform-origin: top center;
+            transform: rotateX(0deg);
+            z-index: 3;
+            transition: transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        }
+        .envelope-wrapper.opened .envelope-flap {
+            transform: rotateX(180deg);
+            box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.06);
+        }
+
+        .seal {
+            position: absolute;
+            bottom: 42%;
+            left: 50%;
+            transform: translate(-50%, 50%);
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle at 30% 30%, #f5a0b5, #c95c78);
+            border-radius: 50%;
+            z-index: 4;
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.35), inset 0 -4px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.6s ease, opacity 0.4s;
+        }
+        .envelope-wrapper.opened .seal {
+            transform: translate(-50%, 50%) scale(0.75);
+            opacity: 0.65;
+        }
+        .seal::after {
+            content: '❤️';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+        }
+
+        .letter-card {
+            position: absolute;
+            top: 20%;
+            left: 8%;
+            width: 84%;
+            height: 68%;
+            background: #ffffff;
+            border-radius: 6px;
+            z-index: 1;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s;
+            transform: translateY(12%);
+            opacity: 0.75;
+            overflow: hidden;
+        }
+        .envelope-wrapper.opened .letter-card {
+            transform: translateY(-28%);
+            opacity: 1;
+        }
+        .letter-text {
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            color: #b04a6a;
+            line-height: 1.8;
+            letter-spacing: 0.05em;
+            font-weight: bold;
+        }
+        .letter-hint {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #c07a90;
+            animation: softBlink 2s infinite;
+        }
+
+        .envelope-wrapper.flyaway {
+            animation: flyUp 1.1s ease-in forwards;
+        }
+        @keyframes flyUp {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-240px) scale(0.7);
+                opacity: 0;
+            }
+        }
+
+        /* 点击涟漪 */
+        .ripple {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 300;
+            animation: rippleOut 1.2s ease-out forwards;
+            border: 2px solid rgba(255, 200, 210, 0.8);
+            background: radial-gradient(circle, rgba(255, 200, 210, 0.5) 0%, transparent 70%);
+        }
+        @keyframes rippleOut {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(0);
+            }
+            100% {
+                width: 200px;
+                height: 200px;
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1);
+            }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <!-- 天数选择器 + 零基础激励 -->
-    <div class="day-card">
-        <div class="day-control">
-            <div class="day-buttons">
-                <button id="dayMinus">−</button>
-                <span id="currentDayShow">1</span>
-                <button id="dayPlus">+</button>
-            </div>
-            <input type="range" id="daySlider" min="1" max="30" value="1" step="1">
-            <span style="font-size:0.8rem;">/30天</span>
-        </div>
-        <div class="tip-text">
-            🌟 零基础大将，你好！不要怕，每一个学霸都是从“啥也不会”开始的。<br>
-            📖 每天只学一点点，重复就是力量！看不懂就多看两遍步骤。
-        </div>
-    </div>
 
-    <!-- 今日学习内容（4大科目，每个都从零讲起） -->
-    <div class="card">
-        <div class="card-title">📚 今日·零基础课堂</div>
-        <div id="subjectsContainer" class="subjects-grid">
-            <!-- 动态加载4科内容 -->
-        </div>
-    </div>
+    <!-- 背景粒子画布 -->
+    <canvas id="bgCanvas"></canvas>
 
-    <!-- 今日练习题 + 手把手答案 -->
-    <div class="card">
-        <div class="card-title">✍️ 今日练习（做不对没关系）</div>
-        <div class="question-area">
-            <div id="dailyQuestion" style="font-size:1rem; margin-bottom:8px;">加载中...</div>
-            <button id="showAnswerBtn">🔍 老师，教我做这道题（超详细步骤）</button>
-            <div id="stepByStep" class="question-step" style="display:none;"></div>
-        </div>
-    </div>
+    <!-- 音乐播放器（静默自动播放，用户交互后启用） -->
+    <audio id="bgMusic" loop preload="auto" style="display:none;">
+        <!-- 使用一首温馨的钢琴曲作为背景音乐 -->
+        <source src="https://cdn.pixabay.com/audio/2022/03/10/audio_a3e3e0e5c2.mp3" type="audio/mpeg">
+    </audio>
 
-    <!-- 每日即时测评（针对今天这4科内容，超级简单） -->
-    <div class="card">
-        <div class="card-title">🎯 每日测一测 · 看看记住没</div>
-        <button id="startQuizBtn">📝 开始评测（5道超基础题）</button>
-        <div id="quizResult" class="score-area"></div>
-        <div class="small-note">✅ 哪怕只对1道也是进步！做错就回到上面再看一遍知识点。</div>
-    </div>
+    <!-- 主场景 -->
+    <div class="main-scene" id="mainScene">
+        <h1 class="hero-title">母亲节快乐</h1>
+        <p class="sub-hero">✨ 愿时光温柔待您 ✨</p>
 
-    <!-- 专注计时器 + 脑力恢复 -->
-    <div class="card">
-        <div class="card-title">⏱️ 番茄钟 · 告别脑子浑浊</div>
-        <div class="timer-display" id="timerText">25:00</div>
-        <div class="timer-row">
-            <button id="focus25">📖 专注25分钟</button>
-            <button id="rest5">🧘 休息5分钟</button>
-            <button id="stopTimer">⏹️ 停</button>
-        </div>
-        <div class="tip-text" style="margin-top:12px;">
-            🧠 脑子浑浊立刻做：闭上眼，用鼻子吸气4秒→憋气7秒→嘴巴呼气8秒，做3组！
+        <div class="bubbles-container" id="bubblesContainer">
+            <!-- LOVE YOU MOM -->
+            <div class="bubble bubble-lg bubble-pink"
+            style="top:5%; left:50%; --bubble-delay:0s; --bubble-start-x:-60vw; --bubble-start-y:-40vh;"
+        data-delay="0">LOVE YOU MOM</div>
+
+        <!-- 永永远远 年轻 -->
+        <div class="bubble bubble-md bubble-rose"
+        style="top:20%; left:10%; --bubble-delay:0.4s; --bubble-start-x:-50vw; --bubble-start-y:30vh;"
+    data-delay="1">永永远远<br>年轻</div>
+
+    <!-- 妈妈，您辛苦了 -->
+    <div class="bubble bubble-lg bubble-coral"
+    style="top:15%; right:8%; --bubble-delay:0.7s; --bubble-start-x:60vw; --bubble-start-y:-30vh;"
+data-delay="2">妈妈，您<br>辛苦了</div>
+
+<!-- 健康 -->
+<div class="bubble bubble-sm bubble-peach"
+style="top:45%; left:18%; --bubble-delay:1.0s; --bubble-start-x:-40vw; --bubble-start-y:50vh;"
+data-delay="3">健康</div>
+
+<!-- 平安 -->
+<div class="bubble bubble-sm bubble-blush"
+style="top:50%; left:40%; --bubble-delay:1.2s; --bubble-start-x:0; --bubble-start-y:60vh;"
+data-delay="4">平安</div>
+
+<!-- 快乐 -->
+<div class="bubble bubble-md bubble-pink"
+style="top:42%; right:14%; --bubble-delay:1.4s; --bubble-start-x:50vw; --bubble-start-y:40vh;"
+data-delay="5">快乐</div>
+
+<!-- HAPPY MOTHER'S DAY -->
+<div class="bubble bubble-lg bubble-rose"
+style="bottom:10%; left:50%; --bubble-delay:1.7s; --bubble-start-x:0; --bubble-start-y:60vh;"
+data-delay="6">HAPPY<br>MOTHER'S DAY</div>
+
+<!-- 我爱您 -->
+<div class="bubble bubble-sm bubble-coral"
+style="bottom:20%; left:12%; --bubble-delay:2.0s; --bubble-start-x:-45vw; --bubble-start-y:40vh;"
+data-delay="7">💖 我爱您</div>
+
+<!-- 永远美丽 -->
+<div class="bubble bubble-xs bubble-peach"
+style="bottom:22%; right:12%; --bubble-delay:2.2s; --bubble-start-x:45vw; --bubble-start-y:30vh;"
+data-delay="8">永远美丽 🌸</div>
+</div>
+</div>
+
+<!-- 音乐提示 -->
+<div class="music-hint" id="musicHint">🎵 轻触屏幕播放音乐 🎵</div>
+
+<!-- 信封开屏 -->
+<div class="envelope-overlay" id="envelopeOverlay">
+    <div class="envelope-wrapper" id="envelopeWrapper">
+        <div class="envelope-body"></div>
+        <div class="envelope-flap"></div>
+        <div class="seal"></div>
+        <div class="letter-card">
+            <p class="letter-text">亲爱的妈妈<br>💌 母亲节快乐 💌</p>
+            <p class="letter-hint">轻触开启</p>
         </div>
     </div>
 </div>
 
+<!-- 点击特效画布 -->
+<canvas id="clickCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:150;pointer-events:none;"></canvas>
+
 <script>
-    // ======================= 零基础大补丸·每课4科都从0讲起 =======================
-    // 第1-30天，极度简单，拒绝复杂术语
-    const courseData = [];
-    
-    // 生成30天内容，每天数学、物理、英语、化学各一个最基础的知识点 + 生活化比喻
-    for (let d = 1; d <= 30; d++) {
-        // 根据天数循环不同基础模块
-        const mathIdx = (d-1) % 8;
-        const physicsIdx = (d-1) % 6;
-        const englishIdx = (d-1) % 7;
-        const chemIdx = (d-1) % 5;
-        
-        const mathContent = [
-            {title:"🔢 数字是什么", content:"数字就是用来数数的：1个苹果、2本书。没有东西就用0表示。", example:"例：你有0块钱 → 就是没钱", tip:"记住：0表示没有"},
-            {title:"➕ 正数和负数", content:"正数：比0大的数（1,2,3...）；负数：比0小的数，前面有−号，表示欠钱或温度零下。", example:"例：-5°C比0°C冷", tip:"负数就是'少了'的意思"},
-            {title:"|绝对值|", content:"绝对值就是'距离'，不管方向只看远近。|−3| = 3，因为−3离0有3步。", example:"|5| = 5，|−2| = 2", tip:"把负号扔了就对了"},
-            {title:"➕ 加法", content:"把两个数合并在一起。2+3=5，可以数手指。", example:"你有2颗糖，妈妈给3颗，一共5颗", tip:"加法就是越来越多"},
-            {title:"➖ 减法", content:"拿走一些。5−2=3，原来5个，拿走2个剩3个。", example:"5块钱花掉2块剩3块", tip:"减法就是越来越少"},
-            {title:"✖️ 乘法", content:"相同的数加很多次。3×4 = 3+3+3+3 = 12", example:"一包辣条3元，买4包就是12元", tip:"乘法是加法的快捷方式"},
-            {title:"➗ 除法", content:"平均分。8÷2=4，把8个苹果平均分给2个人，每人4个。", example:"10÷5=2", tip:"除法就是平均分"},
-            {title:"分数入门", content:"把一块蛋糕切成4块，取其中1块就是1/4。分子在上，分母在下。", example:"1/2就是一半", tip:"分母表示切几份，分子表示拿几份"}
-        ];
-        const physicsContent = [
-            {title:"📏 长度单位", content:"米(m)、厘米(cm)。1米=100厘米，大概你张双臂那么宽。", example:"你的课桌高约70cm", tip:"记住1m=100cm"},
-            {title:"⚡ 速度", content:"速度 = 路程 ÷ 时间。走路1分钟走60米，速度就是60米/分。", example:"汽车速度60km/h意思是1小时跑60公里", tip:"速度就是跑多快"},
-            {title:"🎵 声音", content:"声音由物体振动产生，通过空气传播。没有空气（真空）听不到声音。", example:"敲桌子，手会感觉震动", tip:"震动才有声音"},
-            {title:"💡 光", content:"光沿直线传播，光速超级快。影子就是光被挡住形成的。", example:"手影游戏", tip:"光是直的"},
-            {title:"⚙️ 质量", content:"质量表示物体有多重（多少千克kg）。1个鸡蛋约50克。", example:"你的书包质量约5kg", tip:"质量=重量感"},
-            {title:"🌊 密度", content:"密度=质量÷体积。铁比木头重就是密度大。", example:"油浮在水上，因为油密度小", tip:"密度=沉不沉"}
-        ];
-        const englishContent = [
-            {title:"🇬🇧 be动词：am/is/are", content:"我是I am，你是You are，他是He is，她是She is，它是It is。", example:"I am a student.", tip:"口诀：我用am，你用are，is连着他她它"},
-            {title:"👤 人称代词", content:"我(I)，你(you)，他(he)，她(she)，它(it)，我们(we)，你们(you)，他们(they)。", example:"He is my brother", tip:"主格做主语"},
-            {title:"🔤 一般现在时", content:"表示经常做的事。主语是he/she/it时，动词加s。", example:"She likes apples.", tip:"三单加s，其他用原形"},
-            {title:"📖 名词单复数", content:"一个苹果apple，多个加s apples。特殊：man→men。", example:"one book, two books", tip:"大多数加s"},
-            {title:"🚫 否定句", content:"在动词前加don't或doesn't。I don't like coffee.", example:"He doesn't play football.", tip:"doesn't用于三单"},
-            {title:"❓ 一般疑问句", content:"把am/is/are 或者do/does 放句首。", example:"Are you a student?", tip:"问句动词提前"},
-            {title:"📍 常见介词", content:"in (在里面)，on (在上面)，under (在下面)。", example:"The book is on the desk.", tip:"in/on/under表示位置"}
-        ];
-        const chemistryContent = [
-            {title:"🧪 物理变化", content:"没有新物质生成，只是形状或状态变了。比如水结冰、撕碎纸。", example:"把纸撕碎还是纸", tip:"没变成别的东西"},
-            {title:"🔥 化学变化", content:"生成了新物质。比如木头燃烧变成灰和烟，铁生锈。", example:"鸡蛋煮熟", tip:"彻底变了样"},
-            {title:"💧 水", content:"水化学式H₂O，表示2个氢原子+1个氧原子。", example:"我们喝的水", tip:"H₂O"},
-            {title:"🌬️ 氧气", content:"氧气能支持燃烧，人呼吸需要氧气。", example:"蜡烛在氧气中烧得更旺", tip:"氧气助燃"},
-            {title:"🧂 食盐", content:"食盐化学名氯化钠(NaCl)，咸味。", example:"炒菜放盐", tip:"NaCl"}
-        ];
-        
-        const math = mathContent[mathIdx];
-        const physics = physicsContent[physicsIdx];
-        const eng = englishContent[englishIdx];
-        const chem = chemistryContent[chemIdx];
-        
-        // 每日综合题目（简单）
-        let question = "";
-        let answerSteps = "";
-        if (d % 4 === 1) {
-            question = "① 计算：| -7 | = ?   ② 用am/is/are填空：I ___ a student.   ③ 物理：声音靠什么传播？";
-            answerSteps = "【第1题】绝对值就是去掉负号 → 7 \n【第2题】I 后面用am → I am a student. \n【第3题】声音需要介质，通常靠空气传播。答案：空气";
-        } else if (d % 4 === 2) {
-            question = "① 3 × 4 = ?   ② She ___ (like) apples. 用like的正确形式。   ③ 铁生锈是什么变化？";
-            answerSteps = "【第1题】3×4就是3个4相加=12 \n【第2题】She是三单，like加s → likes \n【第3题】铁生锈有新物质，属于化学变化";
-        } else if (d % 4 === 3) {
-            question = "① 8 ÷ 2 = ?   ② 速度公式是什么？   ③ 水的化学式？";
-            answerSteps = "【第1题】8除以2等于4（平均分成2份每份4）\n【第2题】v = s/t （路程除以时间）\n【第3题】水是H₂O";
-        } else {
-            question = "① 5 - 2 = ?   ② 翻译：她是一名老师。   ③ 影子形成是因为光的什么性质？";
-            answerSteps = "【第1题】5减2等于3 \n【第2句】She is a teacher. \n【第3题】光是沿直线传播，被挡住形成影子";
+    (function() {
+        // ============ 音乐管理 ============
+        const bgMusic = document.getElementById('bgMusic');
+        const musicHint = document.getElementById('musicHint');
+        let musicStarted = false;
+
+        function tryPlayMusic() {
+            if (!musicStarted) {
+                bgMusic.volume = 0.35;
+                bgMusic.play().then(() => {
+                    musicStarted = true;
+                    musicHint.style.opacity = '0';
+                    musicHint.style.transition = 'opacity 1s ease';
+                    setTimeout(() => { musicHint.textContent = '🎵 正在播放：温馨钢琴曲 🎵';
+                        musicHint.style.opacity = '1'; }, 500);
+                }).catch(() => {
+                    musicHint.textContent = '🎵 点击任意位置播放音乐 🎵';
+                });
+            }
         }
-        
-        courseData.push({
-            day: d,
-            math: math,
-            physics: physics,
-            english: eng,
-            chemistry: chem,
-            question: question,
-            answer: answerSteps
+
+        // 用户首次交互时尝试播放
+        document.addEventListener('click', tryPlayMusic, { once: false });
+        document.addEventListener('touchstart', tryPlayMusic, { once: false });
+
+        // ============ 背景粒子系统 ============
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let bgW, bgH, time = 0;
+        const bgParticles = [];
+
+        function resizeBg() { bgW = bgCanvas.width = window.innerWidth;
+            bgH = bgCanvas.height = window.innerHeight; }
+        resizeBg();
+        window.addEventListener('resize', resizeBg);
+
+        class BgParticle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * bgW;
+                this.y = Math.random() * bgH;
+                this.size = Math.random() * 2.5 + 0.6;
+                this.speedX = (Math.random() - 0.5) * 0.25;
+                this.speedY = (Math.random() - 0.5) * 0.45 - 0.15;
+                this.opacity = Math.random() * 0.45 + 0.2;
+                this.twinkleSpeed = Math.random() * 0.025 + 0.008;
+                this.twinkleOffset = Math.random() * Math.PI * 2;
+                this.hue = Math.random() < 0.5 ? (Math.random() * 30 + 335) : (Math.random() * 20 + 345);
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.opacity += Math.sin(time * this.twinkleSpeed * 55 + this.twinkleOffset) * 0.004;
+                this.opacity = Math.max(0.08, Math.min(0.65, this.opacity));
+                if (this.y < -20 || this.y > bgH + 20 || this.x < -20 || this.x > bgW + 20) {
+                    this.reset();
+                    this.y = bgH + 20;
+                    this.x = Math.random() * bgW;
+                }
+            }
+            draw(ctx) {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = `hsl(${this.hue}, 65%, 78%)`;
+                ctx.shadowColor = `hsl(${this.hue}, 75%, 72%)`;
+                ctx.shadowBlur = this.size * 2.5;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+        for (let i = 0; i < 90; i++) bgParticles.push(new BgParticle());
+
+        function drawBgGradient(ctx, w, h, t) {
+            const grad = ctx.createRadialGradient(w * 0.35 + Math.sin(t * 0.28) * w * 0.16, h * 0.4 + Math.cos(t *
+                0.35) * h * 0.12, w * 0.12, w * 0.5, h * 0.5, w * 1.2);
+            grad.addColorStop(0, `hsl(${335+Math.sin(t*0.22)*12}, 50%, 32%)`);
+            grad.addColorStop(0.4, `hsl(${348+Math.cos(t*0.28)*8}, 42%, 20%)`);
+            grad.addColorStop(0.75, `hsl(${320+Math.sin(t*0.32)*16}, 38%, 11%)`);
+            grad.addColorStop(1, `hsl(275, 28%, 7%)`);
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, w, h);
+        }
+
+        function animateBg() {
+            time += 0.016;
+            bgCtx.clearRect(0, 0, bgW, bgH);
+            drawBgGradient(bgCtx, bgW, bgH, time);
+            bgParticles.forEach(p => { p.update();
+                p.draw(bgCtx); });
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+
+        // ============ 花瓣飘落 ============
+        const petalCanvas = document.createElement('canvas');
+        petalCanvas.style.cssText =
+            'position:fixed;top:0;left:0;width:100%;height:100%;z-index:5;pointer-events:none;';
+        document.body.appendChild(petalCanvas);
+        const petalCtx = petalCanvas.getContext('2d');
+        let petalW, petalH;
+
+        function resizePetal() { petalW = petalCanvas.width = window.innerWidth;
+            petalH = petalCanvas.height = window.innerHeight; }
+        resizePetal();
+        window.addEventListener('resize', resizePetal);
+
+        class Petal {
+            constructor(startFromTop = true) { this.reset(startFromTop); }
+            reset(startFromTop) {
+                this.x = Math.random() * petalW;
+                this.y = startFromTop ? -30 - Math.random() * 120 : Math.random() * petalH;
+                this.size = Math.random() * 15 + 8;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotSpeed = (Math.random() - 0.5) * 0.05;
+                this.swayAmp = Math.random() * 1.8 + 0.7;
+                this.swayFreq = Math.random() * 0.018 + 0.007;
+                this.fallSpeed = Math.random() * 0.65 + 0.5;
+                this.opacity = Math.random() * 0.45 + 0.45;
+                this.hue = Math.random() < 0.6 ? (Math.random() * 20 + 342) : (Math.random() * 22 + 352);
+                this.saturation = Math.random() * 25 + 65;
+                this.lightness = Math.random() * 22 + 68;
+                this.phase = Math.random() * Math.PI * 2;
+            }
+            update() {
+                this.y += this.fallSpeed;
+                this.x += Math.sin(time * this.swayFreq * 42 + this.phase) * this.swayAmp * 0.35;
+                this.rotation += this.rotSpeed;
+                if (this.y > petalH + 40) this.reset(true);
+                if (this.x < -40) this.x = petalW + 40;
+                if (this.x > petalW + 40) this.x = -40;
+            }
+            draw(ctx) {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                const s = this.size;
+                ctx.fillStyle = `hsl(${this.hue}, ${this.saturation}%, ${this.lightness}%)`;
+                ctx.shadowColor = 'rgba(255,160,185,0.45)';
+                ctx.shadowBlur = s * 0.7;
+                ctx.beginPath();
+                ctx.moveTo(0, -s * 0.6);
+                ctx.bezierCurveTo(s * 0.5, -s * 0.4, s * 0.45, s * 0.3, 0, s * 0.5);
+                ctx.bezierCurveTo(-s * 0.45, s * 0.3, -s * 0.5, -s * 0.4, 0, -s * 0.6);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+        const petals = [];
+        for (let i = 0; i < 50; i++) petals.push(new Petal(false));
+
+        function animatePetals() {
+            petalCtx.clearRect(0, 0, petalW, petalH);
+            petals.forEach(p => { p.update();
+                p.draw(petalCtx); });
+            requestAnimationFrame(animatePetals);
+        }
+        animatePetals();
+
+        // ============ 爱心漂浮 ============
+        const heartCanvas = document.createElement('canvas');
+        heartCanvas.style.cssText =
+            'position:fixed;top:0;left:0;width:100%;height:100%;z-index:6;pointer-events:none;';
+        document.body.appendChild(heartCanvas);
+        const heartCtx = heartCanvas.getContext('2d');
+        let heartW, heartH;
+
+        function resizeHeart() { heartW = heartCanvas.width = window.innerWidth;
+            heartH = heartCanvas.height = window.innerHeight; }
+        resizeHeart();
+        window.addEventListener('resize', resizeHeart);
+
+        class FloatingHeart {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * heartW;
+                this.y = heartH + 40 + Math.random() * 180;
+                this.size = Math.random() * 20 + 9;
+                this.riseSpeed = Math.random() * 0.45 + 0.3;
+                this.sway = Math.random() * 1.4 + 0.5;
+                this.swaySpeed = Math.random() * 0.014 + 0.005;
+                this.opacity = Math.random() * 0.5 + 0.3;
+                this.phase = Math.random() * Math.PI * 2;
+                this.hue = Math.random() < 0.7 ? (Math.random() * 22 + 348) : (Math.random() * 14 + 352);
+                this.scalePulse = Math.random() * 0.28 + 0.86;
+                this.pulseSpeed = Math.random() * 0.028 + 0.012;
+            }
+            update() {
+                this.y -= this.riseSpeed;
+                this.x += Math.sin(time * this.swaySpeed * 48 + this.phase) * this.sway * 0.4;
+                this.scalePulse = 0.86 + Math.sin(time * this.pulseSpeed * 48 + this.phase) * 0.18;
+                if (this.y < -50) this.reset();
+                if (this.x < -30) this.x = heartW + 30;
+                if (this.x > heartW + 30) this.x = -30;
+            }
+            draw(ctx) {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.translate(this.x, this.y);
+                const s = this.size * this.scalePulse;
+                ctx.fillStyle = `hsl(${this.hue}, 68%, 68%)`;
+                ctx.shadowColor = `hsl(${this.hue}, 75%, 62%)`;
+                ctx.shadowBlur = s * 1.1;
+                ctx.beginPath();
+                ctx.moveTo(0, -s * 0.32);
+                ctx.bezierCurveTo(-s * 0.48, -s * 0.65, -s * 0.85, -s * 0.15, 0, s * 0.48);
+                ctx.bezierCurveTo(s * 0.85, -s * 0.15, s * 0.48, -s * 0.65, 0, -s * 0.32);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+        const hearts = [];
+        for (let i = 0; i < 22; i++) hearts.push(new FloatingHeart());
+
+        function animateHearts() {
+            heartCtx.clearRect(0, 0, heartW, heartH);
+            hearts.forEach(h => { h.update();
+                h.draw(heartCtx); });
+            requestAnimationFrame(animateHearts);
+        }
+        animateHearts();
+
+        // ============ 点击绽放特效 ============
+        const clickCanvas = document.getElementById('clickCanvas');
+        const clickCtx = clickCanvas.getContext('2d');
+        let clickW, clickH;
+
+        function resizeClick() { clickW = clickCanvas.width = window.innerWidth;
+            clickH = clickCanvas.height = window.innerHeight; }
+        resizeClick();
+        window.addEventListener('resize', resizeClick);
+        const clickEffects = [];
+
+        class ClickBloom {
+            constructor(x, y, scale = 1) {
+                this.x = x;
+                this.y = y;
+                this.age = 0;
+                this.maxAge = 1.5;
+                this.particles = [];
+                for (let i = 0; i < 20; i++) {
+                    const angle = (Math.PI * 2 / 20) * i + (Math.random() - 0.5) * 0.5;
+                    this.particles.push({
+                        angle,
+                        dist: (Math.random() * 45 + 30) * scale,
+                        speed: Math.random() * 2.8 + 2.2,
+                        size: (Math.random() * 5 + 3.5) * scale,
+                        hue: Math.random() < 0.6 ? (Math.random() * 18 + 342) : (Math.random() *
+                            25 + 12),
+                        opacity: 1,
+                    });
+                }
+            }
+            update(dt) {
+                this.age += dt;
+                const progress = this.age / this.maxAge;
+                this.particles.forEach(p => {
+                    p.dist += p.speed * dt * 38;
+                    p.opacity = Math.max(0, 1 - progress * 1.15);
+                    p.size *= 0.994;
+                });
+                return this.age < this.maxAge;
+            }
+            draw(ctx) {
+                const progress = this.age / this.maxAge;
+                const alpha = Math.max(0, 1 - progress * 1.15);
+                this.particles.forEach(p => {
+                    const px = this.x + Math.cos(p.angle) * p.dist;
+                    const py = this.y + Math.sin(p.angle) * p.dist + p.dist * 0.2;
+                    ctx.save();
+                    ctx.globalAlpha = p.opacity * alpha;
+                    ctx.fillStyle = `hsl(${p.hue}, 72%, 68%)`;
+                    ctx.shadowColor = `hsl(${p.hue}, 78%, 62%)`;
+                    ctx.shadowBlur = p.size * 1.8;
+                    ctx.beginPath();
+                    ctx.arc(px, py, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                });
+            }
+        }
+
+        function addClickEffect(x, y, scale = 1) {
+            clickEffects.push(new ClickBloom(x, y, scale));
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            document.body.appendChild(ripple);
+            ripple.addEventListener('animationend', () => ripple.remove());
+            setTimeout(() => ripple.remove(), 1250);
+        }
+
+        function animateClicks() {
+            clickCtx.clearRect(0, 0, clickW, clickH);
+            for (let i = clickEffects.length - 1; i >= 0; i--) {
+                if (!clickEffects[i].update(0.016)) clickEffects.splice(i, 1);
+                else clickEffects[i].draw(clickCtx);
+            }
+            requestAnimationFrame(animateClicks);
+        }
+        animateClicks();
+
+        // ============ 气泡动画启动 ============
+        const bubblesContainer = document.getElementById('bubblesContainer');
+        const allBubbles = bubblesContainer.querySelectorAll('.bubble');
+        const mainScene = document.getElementById('mainScene');
+
+        function startBubblesAnimation() {
+            allBubbles.forEach(bubble => {
+                const delay = parseFloat(bubble.getAttribute('data-delay')) || 0;
+                setTimeout(() => {
+                    bubble.classList.add('show');
+                    const rect = bubble.getBoundingClientRect();
+                    addClickEffect(rect.left + rect.width / 2, rect.top + rect.height / 2,
+                        0.65);
+                }, delay * 1000);
+            });
+        }
+
+        // ============ 信封开屏逻辑 ============
+        const envelopeOverlay = document.getElementById('envelopeOverlay');
+        const envelopeWrapper = document.getElementById('envelopeWrapper');
+        let envelopeOpened = false;
+
+        function openEnvelope() {
+            if (envelopeOpened) return;
+            envelopeOpened = true;
+
+            // 尝试播放音乐
+            tryPlayMusic();
+
+            envelopeWrapper.classList.add('opened');
+
+            setTimeout(() => {
+                envelopeWrapper.classList.add('flyaway');
+                mainScene.classList.add('visible');
+                setTimeout(startBubblesAnimation, 400);
+            }, 950);
+
+            setTimeout(() => {
+                envelopeOverlay.classList.add('hidden');
+            }, 1900);
+
+            // 信封绽放
+            const rect = envelopeWrapper.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    addClickEffect(cx + (Math.random() - 0.5) * 160, cy + (Math.random() - 0.5) *
+                        110, 0.8);
+                }, i * 90);
+            }
+        }
+
+        envelopeOverlay.addEventListener('click', openEnvelope);
+        envelopeOverlay.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            openEnvelope();
         });
-    }
-    
-    // 当前选择天数
-    let currentDay = 1;
-    
-    // 渲染当天完整内容
-    function renderDay(day) {
-        const data = courseData.find(c => c.day === day);
-        if (!data) return;
-        // 构建4科html
-        const html = `
-            <div class="subject-box subject-math">
-                <div class="sub-title">📐 ${data.math.title}</div>
-                <div class="sub-content">${data.math.content}<br><span class="memory-tip">⭐ 生活例：${data.math.example}</span><br><span class="memory-tip">📌 口诀/技巧：${data.math.tip}</span></div>
-            </div>
-            <div class="subject-box subject-physics">
-                <div class="sub-title">⚡ ${data.physics.title}</div>
-                <div class="sub-content">${data.physics.content}<br><span class="memory-tip">⭐ 例子：${data.physics.example}</span><br><span class="memory-tip">📌 记忆：${data.physics.tip}</span></div>
-            </div>
-            <div class="subject-box subject-english">
-                <div class="sub-title">🇬🇧 ${data.english.title}</div>
-                <div class="sub-content">${data.english.content}<br><span class="memory-tip">🔊 例句：${data.english.example}</span><br><span class="memory-tip">🎯 小口诀：${data.english.tip}</span></div>
-            </div>
-            <div class="subject-box subject-chemistry">
-                <div class="sub-title">🧪 ${data.chemistry.title}</div>
-                <div class="sub-content">${data.chemistry.content}<br><span class="memory-tip">💡 举例：${data.chemistry.example}</span><br><span class="memory-tip">🧠 一句话：${data.chemistry.tip}</span></div>
-            </div>
-        `;
-        document.getElementById("subjectsContainer").innerHTML = html;
-        document.getElementById("dailyQuestion").innerHTML = `📌 今日题目（别怕，不会就点答案）：<br>${data.question}`;
-        window.currentSteps = data.answer;
-        // 隐藏上次显示的步骤
-        document.getElementById("stepByStep").style.display = "none";
-        document.getElementById("stepByStep").innerHTML = "";
-        // 更新天数滑块显示
-        document.getElementById("currentDayShow").innerText = day;
-        document.getElementById("daySlider").value = day;
-        
-        // 之前测评成绩显示
-        const saved = localStorage.getItem(`quiz_score_day_${day}`);
-        const quizDiv = document.getElementById("quizResult");
-        if (saved !== null) {
-            quizDiv.style.display = "block";
-            quizDiv.innerHTML = `📊 上次本日评测得分：${saved}/5<br>继续加油，错了就回头看上面知识！`;
-        } else {
-            quizDiv.style.display = "none";
-        }
-    }
-    
-    // 显示详细解题步骤按钮
-    document.getElementById("showAnswerBtn").addEventListener("click", () => {
-        const stepDiv = document.getElementById("stepByStep");
-        stepDiv.style.display = "block";
-        stepDiv.innerHTML = `<strong>🧑‍🏫 零基础老师一步步教你：</strong><br><br>${(window.currentSteps || "暂无详细步骤").replace(/\n/g,'<br>')}<br><br>✨ 没看懂？再看一遍知识点，或者大声读出来！`;
-    });
-    
-    // 每日即时测评（基于当天4科知识点，5道超简单填空题/选择题）
-    function startDailyQuiz() {
-        const data = courseData.find(c => c.day === currentDay);
-        if (!data) return;
-        // 生成5个简单题目
-        let quizQuestions = [];
-        // 数学
-        quizQuestions.push({q: `${data.math.title}：${data.math.tip} 根据今天内容，绝对值|−4|等于？`, a: "4"});
-        quizQuestions.push({q: `物理：${data.physics.title} —— ${data.physics.content.substring(0,40)}... 速度的计算公式是？`, a: "v=s/t"});
-        quizQuestions.push({q: `英语：be动词填空： He ___ a boy.`, a: "is"});
-        quizQuestions.push({q: `化学：${data.chemistry.title} —— 水结冰是什么变化？(物理变化/化学变化)`, a: "物理变化"});
-        quizQuestions.push({q: `综合：今天学到的任何一个知识点，写出你能记住的一句话。`, a: "任意"});
-        
-        let score = 0;
-        for (let i = 0; i < quizQuestions.length; i++) {
-            let user = prompt(`📝 第${i+1}题（超基础）\n${quizQuestions[i].q}\n输入你的答案（不区分大小写）:`);
-            if (i === 4) {
-                if (user && user.trim().length > 1) score++;
-            } else {
-                if (user && user.trim().toLowerCase() === quizQuestions[i].a.toLowerCase()) score++;
+
+        // 主场景点击花朵
+        document.addEventListener('click', function(e) {
+            if (!envelopeOpened) return;
+            tryPlayMusic();
+            addClickEffect(e.clientX, e.clientY);
+        });
+        document.addEventListener('touchstart', function(e) {
+            if (!envelopeOpened) return;
+            tryPlayMusic();
+            if (e.touches.length === 1) {
+                addClickEffect(e.touches[0].clientX, e.touches[0].clientY);
             }
-        }
-        localStorage.setItem(`quiz_score_day_${currentDay}`, score);
-        const percent = (score/5)*100;
-        let advice = "";
-        if (score === 0) advice = "🥺 没关系！咱从零开始，今天再读两遍知识点，明天再测！";
-        else if (score <= 2) advice = "🌱 有进步！把错题对照上面步骤看一遍。";
-        else if (score <= 4) advice = "👍 不错！再巩固下错的那一科。";
-        else advice = "🎉 零基础大将今天很棒！继续坚持！";
-        const resultDiv = document.getElementById("quizResult");
-        resultDiv.style.display = "block";
-        resultDiv.innerHTML = `🎯 今日测评得分：${score}/5 （正确率${percent}%）<br>${advice}<br>❤️ 记住：每天对1题就是胜利！`;
-    }
-    
-    // 天数切换
-    document.getElementById("dayMinus").addEventListener("click", () => {
-        if (currentDay > 1) currentDay--;
-        renderDay(currentDay);
-    });
-    document.getElementById("dayPlus").addEventListener("click", () => {
-        if (currentDay < 30) currentDay++;
-        renderDay(currentDay);
-    });
-    document.getElementById("daySlider").addEventListener("input", (e) => {
-        currentDay = parseInt(e.target.value);
-        renderDay(currentDay);
-    });
-    document.getElementById("startQuizBtn").addEventListener("click", startDailyQuiz);
-    
-    // 计时器逻辑（简单可靠）
-    let timerInterval = null;
-    let remain = 1500;
-    const timerEl = document.getElementById("timerText");
-    function updateTimer() {
-        let m = Math.floor(remain/60);
-        let s = remain % 60;
-        timerEl.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-        if (remain <= 0 && timerInterval) {
-            clearInterval(timerInterval);
-            alert("⏰ 时间到！快站起来，喝口水，做深呼吸！");
-        }
-    }
-    function setTimer(seconds) {
-        if (timerInterval) clearInterval(timerInterval);
-        remain = seconds;
-        updateTimer();
-        timerInterval = setInterval(() => {
-            if (remain > 0) {
-                remain--;
-                updateTimer();
-            } else {
-                clearInterval(timerInterval);
-                timerInterval = null;
-                alert("专注时间结束，休息一会儿吧！");
-            }
-        }, 1000);
-    }
-    document.getElementById("focus25").addEventListener("click", () => setTimer(1500));
-    document.getElementById("rest5").addEventListener("click", () => setTimer(300));
-    document.getElementById("stopTimer").addEventListener("click", () => {
-        if (timerInterval) clearInterval(timerInterval);
-        timerInterval = null;
-        remain = 1500;
-        updateTimer();
-    });
-    
-    // 初始化第1天
-    renderDay(1);
+        }, { passive: true });
+
+        console.log('💐 母亲节快乐！愿天下所有的妈妈幸福安康！');
+        console.log('🎵 背景音乐：温馨钢琴曲');
+    })();
 </script>
 </body>
 </html>
