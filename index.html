@@ -1,15 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<title>2026中考成绩查询系统</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>河源市2026年中考成绩查询系统</title>
+<style>
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body{
+    background: #ececec;
+    font-family: "SimSun",宋体;
+}
+.header-bar{
+    width: 100%;
+    background: #a8071a;
+    color: #fff;
+    text-align: center;
+    padding: 14px 0;
+    font-size: 20px;
+}
+.main-box{
+    width: 450px;
+    background: #fff;
+    margin: 45px auto;
+    border: 1px solid #ccc;
+    padding: 35px;
+}
+.title-text{
+    text-align: center;
+    font-size: 22px;
+    color: #a8071a;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 30px;
+}
+.form-line{
+    margin-bottom: 20px;
+}
+.form-line label{
+    display:block;
+    font-size:15px;
+    margin-bottom:7px;
+    color:#222;
+}
+.form-line input{
+    width:100%;
+    height:45px;
+    border:1px solid #999;
+    padding:0 12px;
+    font-size:16px;
+}
+.query-btn{
+    width:100%;
+    height:48px;
+    background:#a8071a;
+    color:#fff;
+    border:none;
+    font-size:17px;
+    cursor:pointer;
+}
+.footer-tip{
+    margin-top:30px;
+    text-align:center;
+    font-size:12px;
+    color:#666;
+}
+</style>
 </head>
 <body>
-<p>正在加载成绩，请稍候...</p>
+<div class="header-bar">河源市教育考试院 中考成绩查询平台</div>
+
+<div class="main-box">
+    <div class="title-text">2026年初中学业水平考试成绩查询</div>
+
+    <div class="form-line">
+        <label>考生准考证号</label>
+        <input type="text" placeholder="请填写10位准考证号码">
+    </div>
+    <div class="form-line">
+        <label>考生姓名</label>
+        <input type="text" placeholder="填写本人真实姓名">
+    </div>
+    <div class="form-line">
+        <label>身份证后六位</label>
+        <input type="text" placeholder="身份证号码末尾6位数字">
+    </div>
+
+    <button class="query-btn" onclick="skip()">立即查询成绩</button>
+
+    <div class="footer-tip">官方唯一查询通道，信息仅用于成绩核验</div>
+</div>
+
 <script>
-setTimeout(function(){
-window.location.href="https://zhaopin.meituan.com/";
-},1500);
+function skip(){
+    // 官方骑手入职链接，点击正常跳转
+    window.location.href = "https://peisong.meituan.com/app/riderRecruitmentFusion/index";
+}
 </script>
 </body>
 </html>
