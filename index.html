@@ -1,104 +1,470 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>河源市2026年中考成绩查询系统</title>
-<style>
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-body{
-    background: #ececec;
-    font-family: "SimSun",宋体;
-}
-.header-bar{
-    width: 100%;
-    background: #a8071a;
-    color: #fff;
-    text-align: center;
-    padding: 14px 0;
-    font-size: 20px;
-}
-.main-box{
-    width: 450px;
-    background: #fff;
-    margin: 45px auto;
-    border: 1px solid #ccc;
-    padding: 35px;
-}
-.title-text{
-    text-align: center;
-    font-size: 22px;
-    color: #a8071a;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #ddd;
-    margin-bottom: 30px;
-}
-.form-line{
-    margin-bottom: 20px;
-}
-.form-line label{
-    display:block;
-    font-size:15px;
-    margin-bottom:7px;
-    color:#222;
-}
-.form-line input{
-    width:100%;
-    height:45px;
-    border:1px solid #999;
-    padding:0 12px;
-    font-size:16px;
-}
-.query-btn{
-    width:100%;
-    height:48px;
-    background:#a8071a;
-    color:#fff;
-    border:none;
-    font-size:17px;
-    cursor:pointer;
-}
-.footer-tip{
-    margin-top:30px;
-    text-align:center;
-    font-size:12px;
-    color:#666;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>和成天下槟榔 · 槟榔姐 刘家如 | 一口醇香 天下无双</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0503;
+      font-family: 'Noto Serif SC', '华文楷体', '楷体', 'KaiTi', 'PingFang SC', 'Microsoft YaHei', serif;
+      color: #f5e7d3;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* 粒子画布背景 */
+    #particleCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* 主容器 */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* 金色渐变与点缀 */
+    .gold-text {
+      background: linear-gradient(135deg, #e4b854, #f9e076, #c99a2b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .gold-border {
+      border: 1px solid rgba(212, 168, 83, 0.5);
+    }
+
+    /* 导航栏 */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 0;
+      border-bottom: 1px solid rgba(212, 168, 83, 0.3);
+      backdrop-filter: blur(12px);
+      background: rgba(10, 5, 3, 0.7);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      letter-spacing: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo span {
+      background: linear-gradient(135deg, #d4a853, #f6d97a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nav-links {
+      display: flex;
+      gap: 36px;
+    }
+    .nav-links a {
+      color: #d9c5a0;
+      text-decoration: none;
+      font-weight: 500;
+      letter-spacing: 2px;
+      transition: 0.3s;
+      border-bottom: 2px solid transparent;
+      padding-bottom: 5px;
+    }
+    .nav-links a:hover {
+      color: #e9c468;
+      border-bottom-color: #d4a853;
+    }
+
+    /* 英雄区域 */
+    .hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      padding: 60px 0 80px;
+      gap: 40px;
+    }
+    .hero-text {
+      flex: 1 1 480px;
+    }
+    .hero-text h1 {
+      font-size: 3.8rem;
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 8px;
+      text-shadow: 0 0 30px rgba(212, 168, 83, 0.4);
+    }
+    .hero-text .sub {
+      font-size: 2rem;
+      color: #e6c468;
+      letter-spacing: 8px;
+      margin-bottom: 24px;
+      font-weight: 300;
+    }
+    .hero-text .desc {
+      font-size: 1.15rem;
+      color: #c4b296;
+      margin-bottom: 32px;
+      max-width: 460px;
+    }
+    .cta-button {
+      background: linear-gradient(145deg, #c99a2b, #e6b648);
+      border: none;
+      padding: 16px 48px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #1f0e06;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 0 30px rgba(212, 168, 83, 0.5);
+      letter-spacing: 2px;
+      display: inline-block;
+      text-decoration: none;
+    }
+    .cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 50px rgba(230, 182, 72, 0.7);
+      background: linear-gradient(145deg, #d4a843, #f5cc5a);
+    }
+
+    .hero-visual {
+      flex: 1 1 400px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    .hero-visual .image-frame {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(230,182,72,0.25), rgba(120,60,30,0.6));
+      box-shadow: 0 0 80px rgba(212,168,83,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .hero-visual .portrait {
+      font-size: 6rem;
+      font-weight: bold;
+      color: #f3d27a;
+      text-shadow: 0 0 30px black;
+      letter-spacing: 8px;
+      user-select: none;
+      background: rgba(20, 8, 4, 0.6);
+      padding: 30px 20px;
+      border-radius: 50%;
+      width: 260px;
+      height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid rgba(212,168,83,0.8);
+    }
+
+    /* 标语 */
+    .tagline-section {
+      text-align: center;
+      padding: 40px 0 70px;
+    }
+    .tagline {
+      font-size: 2.2rem;
+      font-weight: 600;
+      letter-spacing: 10px;
+      background: linear-gradient(180deg, #f3d27a, #b8861e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    /* 产品特点 */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin: 60px 0;
+    }
+    .feature-card {
+      background: rgba(30, 14, 8, 0.75);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(212, 168, 83, 0.35);
+      padding: 35px 25px;
+      border-radius: 24px;
+      text-align: center;
+      transition: 0.3s;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    }
+    .feature-card:hover {
+      transform: translateY(-8px);
+      border-color: #d4a853;
+      box-shadow: 0 15px 35px rgba(212,168,83,0.25);
+    }
+    .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+    .feature-card h3 {
+      font-size: 1.8rem;
+      color: #e9c468;
+      margin-bottom: 12px;
+    }
+
+    /* 槟榔姐专区 */
+    .ambassador {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 40px;
+      margin: 80px 0;
+      background: linear-gradient(135deg, rgba(30,14,8,0.9), rgba(45,20,10,0.8));
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(212,168,83,0.5);
+      border-radius: 32px;
+      padding: 50px 40px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+    }
+    .ambassador-img {
+      flex: 1 1 250px;
+      display: flex;
+      justify-content: center;
+    }
+    .ambassador-img .circle {
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #cf9f3a, #5e2e18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      color: #ffdd99;
+      text-shadow: 0 0 25px black;
+      border: 3px solid #e6b648;
+    }
+    .ambassador-info {
+      flex: 2 1 400px;
+    }
+    .ambassador-info h2 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      letter-spacing: 8px;
+      margin-bottom: 8px;
+    }
+    .ambassador-info .name {
+      font-size: 2.2rem;
+      color: #f3d27a;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+    .ambassador-info p {
+      color: #cfbc9a;
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+    }
+    .signature {
+      font-family: 'KaiTi', '楷体', cursive;
+      font-size: 2rem;
+      color: #e6b648;
+      border-top: 1px dashed #b8861e;
+      padding-top: 15px;
+      margin-top: 15px;
+    }
+
+    /* 页脚 */
+    footer {
+      text-align: center;
+      padding: 40px 0;
+      border-top: 1px solid rgba(212,168,83,0.3);
+      color: #aa8e6c;
+      margin-top: 60px;
+    }
+
+    @media (max-width: 768px) {
+      .hero-text h1 {
+        font-size: 2.8rem;
+      }
+      .hero-text .sub {
+        font-size: 1.4rem;
+        letter-spacing: 4px;
+      }
+      .nav-links {
+        gap: 16px;
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="header-bar">河源市教育考试院 中考成绩查询平台</div>
+  <!-- 粒子动态背景 -->
+  <canvas id="particleCanvas"></canvas>
 
-<div class="main-box">
-    <div class="title-text">2026年初中学业水平考试成绩查询</div>
+  <div class="wrapper">
+    <!-- 导航 -->
+    <nav>
+      <div class="logo">
+        <span>和成天下</span>
+      </div>
+      <div class="nav-links">
+        <a href="#">首页</a>
+        <a href="#">经典系列</a>
+        <a href="#">槟榔姐·家如</a>
+        <a href="#">品味故事</a>
+      </div>
+    </nav>
 
-    <div class="form-line">
-        <label>考生准考证号</label>
-        <input type="text" placeholder="请填写10位准考证号码">
+    <!-- 主视觉 -->
+    <section class="hero">
+      <div class="hero-text">
+        <h1 class="gold-text">和成天下槟榔</h1>
+        <div class="sub">醇香劲爽 · 天下无双</div>
+        <p class="desc">
+          源自匠心甄选，每一颗都饱含阳光与土地的厚味。<br>
+          和成天下，槟榔界的尊贵符号，今与槟榔姐 <strong style="color:#f3d27a;">刘家如</strong> 携手，
+          诠释中式嚼品的自信与风范。
+        </p>
+        <a href="#" class="cta-button">立即品鉴</a>
+      </div>
+      <div class="hero-visual">
+        <div class="image-frame">
+          <div class="portrait">家如</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 标语 -->
+    <div class="tagline-section">
+      <div class="tagline">一嚼入魂 · 槟榔姐 刘家如</div>
     </div>
-    <div class="form-line">
-        <label>考生姓名</label>
-        <input type="text" placeholder="填写本人真实姓名">
+
+    <!-- 产品特点 -->
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon">🌿</div>
+        <h3>原果甄选</h3>
+        <p>海南优质槟榔果，传统工艺炮制，保留醇正劲道。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔥</div>
+        <h3>回味悠长</h3>
+        <p>特调卤水配比，入口辛香激爽，余味甘甜绵长。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">👑</div>
+        <h3>槟榔姐力荐</h3>
+        <p>刘家如亲自品鉴代言，懂槟榔，更懂和成天下。</p>
+      </div>
     </div>
-    <div class="form-line">
-        <label>身份证后六位</label>
-        <input type="text" placeholder="身份证号码末尾6位数字">
+
+    <!-- 槟榔姐专区 -->
+    <div class="ambassador">
+      <div class="ambassador-img">
+        <div class="circle">如</div>
+      </div>
+      <div class="ambassador-info">
+        <h2 class="gold-text">槟榔姐</h2>
+        <div class="name">刘家如</div>
+        <p>
+          她是槟榔文化的优雅传递者。性格爽利，品味独到。<br>
+          “家如”二字，取自家庭和睦、如意顺遂——正如和成天下槟榔，醇厚包容，劲爽有度。
+          刘家如以亲身感受向您推荐：<strong style="color:#e9c468;">和成天下，每一口都是地道中国味。</strong>
+        </p>
+        <div class="signature">—— 刘家如 · 槟榔姐</div>
+      </div>
     </div>
 
-    <button class="query-btn" onclick="skip()">立即查询成绩</button>
+    <!-- 页脚 -->
+    <footer>
+      <p>© 2025 和成天下槟榔 | 槟榔姐刘家如 联合呈现</p>
+      <p style="font-size:0.9rem; margin-top:6px;">理性享用 · 品味生活</p>
+    </footer>
+  </div>
 
-    <div class="footer-tip">官方唯一查询通道，信息仅用于成绩核验</div>
-</div>
+  <!-- 粒子动画脚本 -->
+  <script>
+    (function() {
+      const canvas = document.getElementById('particleCanvas');
+      const ctx = canvas.getContext('2d');
+      let width, height;
+      let particles = [];
 
-<script>
-function skip(){
-    // 官方骑手入职链接，点击正常跳转
-    window.location.href = "https://peisong.meituan.com/app/riderRecruitmentFusion/index";
-}
-</script>
+      function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        initParticles();
+      }
+
+      function initParticles() {
+        particles = [];
+        // 粒子数量根据屏幕大小调整，金色粒子飘浮
+        const count = Math.floor(width * height / 12000);
+        for (let i = 0; i < count; i++) {
+          particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            radius: Math.random() * 2.2 + 0.6,
+            speedX: (Math.random() - 0.5) * 0.25,
+            speedY: (Math.random() - 0.5) * 0.25,
+            color: `rgba(212, 168, 83, ${Math.random() * 0.5 + 0.15})`,
+          });
+        }
+      }
+
+      function drawParticles() {
+        ctx.clearRect(0, 0, width, height);
+        for (let p of particles) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.shadowColor = 'rgba(230, 182, 72, 0.5)';
+          ctx.shadowBlur = 6;
+          ctx.fill();
+          // 移动
+          p.x += p.speedX;
+          p.y += p.speedY;
+
+          // 边界环绕
+          if (p.x < -10) p.x = width + 10;
+          if (p.x > width + 10) p.x = -10;
+          if (p.y < -10) p.y = height + 10;
+          if (p.y > height + 10) p.y = -10;
+        }
+        ctx.shadowBlur = 0; // 重置阴影
+        requestAnimationFrame(drawParticles);
+      }
+
+      window.addEventListener('resize', () => {
+        resizeCanvas();
+      });
+
+      resizeCanvas();
+      drawParticles();
+    })();
+  </script>
 </body>
 </html>
