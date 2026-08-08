@@ -1,506 +1,649 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>刘家如 · 东瑶村未来之星</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>OPPO Find X9 系列对比 · 移动版</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    /* 加深主题色，保证白底文字对比度 ≥ 4.5:1 */
+    --c-x9:    #1d5fd6; /* 标准版：深蓝 */
+    --c-pro:   #1a7a37; /* Pro：深绿 */
+    --c-spro:  #b45309; /* X9s Pro：深橙（原 #f5a623 作文字看不清，已加深） */
+    --c-ultra: #c1322f; /* Ultra：深红（原 #e5484d 已加深） */
+    --ink:#0f172a;          /* 主文字（极深，对比度最高） */
+    --ink2:#334155;         /* 次级文字 */
+    --muted:#475569;        /* 描述文字（从 #6b7280 加深） */
+    --line:#e2e8f0;
+    --bg:#f1f5f9;
+    --card:#ffffff;
+    --shadow:0 4px 16px rgba(15,23,42,.08);
+    --shadow-lg:0 10px 40px rgba(15,23,42,.18);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:"PingFang SC","Microsoft YaHei",-apple-system,"Helvetica Neue",Arial,sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    line-height:1.6;
+    /* 给底部固定导航留空间 */
+    padding-bottom:64px;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 14px;}
 
-    body {
-      font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
-      background: #0a1628;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 12px;
-    }
+  /* ===== 顶部标题 ===== */
+  .topbar{
+    position:sticky;top:0;z-index:50;
+    background:rgba(255,255,255,.92);
+    backdrop-filter:saturate(180%) blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar .wrap{display:flex;align-items:center;gap:10px;padding:10px 14px;}
+  .topbar .logo{font-weight:800;font-size:16px;color:var(--ink);white-space:nowrap;}
+  .topbar .logo span{color:var(--c-pro);}
 
-    /* 开屏动画 */
-    .splash-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle at 30% 20%, #004a99, #001630);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      animation: splashFadeOut 0.7s ease 2.2s forwards;
-    }
-    @keyframes splashFadeOut {
-      0% { opacity: 1; }
-      100% { opacity: 0; visibility: hidden; }
-    }
-    .splash-content {
-      text-align: center;
-      animation: splashBounceIn 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    }
-    @keyframes splashBounceIn {
-      0% { transform: scale(0.2); opacity: 0; }
-      60% { transform: scale(1.1); opacity: 1; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    .splash-basketball {
-      font-size: 85px;
-      color: #ff9f4b;
-      filter: drop-shadow(0 0 35px #ff6600);
-      margin-bottom: 12px;
-      animation: spinBall 1.2s infinite linear;
-    }
-    @keyframes spinBall {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .splash-name {
-      font-size: 68px;
-      font-weight: 900;
-      background: linear-gradient(180deg, #ffffff 0%, #9ad5ff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: 10px;
-      margin: 8px 0;
-    }
-    .splash-sub {
-      font-size: 18px;
-      color: #b3dcff;
-      letter-spacing: 5px;
-    }
+  /* ===== 机型对比选择条 ===== */
+  .model-bar{padding:10px 14px 4px;}
+  .model-bar .lab{font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600;}
+  .model-bar .pills{display:flex;flex-wrap:wrap;gap:8px;}
+  .model-bar .pill{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:7px 12px;border-radius:999px;border:2px solid var(--line);
+    font-size:13px;font-weight:600;color:var(--ink2);background:#fff;
+    cursor:pointer;transition:.15s;
+  }
+  .model-bar .pill .dot{width:10px;height:10px;border-radius:50%;background:var(--mc,#999);}
+  .model-bar .pill.on{border-color:var(--mc);color:var(--mc);background:color-mix(in srgb,var(--mc) 8%,#fff);}
 
-    /* 主容器 */
-    .app-container {
-      width: 100%;
-      max-width: 420px;
-      height: 780px;
-      max-height: 95vh;
-      background: rgba(12, 25, 45, 0.55);
-      backdrop-filter: blur(30px);
-      -webkit-backdrop-filter: blur(30px);
-      border-radius: 48px;
-      box-shadow: 0 40px 80px rgba(0, 20, 60, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.2);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      border: 1px solid rgba(64, 140, 255, 0.35);
-      position: relative;
-    }
-    .app-container::before {
-      content: "";
-      position: absolute;
-      top: -30%;
-      left: -20%;
-      width: 140%;
-      height: 140%;
-      background: radial-gradient(circle at 40% 20%, rgba(0, 180, 255, 0.25) 0%, transparent 50%);
-      animation: floatGlow 10s infinite ease-in-out;
-      pointer-events: none;
-      z-index: 0;
-    }
-    @keyframes floatGlow {
-      0% { transform: translate(0, 0); }
-      50% { transform: translate(15px, 25px); }
-      100% { transform: translate(0, 0); }
-    }
+  /* ===== 智能助手搜索 ===== */
+  .assistant{padding:10px 14px 14px;}
+  .assistant .search{
+    display:flex;gap:8px;align-items:center;
+    background:#fff;border:1.5px solid var(--c-x9);border-radius:14px;
+    padding:8px 12px;box-shadow:var(--shadow);
+  }
+  .assistant .search svg{flex:0 0 auto;color:var(--c-x9);}
+  .assistant input{
+    flex:1;border:0;outline:0;font-size:15px;background:transparent;color:var(--ink);
+    min-width:0;
+  }
+  .assistant input::placeholder{color:#94a3b8;}
+  .assistant .go{
+    border:0;background:var(--c-x9);color:#fff;font-weight:700;font-size:13px;
+    padding:7px 14px;border-radius:10px;cursor:pointer;
+  }
+  .assistant .suggest{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+  .assistant .suggest b{
+    font-size:12px;padding:5px 10px;border-radius:8px;background:#e8eefc;color:var(--c-x9);
+    cursor:pointer;font-weight:600;
+  }
+  .assistant .hint{font-size:12px;color:var(--muted);margin-top:6px;}
 
-    .main-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px 14px 10px;
-      position: relative;
-      z-index: 2;
-    }
-    .main-content::-webkit-scrollbar { width: 3px; }
-    .main-content::-webkit-scrollbar-track { background: transparent; }
-    .main-content::-webkit-scrollbar-thumb { background: #2a5bb0; border-radius: 10px; }
+  /* ===== Hero ===== */
+  .hero{
+    background:linear-gradient(135deg,#0b1220,#142544 70%);
+    color:#fff;padding:24px 16px 26px;border-radius:0 0 20px 20px;
+  }
+  .hero .eyebrow{font-size:11px;letter-spacing:2px;color:#9bb8e8;}
+  .hero h1{font-size:21px;margin:6px 0 8px;line-height:1.3;font-weight:800;}
+  .hero p{font-size:13px;color:#cdd9ec;margin:0;}
 
-    .panel { display: none; animation: fadeSlide 0.35s ease; }
-    .panel.active { display: block; }
-    @keyframes fadeSlide {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+  /* ===== 区块 ===== */
+  section{padding:18px 0;}
+  .sec-h{margin:4px 0 14px;}
+  .sec-h .k{font-size:11px;font-weight:800;letter-spacing:1.5px;color:var(--c-pro);}
+  .sec-h h2{font-size:18px;margin:3px 0 4px;color:var(--ink);}
+  .sec-h p{font-size:12.5px;color:var(--muted);margin:0;}
 
-    /* 玻璃卡片 */
-    .glass-card {
-      background: rgba(15, 32, 60, 0.55);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: 32px;
-      padding: 18px 16px;
-      margin-bottom: 18px;
-      border: 1px solid rgba(0, 180, 255, 0.4);
-      box-shadow: 0 12px 30px rgba(0, 40, 100, 0.5);
-    }
+  /* ===== 机型速览卡片 ===== */
+  .pcard{
+    background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px;
+    box-shadow:var(--shadow);border-left:5px solid var(--mc);
+  }
+  .pcard .head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .pcard .name{font-size:17px;font-weight:800;color:var(--ink);margin:0;}
+  .pcard .tag{font-size:11px;color:var(--mc);font-weight:700;margin-top:2px;}
+  .pcard .date{font-size:11px;color:var(--muted);margin-top:4px;}
+  .pcard .chips{margin:10px 0;}
+  .pcard .chip{
+    display:inline-block;font-size:11px;padding:3px 8px;border-radius:6px;
+    background:#f1f5f9;color:var(--ink2);margin:0 5px 5px 0;font-weight:600;
+  }
+  .pcard ul{margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--ink2);}
+  .pcard li{margin-bottom:4px;}
 
-    .player-header {
-      text-align: center;
-      margin-bottom: 18px;
-    }
-    .avatar {
-      width: 95px;
-      height: 95px;
-      background: linear-gradient(135deg, #0080ff, #0038a8);
-      border-radius: 50%;
-      margin: 0 auto 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      color: white;
-      box-shadow: 0 0 40px #1e90ff;
-      border: 3px solid rgba(255,255,255,0.5);
-    }
-    .player-name {
-      font-size: 30px;
-      font-weight: 800;
-      background: linear-gradient(to right, #e6f2ff, #7bc1ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: 3px;
-    }
-    .player-title {
-      font-size: 15px;
-      color: #b3d9ff;
-      margin: 6px 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-    .village-badge {
-      background: #0c2c58;
-      padding: 6px 18px;
-      border-radius: 30px;
-      font-size: 14px;
-      color: #a8d4ff;
-      border: 1px solid #3366cc;
-      display: inline-block;
-      margin-top: 8px;
-    }
+  /* 价格行 */
+  .price-box{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);}
+  .price-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:13px;}
+  .price-row .lab{color:var(--muted);}
+  .price-row .v{font-weight:700;color:var(--ink);}
+  .price-row.gov .v{color:var(--c-pro);font-size:16px;}
+  .price-row.gov .v.no{color:var(--c-ultra);}
+  .price-note{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4;}
 
-    .section-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: #d4ebff;
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-left: 4px solid #00a6ff;
-      padding-left: 12px;
-    }
+  .btn-official{
+    display:block;width:100%;margin-top:12px;
+    padding:11px;border:0;border-radius:11px;
+    background:var(--mc);color:#fff;font-size:14px;font-weight:700;cursor:pointer;
+  }
+  .btn-official:active{opacity:.85;}
 
-    .accuracy-bar { margin: 14px 0; }
-    .bar-label { display: flex; justify-content: space-between; color: #b0d4ff; font-weight: 500; margin-bottom: 5px; }
-    .bar-bg { height: 12px; background: #132c4a; border-radius: 20px; overflow: hidden; box-shadow: inset 0 2px 6px rgba(0,0,0,0.6); }
-    .bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #0044cc, #3399ff); border-radius: 20px; box-shadow: 0 0 15px #0066ff; }
-    .zero-fill { width: 0% !important; background: #2a3f5a; box-shadow: none; }
-    .funny-comment { font-size: 13px; color: #8bb3e0; font-style: italic; margin-top: 5px; }
+  /* ===== 曲线图 ===== */
+  .chart-card{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow);}
+  .chart-card h3{margin:0 0 2px;font-size:14px;color:var(--ink);}
+  .chart-card .desc{font-size:11.5px;color:var(--muted);margin:0 0 10px;}
+  .chart-wrap{position:relative;height:260px;}
+  .legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+  .legend span{font-size:11.5px;color:var(--ink2);font-weight:600;}
 
-    .roast-text {
-      color: #c6e0ff;
-      font-size: 15px;
-      background: rgba(0, 80, 200, 0.15);
-      border-radius: 20px;
-      padding: 12px;
-      margin: 12px 0;
-      border-left: 4px solid #ffaa33;
-      font-weight: 500;
-    }
+  /* ===== 配置表 ===== */
+  .table-card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;}
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table.spec{width:100%;border-collapse:collapse;min-width:560px;}
+  table.spec th,table.spec td{padding:11px 12px;text-align:left;font-size:12.5px;border-bottom:1px solid var(--line);vertical-align:top;}
+  table.spec thead th{
+    background:#0f172a;color:#fff;font-weight:700;position:sticky;top:0;z-index:2;font-size:12px;
+  }
+  table.spec th:first-child{background:#1e293b;color:#cbd5e1;width:96px;font-size:11.5px;}
+  table.spec th .role{display:block;font-size:10px;color:#94a3b8;font-weight:500;margin-top:1px;}
+  table.spec td.k{color:var(--muted);font-weight:600;font-size:11.5px;background:#f8fafc;}
+  table.spec td.v{color:var(--ink);font-weight:500;}
+  table.spec td.v.win{color:var(--c-pro);font-weight:700;}
+  table.spec .grp td{background:#e0e7ef;color:#1e293b;font-weight:800;font-size:11px;letter-spacing:.5px;}
+  table.spec tr.highlight{background:#fff8d6 !important;animation:flash 1.6s ease 2;}
+  @keyframes flash{0%,100%{background:#fff8d6;}50%{background:#ffe066;}}
+  .col-x9{color:var(--c-x9)!important;}
+  .col-pro{color:var(--c-pro)!important;}
+  .col-spro{color:var(--c-spro)!important;}
+  .col-ultra{color:var(--c-ultra)!important;}
 
-    .badge-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-    }
-    .badge-item {
-      background: #0b2647;
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 13px;
-      color: #cde1ff;
-      border: 1px solid #2a5bb0;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
+  /* ===== 底部导航 ===== */
+  .tabbar{
+    position:fixed;left:0;right:0;bottom:0;z-index:60;
+    background:rgba(255,255,255,.96);backdrop-filter:blur(12px);
+    border-top:1px solid var(--line);
+    display:flex;max-width:760px;margin:0 auto;
+  }
+  .tabbar a{
+    flex:1;text-align:center;padding:8px 0 10px;font-size:11px;color:var(--muted);
+    text-decoration:none;font-weight:600;
+  }
+  .tabbar a.on{color:var(--c-pro);}
+  .tabbar a svg{display:block;margin:0 auto 2px;}
 
-    .highlight-box {
-      background: rgba(0, 70, 130, 0.3);
-      border-radius: 28px;
-      padding: 20px;
-      text-align: center;
-      color: #c0daff;
-    }
+  /* ===== 官方配置模态框 ===== */
+  .modal-mask{
+    position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:100;
+    display:none;align-items:flex-end;justify-content:center;
+  }
+  .modal-mask.show{display:flex;}
+  .modal{
+    background:#fff;width:100%;max-width:760px;height:88vh;border-radius:18px 18px 0 0;
+    display:flex;flex-direction:column;overflow:hidden;animation:slideUp .25s ease;
+  }
+  @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+  .modal-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);}
+  .modal-head .t{font-size:15px;font-weight:800;color:var(--ink);}
+  .modal-head .x{font-size:22px;color:var(--muted);background:none;border:0;cursor:pointer;line-height:1;padding:0 4px;}
+  .modal-body{flex:1;overflow:hidden;position:relative;background:#f8fafc;}
+  .modal-body iframe{width:100%;height:100%;border:0;background:#fff;}
+  .modal-fallback{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:30px;text-align:center;gap:14px;
+  }
+  .modal-fallback .ic{font-size:42px;}
+  .modal-fallback .t{font-size:15px;font-weight:700;color:var(--ink);}
+  .modal-fallback .d{font-size:13px;color:var(--muted);line-height:1.6;max-width:340px;}
+  .modal-fallback .open{
+    display:inline-block;padding:11px 24px;border-radius:11px;background:var(--c-x9);color:#fff;
+    font-weight:700;font-size:14px;text-decoration:none;
+  }
 
-    .bottom-nav {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      background: rgba(2, 15, 32, 0.92);
-      backdrop-filter: blur(30px);
-      border-top: 1px solid #1e4785;
-      padding: 8px 8px 14px;
-      border-radius: 0 0 48px 48px;
-      position: relative;
-      z-index: 10;
-    }
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: #4f75b0;
-      font-size: 19px;
-      transition: 0.2s;
-      cursor: pointer;
-      flex: 1;
-      padding: 8px 0;
-      border-radius: 30px;
-      margin: 0 2px;
-      background: transparent;
-    }
-    .nav-item i { font-size: 22px; margin-bottom: 3px; }
-    .nav-item span { font-size: 11px; font-weight: 600; }
-    .nav-item.active {
-      color: white;
-      background: rgba(0, 160, 255, 0.3);
-      box-shadow: 0 0 25px #0066ff;
-      border: 1px solid rgba(255,255,255,0.35);
-      transform: translateY(-3px);
-    }
-
-    .credit {
-      text-align: center;
-      font-size: 12px;
-      color: #6b93c5;
-      margin-top: 16px;
-      padding-top: 12px;
-      border-top: 1px solid rgba(0,160,255,0.3);
-    }
-
-    .roast-quote {
-      background: rgba(0,0,0,0.3);
-      border-radius: 16px;
-      padding: 10px 14px;
-      margin: 8px 0;
-      color: #e0eeff;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-  </style>
+  .src{font-size:11px;color:var(--muted);padding:14px 4px 6px;line-height:1.6;}
+  .src a{color:var(--c-x9);text-decoration:underline;}
+</style>
 </head>
 <body>
-  <!-- 开屏动画：显示刘佳茹 -->
-  <div class="splash-screen">
-    <div class="splash-content">
-      <i class="fas fa-basketball-ball splash-basketball"></i>
-      <div class="splash-name">刘佳茹</div>
-      <div class="splash-sub">东瑶村·未来之星</div>
+
+<!-- 顶部标题 -->
+<div class="topbar">
+  <div class="wrap">
+    <div class="logo">OPPO <span>Find X9</span> 系列对比</div>
+  </div>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="eyebrow">FIND X9 SERIES · 移动版横评</div>
+  <h1>Find X9 · Pro · X9s Pro · Ultra<br/>官方配置 + 实时价格 + 国补价</h1>
+  <p>数据接入 OPPO 官网规格页。可勾选机型对比、用智能助手搜关键词直达对应配置。</p>
+</div>
+
+<!-- 机型对比选择 -->
+<div class="wrap">
+  <div class="model-bar">
+    <div class="lab">勾选要对比的机型（在配置表中过滤显示）</div>
+    <div class="pills">
+      <span class="pill on" data-model="x9" style="--mc:var(--c-x9)"><span class="dot"></span>Find X9</span>
+      <span class="pill on" data-model="pro" style="--mc:var(--c-pro)"><span class="dot"></span>X9 Pro</span>
+      <span class="pill on" data-model="spro" style="--mc:var(--c-spro)"><span class="dot"></span>X9s Pro</span>
+      <span class="pill on" data-model="ultra" style="--mc:var(--c-ultra)"><span class="dot"></span>X9 Ultra</span>
     </div>
   </div>
 
-  <div class="app-container">
-    <div class="main-content" id="mainContent">
-      <!-- 首页简介面板（嘲讽拉满） -->
-      <div id="homePanel" class="panel active">
-        <div class="player-header glass-card">
-          <div class="avatar"><i class="fas fa-basketball-ball"></i></div>
-          <div class="player-name">刘家如</div>
-          <div class="player-title">
-            <i class="fas fa-star" style="color: #ffbb33;"></i> 东瑶村最会打篮球的 <i class="fas fa-star" style="color: #ffbb33;"></i>
-          </div>
-          <div class="village-badge"><i class="fas fa-map-marker-alt"></i> 东瑶村·传奇铁匠</div>
-        </div>
+  <!-- 智能助手 -->
+  <div class="assistant">
+    <div class="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="searchInput" type="text" placeholder="搜配置：屏幕 / 电池 / 相机 / 价格 / 快充…" />
+      <button class="go" id="searchGo">定位</button>
+    </div>
+    <div class="suggest">
+      <b data-q="屏幕">屏幕</b>
+      <b data-q="电池">电池续航</b>
+      <b data-q="相机">相机影像</b>
+      <b data-q="长焦">长焦变焦</b>
+      <b data-q="处理器">处理器</b>
+      <b data-q="快充">快充</b>
+      <b data-q="价格">价格国补</b>
+      <b data-q="防水">防水</b>
+      <b data-q="重量">重量厚度</b>
+    </div>
+    <div class="hint">输入关键词点「定位」，自动滚动并高亮对应配置行。</div>
+  </div>
+</div>
 
-        <div class="glass-card">
-          <div class="section-title"><i class="fas fa-chart-pie"></i> 灾难级投篮数据</div>
-          <div style="color: #c6e2ff; margin-bottom: 16px; line-height: 1.6;">
-            “三分球三不沾，两分球一球不进，内线10球进不了1球。” <br>
-            <span style="font-size: 13px; color: #85b8ff;">—— 东瑶村篮筐保护协会认证</span>
-          </div>
-          <div class="accuracy-bar">
-            <div class="bar-label"><span>🏀 三分球</span> <span>空气球 × 100%</span></div>
-            <div class="bar-bg"><div class="bar-fill zero-fill"></div></div>
-            <div class="funny-comment">篮筐：我好像被无视了？</div>
-          </div>
-          <div class="accuracy-bar">
-            <div class="bar-label"><span>🏀 两分球</span> <span>完美避开篮网</span></div>
-            <div class="bar-bg"><div class="bar-fill zero-fill"></div></div>
-            <div class="funny-comment">投篮动作值一个亿，命中率倒贴</div>
-          </div>
-          <div class="accuracy-bar">
-            <div class="bar-label"><span>🏀 内线终结</span> <span>10投0中·史诗级</span></div>
-            <div class="bar-bg"><div class="bar-fill zero-fill"></div></div>
-            <div class="funny-comment">距离越近，打铁越狠</div>
-          </div>
-        </div>
+<!-- 机型速览 + 官方价 + 国补价 -->
+<section id="overview">
+  <div class="wrap">
+    <div class="sec-h">
+      <div class="k">01 · 机型速览</div>
+      <h2>四款机型 · 官方价 & 国补到手价</h2>
+      <p>官方价为 OPPO 官网起售价；国补价按「单件 ≤6000 元、15% 补贴、封顶 500 元」估算，实际以结算页为准。</p>
+    </div>
 
-        <div class="glass-card">
-          <div class="section-title"><i class="fas fa-fire"></i> 今日嘲讽语录</div>
-          <div class="roast-quote"><i class="fas fa-quote-left" style="color:#ffaa33;"></i> 刘家如出手，篮筐直接下班。</div>
-          <div class="roast-quote"><i class="fas fa-quote-left" style="color:#ffaa33;"></i> 别人投篮要分，他投篮要命（观众笑没命）。</div>
-          <div class="roast-quote"><i class="fas fa-quote-left" style="color:#ffaa33;"></i> 东瑶村最佳防守球员——因为球永远在他手里终结。</div>
-          <div class="roast-quote"><i class="fas fa-quote-left" style="color:#ffaa33;"></i> 他的投篮热区：整个球场都是冰凉区。</div>
-        </div>
-
-        <div class="roast-text">
-          <i class="fas fa-skull"></i> 江湖人称“东瑶村铁王”，场均打铁声绕梁三日。
+    <!-- Find X9 -->
+    <div class="pcard" style="--mc:var(--c-x9)">
+      <div class="head">
+        <div>
+          <div class="name">OPPO Find X9</div>
+          <div class="tag">标准版 · 轻薄水桶旗舰</div>
+          <div class="date">2025-10-16 发布 · 入网 PLJ110</div>
         </div>
       </div>
+      <div class="chips">
+        <span class="chip">6.59" 直屏</span><span class="chip">203g / 7.99mm</span>
+        <span class="chip">天玑 9500</span><span class="chip">7025mAh</span>
+      </div>
+      <ul>
+        <li>50MP 主摄 + 50MP 超广角 + 50MP 长焦（3 倍）</li>
+        <li>1.15mm 极窄四等边直屏，单手友好</li>
+      </ul>
+      <div class="price-box">
+        <div class="price-row"><span class="lab">官方起售价</span><span class="v">¥4399</span></div>
+        <div class="price-row gov"><span class="lab">国补到手价（约）</span><span class="v">¥3899</span></div>
+        <div class="price-note">15% 补贴封顶 500 元，起售版本符合国补门槛。</div>
+      </div>
+      <button class="btn-official" data-model="x9">查看官方实时配置</button>
+    </div>
 
-      <!-- 数据面板（更多嘲讽统计） -->
-      <div id="statsPanel" class="panel">
-        <div class="player-header glass-card">
-          <div class="player-name" style="font-size: 26px;">刘家如 · 反向数据</div>
-          <div style="color: #9dc7ff;">东瑶村打铁艺术展</div>
-        </div>
-
-        <div class="glass-card">
-          <div class="section-title"><i class="fas fa-table"></i> 生涯毁灭性数据</div>
-          <div style="display: flex; justify-content: space-around; color: white; text-align: center;">
-            <div><div style="font-size: 36px; font-weight: 800;">0</div><span style="color:#9dc7ff;">总进球</span></div>
-            <div><div style="font-size: 36px; font-weight: 800;">∞</div><span style="color:#9dc7ff;">打铁数</span></div>
-            <div><div style="font-size: 36px; font-weight: 800;">0%</div><span style="color:#9dc7ff;">真实命中</span></div>
-          </div>
-          <div class="badge-list" style="margin-top: 16px;">
-            <span class="badge-item"><i class="fas fa-hammer"></i> 铁匠宗师</span>
-            <span class="badge-item"><i class="fas fa-wind"></i> 空气动力学博士</span>
-            <span class="badge-item"><i class="fas fa-face-frown"></i> 篮筐恐惧症晚期</span>
-            <span class="badge-item"><i class="fas fa-circle"></i> 三不沾大满贯</span>
-          </div>
-        </div>
-
-        <div class="glass-card">
-          <div class="section-title"><i class="fas fa-trophy"></i> 特别耻辱成就</div>
-          <div style="color: #cde1ff;">
-            <p>🏅 连续47投0中俱乐部终身会员</p>
-            <p>🎯 唯一达成“投篮全避开篮筐”成就</p>
-            <p>📉 NBA 2K评分：25 (全部扣在投篮)</p>
-            <p>😂 对手防守策略：放他投，反正不进</p>
-            <p>🧊 手感冰冷程度：绝对零度</p>
-          </div>
-        </div>
-
-        <div class="roast-text">
-          <i class="fas fa-microphone"></i> 村口大妈：“家如啊，要不咱改踢足球？”
+    <!-- Find X9 Pro -->
+    <div class="pcard" style="--mc:var(--c-pro)">
+      <div class="head">
+        <div>
+          <div class="name">OPPO Find X9 Pro</div>
+          <div class="tag">影像进阶 · 哈苏长焦</div>
+          <div class="date">2025-10-16 发布 · 入网 PLG110</div>
         </div>
       </div>
+      <div class="chips">
+        <span class="chip">6.78" 直屏</span><span class="chip">224g / 8.25mm</span>
+        <span class="chip">天玑 9500</span><span class="chip">7500mAh</span>
+      </div>
+      <ul>
+        <li>50MP 主摄（LYT-828）+ 2 亿像素哈苏长焦</li>
+        <li>瞬时三曝光，4K 120fps 杜比视界</li>
+      </ul>
+      <div class="price-box">
+        <div class="price-row"><span class="lab">官方起售价</span><span class="v">¥5299</span></div>
+        <div class="price-row gov"><span class="lab">国补到手价（约）</span><span class="v">¥4799</span></div>
+        <div class="price-note">起售版本符合 ≤6000 元门槛；百亿补贴叠加后京东实测可低至约 ¥4022（以页面为准）。</div>
+      </div>
+      <button class="btn-official" data-model="pro">查看官方实时配置</button>
+    </div>
 
-      <!-- 高光面板（全是嘲讽） -->
-      <div id="highlightsPanel" class="panel">
-        <div class="player-header glass-card">
-          <div class="player-name">精彩瞬间</div>
-          <div style="color: #8ab8ff;">（几乎不存在）</div>
-        </div>
-        <div class="highlight-box glass-card">
-          <div style="font-size: 50px;">🤦‍♂️</div>
-          <h3 style="color:white; margin:10px 0;">暂无高光集锦</h3>
-          <p style="color:#b0d4ff;">因为唯一一次“进球”是队友乌龙补篮</p>
-          <p style="color:#b0d4ff; margin-top:6px;">摄像机长期捕捉到的是：球飞出球场、砸中裁判、掉进观众席</p>
-        </div>
-        <div class="glass-card" style="margin-top:12px;">
-          <div class="section-title"><i class="fas fa-video"></i> 史诗级失误TOP3</div>
-          <div class="roast-quote">🥇 空篮上过桥，篮架都在颤抖</div>
-          <div class="roast-quote">🥈 罚球三不沾，对方替补席笑翻</div>
-          <div class="roast-quote">🥉 快攻1打0，被篮筐盖帽</div>
-        </div>
-        <div class="roast-text" style="margin-top:12px;">
-          <i class="fas fa-face-laugh-squint"></i> 刘家如的集锦，是东瑶村最佳解压视频。
+    <!-- Find X9s Pro -->
+    <div class="pcard" style="--mc:var(--c-spro)">
+      <div class="head">
+        <div>
+          <div class="name">OPPO Find X9s Pro</div>
+          <div class="tag">小屏双 2 亿 · 旅拍神器</div>
+          <div class="date">2026-04-21 发布</div>
         </div>
       </div>
+      <div class="chips">
+        <span class="chip">6.32" 直屏</span><span class="chip">198g / 8.4mm</span>
+        <span class="chip">天玑 9500</span><span class="chip">144Hz</span>
+      </div>
+      <ul>
+        <li>哈苏 2 亿主摄 + 2 亿潜望长焦（黄金人像）</li>
+        <li>第二代丹霞色彩还原镜头，1nit 护眼屏</li>
+      </ul>
+      <div class="price-box">
+        <div class="price-row"><span class="lab">官方起售价</span><span class="v">¥5299</span></div>
+        <div class="price-row gov"><span class="lab">国补到手价（约）</span><span class="v">¥4799</span></div>
+        <div class="price-note">起售版本符合国补门槛；16+1TB 版（¥6999）超门槛不可享。</div>
+      </div>
+      <button class="btn-official" data-model="spro">查看官方实时配置</button>
+    </div>
 
-      <!-- 关于面板（含制作人） -->
-      <div id="aboutPanel" class="panel">
-        <div class="player-header glass-card">
-          <div class="avatar"><i class="fas fa-user"></i></div>
-          <div class="player-name">刘家如</div>
-          <div class="village-badge"><i class="fas fa-home"></i> 东瑶村</div>
+    <!-- Find X9 Ultra -->
+    <div class="pcard" style="--mc:var(--c-ultra)">
+      <div class="head">
+        <div>
+          <div class="name">OPPO Find X9 Ultra</div>
+          <div class="tag">顶级旗舰 · 口袋哈苏</div>
+          <div class="date">2026-04-21 发布 · 入网 PMA110</div>
         </div>
-        <div class="glass-card">
-          <div class="section-title"><i class="fas fa-info-circle"></i> 球员简介·嘲讽版</div>
-          <p style="color: #d4e6ff; line-height: 1.7;">
-            刘家如，东瑶村篮球界的“现象级”人物。凭借三分三不沾、两分全丢、内线10中0的稳定输出，被誉为“篮筐毁灭者”。他的投篮哲学是：只要我不尴尬，尴尬的就是篮筐。
-          </p>
-          <div class="badge-list">
-            <span class="badge-item"><i class="fas fa-map-pin"></i> 主场：东瑶村铁匠铺</span>
-            <span class="badge-item"><i class="fas fa-heart"></i> 外号：空气动力学专家</span>
-            <span class="badge-item"><i class="fas fa-calendar"></i> 目标：打破连续打铁纪录</span>
-          </div>
-        </div>
-        <div class="roast-text">
-          “投不进没关系，姿势一定要帅” —— 刘家如 (其实姿势也丑)
-        </div>
-        <div class="roast-quote">
-          <i class="fas fa-comment"></i> 村民评价：“看家如打球，治好了我的低血压。”
-        </div>
-        <div class="credit">
-          <i class="fas fa-pencil-alt"></i> 制作人：lyn
-        </div>
+      </div>
+      <div class="chips">
+        <span class="chip">6.82" 2K 直屏</span><span class="chip">235g / 8.65mm</span>
+        <span class="chip">骁龙 8 至尊版</span><span class="chip">100W</span>
+      </div>
+      <ul>
+        <li>双 2 亿大底 + 5000 万 10 倍潜望长焦</li>
+        <li>2K 144Hz，8K 视频，DXOMARK 170 分</li>
+      </ul>
+      <div class="price-box">
+        <div class="price-row"><span class="lab">官方起售价</span><span class="v">¥7499</span></div>
+        <div class="price-row gov"><span class="lab">国补</span><span class="v no">¥7499（不可享）</span></div>
+        <div class="price-note">起售价 7499 元超出 6000 元国补门槛；需靠平台券把实付压到 6000 内才可能领满 500 元。</div>
+      </div>
+      <button class="btn-official" data-model="ultra">查看官方实时配置</button>
+    </div>
+  </div>
+</section>
+
+<!-- 曲线对比 -->
+<section id="charts" style="background:#e8eef6;">
+  <div class="wrap">
+    <div class="sec-h">
+      <div class="k">02 · 曲线对比</div>
+      <h2>关键参数曲线图</h2>
+      <p>曲线越高代表该数值越大，便于一眼看出差距。</p>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--c-x9)"></i>X9</span>
+      <span><i style="background:var(--c-pro)"></i>X9 Pro</span>
+      <span><i style="background:var(--c-spro)"></i>X9s Pro</span>
+      <span><i style="background:var(--c-ultra)"></i>X9 Ultra</span>
+    </div>
+
+    <div class="chart-card">
+      <h3>多维综合（归一化 0–100）</h3>
+      <p class="desc">电池/屏幕/快充/刷新/主摄/变焦六维归一化。</p>
+      <div class="chart-wrap"><canvas id="cRadar"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>电池容量 & 有线快充</h3>
+      <p class="desc">左轴 mAh，右轴 W。</p>
+      <div class="chart-wrap"><canvas id="cBat"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>起售价 & 国补价（元）</h3>
+      <p class="desc">Ultra 起售超门槛，国补不可享。</p>
+      <div class="chart-wrap"><canvas id="cPrice"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>屏幕尺寸 / 重量 / 光学变焦</h3>
+      <p class="desc">三维度同图对比。</p>
+      <div class="chart-wrap"><canvas id="cMulti"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- 详细配置表 -->
+<section id="spec">
+  <div class="wrap">
+    <div class="sec-h">
+      <div class="k">03 · 详细配置</div>
+      <h2>官方规格对比表</h2>
+      <p>数据接入 OPPO 官网规格页。点击机型标签可过滤列；用智能助手搜索关键词可定位行。</p>
+    </div>
+
+    <div class="table-card">
+      <div class="table-scroll">
+        <table class="spec" id="specTable">
+          <thead>
+            <tr>
+              <th>规格</th>
+              <th class="col-x9" data-model="x9">Find X9<span class="role">标准版</span></th>
+              <th class="col-pro" data-model="pro">X9 Pro<span class="role">PLG110</span></th>
+              <th class="col-spro" data-model="spro">X9s Pro<span class="role">小屏双2亿</span></th>
+              <th class="col-ultra" data-model="ultra">X9 Ultra<span class="role">PMA110</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="grp" data-key="外观 尺寸 重量 厚度 手感 轻薄"><td colspan="5">基本与外观</td></tr>
+            <tr data-key="发布时间 上市"><td class="k">发布</td><td class="v">2025-10-16</td><td class="v">2025-10-16</td><td class="v">2026-04-21</td><td class="v">2026-04-21</td></tr>
+            <tr data-key="尺寸 厚度 mm"><td class="k">尺寸(mm)</td><td class="v">156.98×73.93×7.99</td><td class="v">161.26×76.46×8.25</td><td class="v">约150×71.72×8.4</td><td class="v">163.16×76.97×8.65</td></tr>
+            <tr data-key="重量 克 g 轻薄"><td class="k">重量</td><td class="v">约203g</td><td class="v">约224g</td><td class="v win">约198g（最轻）</td><td class="v">约235g</td></tr>
+            <tr data-key="防水 ip68 ip69 防尘"><td class="k">防水</td><td class="v">IP69</td><td class="v">IP69</td><td class="v">IP68/IP69</td><td class="v">IP69</td></tr>
+            <tr data-key="指纹 解锁 识别"><td class="k">指纹</td><td class="v">3D 超声波</td><td class="v">3D 超声波</td><td class="v">3D 超声波</td><td class="v">3D 超声波</td></tr>
+
+            <tr class="grp" data-key="屏幕 显示 分辨率 刷新率 亮度 护眼 ppi"><td colspan="5">屏幕</td></tr>
+            <tr data-key="屏幕 尺寸 英寸"><td class="k">屏幕</td><td class="v">6.59"</td><td class="v">6.78"</td><td class="v">6.32"（最小）</td><td class="v win">6.82"（最大）</td></tr>
+            <tr data-key="分辨率 ppi 2k"><td class="k">分辨率</td><td class="v">FHD+ 2760×1256 / 460</td><td class="v">FHD+ 2772×1272 / 450</td><td class="v">FHD+ 2640×1216</td><td class="v win">QHD+ 3168×1440 / 510</td></tr>
+            <tr data-key="刷新率 hz"><td class="k">刷新率</td><td class="v">120Hz</td><td class="v">120Hz LTPO</td><td class="v win">144Hz</td><td class="v win">144Hz</td></tr>
+            <tr data-key="亮度 nit"><td class="k">亮度</td><td class="v">1800nit</td><td class="v">1800nit</td><td class="v">—</td><td class="v win">1800nit（峰3600）</td></tr>
+
+            <tr class="grp" data-key="处理器 芯片 性能 cpu 天玑 骁龙 内存 存储"><td colspan="5">性能</td></tr>
+            <tr data-key="处理器 芯片 cpu 天玑 骁龙"><td class="k">处理器</td><td class="v">天玑9500</td><td class="v">天玑9500</td><td class="v">天玑9500</td><td class="v win">骁龙8至尊版(5代)</td></tr>
+            <tr data-key="主频 ghz 制程"><td class="k">主频</td><td class="v">4.21GHz</td><td class="v">4.21GHz</td><td class="v">4.21GHz</td><td class="v win">4.608GHz</td></tr>
+            <tr data-key="内存 闪存 存储 容量 lpddr ufs"><td class="k">内存/闪存</td><td class="v">LPDDR5X/UFS4.1</td><td class="v">LPDDR5X/UFS4.1</td><td class="v">LPDDR5X/UFS4.1</td><td class="v">LPDDR5X/UFS4.1</td></tr>
+
+            <tr class="grp" data-key="相机 影像 拍照 主摄 长焦 广角 变焦 像素"><td colspan="5">后置影像</td></tr>
+            <tr data-key="主摄 像素 光圈 传感器"><td class="k">主摄</td><td class="v">50MP f/1.6 LYT-808</td><td class="v">50MP f/1.5 LYT-828</td><td class="v win">2亿 f/1.6 HPE</td><td class="v win">2亿 f/1.5 LYT-901(1/1.12")</td></tr>
+            <tr data-key="超广角 广角"><td class="k">超广角</td><td class="v">50MP 120°</td><td class="v">50MP 120°</td><td class="v">50MP</td><td class="v">50MP 123°</td></tr>
+            <tr data-key="长焦 变焦 潜望"><td class="k">长焦</td><td class="v">50MP 3× LYT-600</td><td class="v">2亿 3× HP5哈苏</td><td class="v">2亿 2.8× HP5潜望</td><td class="v win">2亿 3× + 5000万 10×潜望</td></tr>
+            <tr data-key="光学变焦 数码变焦 倍数"><td class="k">变焦</td><td class="v">3倍光变/120倍数</td><td class="v">3倍光变/120倍数</td><td class="v">2.8倍光变</td><td class="v win">3倍+10倍光变/120倍数</td></tr>
+            <tr data-key="视频 8k 4k 杜比"><td class="k">视频</td><td class="v">4K 120fps</td><td class="v">4K 120fps 杜比</td><td class="v">8K电影级</td><td class="v win">8K 30fps + 4K120杜比</td></tr>
+
+            <tr class="grp" data-key="电池 续航 充电 快充 无线"><td colspan="5">电池与快充</td></tr>
+            <tr data-key="电池 容量 续航 mah"><td class="k">电池</td><td class="v">7025mAh</td><td class="v win">7500mAh（最大）</td><td class="v">7025mAh</td><td class="v">7050mAh</td></tr>
+            <tr data-key="快充 有线 充电 w"><td class="k">有线快充</td><td class="v">80W</td><td class="v">80W</td><td class="v">80W</td><td class="v win">100W（最快）</td></tr>
+            <tr data-key="无线充电 无线快充"><td class="k">无线快充</td><td class="v">50W</td><td class="v">50W</td><td class="v">50W</td><td class="v">50W</td></tr>
+
+            <tr class="grp" data-key="价格 多少钱 国补 补贴 便宜 售价"><td colspan="5">价格与国补</td></tr>
+            <tr data-key="起售价 官方价 价格"><td class="k">官方起售</td><td class="v">¥4399</td><td class="v">¥5299</td><td class="v">¥5299</td><td class="v">¥7499</td></tr>
+            <tr data-key="国补 补贴 到手价"><td class="k">国补到手(约)</td><td class="v win">¥3899</td><td class="v win">¥4799</td><td class="v win">¥4799</td><td class="v" style="color:var(--c-ultra)">不可享</td></tr>
+            <tr data-key="顶配价"><td class="k">顶配(16+1T)</td><td class="v">¥5799</td><td class="v">¥6699</td><td class="v">¥6999</td><td class="v">¥9299</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <!-- 底部导航栏（独立UI） -->
-    <div class="bottom-nav">
-      <div class="nav-item active" data-panel="homePanel">
-        <i class="fas fa-home"></i><span>首页</span>
-      </div>
-      <div class="nav-item" data-panel="statsPanel">
-        <i class="fas fa-chart-bar"></i><span>数据</span>
-      </div>
-      <div class="nav-item" data-panel="highlightsPanel">
-        <i class="fas fa-film"></i><span>高光</span>
-      </div>
-      <div class="nav-item" data-panel="aboutPanel">
-        <i class="fas fa-circle-info"></i><span>关于</span>
+    <p class="src">
+      数据来源：OPPO 官网规格页（接入展示）。
+      <a href="https://www.oppo.com/cn/smartphones/series-find-x/find-x9/specs/" target="_blank" rel="noopener">X9 官网</a> ·
+      <a href="https://www.oppo.com/cn/smartphones/series-find-x/find-x9-pro/specs/" target="_blank" rel="noopener">X9 Pro 官网</a> ·
+      <a href="https://www.oppo.com/cn/smartphones/series-find-x/find-x9s-pro/" target="_blank" rel="noopener">X9s Pro 官网</a> ·
+      <a href="https://www.oppo.com/cn/smartphones/series-find-x/find-x9-ultra/specs/" target="_blank" rel="noopener">X9 Ultra 官网</a>。
+      国补规则：单件≤6000元、15%补贴、封顶500元；Ultra 起售超门槛不可享。价格实时变动，以订单结算页为准。
+    </p>
+  </div>
+</section>
+
+<!-- 底部导航 -->
+<div class="tabbar">
+  <a href="#overview" class="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>速览</a>
+  <a href="#charts"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m7 14 3-4 3 3 5-6"/></svg>曲线</a>
+  <a href="#spec"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>配置</a>
+</div>
+
+<!-- 官方配置模态框 -->
+<div class="modal-mask" id="modalMask">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="t" id="modalTitle">官方实时配置</div>
+      <button class="x" id="modalClose">×</button>
+    </div>
+    <div class="modal-body">
+      <iframe id="modalFrame" src="" referrerpolicy="no-referrer" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+      <div class="modal-fallback" id="modalFallback">
+        <div class="ic">🔗</div>
+        <div class="t">官方页面无法在站内嵌入显示</div>
+        <div class="d">OPPO 官网启用了防嵌入安全策略（X-Frame-Options），禁止被其他网页 iframe 加载。这是浏览器安全限制，无法绕过。请点击下方按钮在新窗口打开官方实时配置页。</div>
+        <a class="open" id="modalOpen" href="#" target="_blank" rel="noopener">在新窗口打开官网配置</a>
       </div>
     </div>
   </div>
+</div>
 
-  <script>
-    (function() {
-      const navItems = document.querySelectorAll('.nav-item');
-      const panels = {
-        homePanel: document.getElementById('homePanel'),
-        statsPanel: document.getElementById('statsPanel'),
-        highlightsPanel: document.getElementById('highlightsPanel'),
-        aboutPanel: document.getElementById('aboutPanel')
-      };
+<script>
+  const OFFICIAL = {
+    x9:    { name:'OPPO Find X9',        url:'https://www.oppo.com/cn/smartphones/series-find-x/find-x9/specs/' },
+    pro:   { name:'OPPO Find X9 Pro',    url:'https://www.oppo.com/cn/smartphones/series-find-x/find-x9-pro/specs/' },
+    spro:  { name:'OPPO Find X9s Pro',   url:'https://www.oppo.com/cn/smartphones/series-find-x/find-x9s-pro/' },
+    ultra: { name:'OPPO Find X9 Ultra',  url:'https://www.oppo.com/cn/smartphones/series-find-x/find-x9-ultra/specs/' }
+  };
 
-      function switchPanel(panelId) {
-        Object.values(panels).forEach(p => p.classList.remove('active'));
-        if (panels[panelId]) panels[panelId].classList.add('active');
-        navItems.forEach(item => {
-          item.classList.toggle('active', item.dataset.panel === panelId);
-        });
-        document.getElementById('mainContent').scrollTop = 0;
+  /* ===== 官方配置模态框 ===== */
+  const mask = document.getElementById('modalMask');
+  const frame = document.getElementById('modalFrame');
+  const fallback = document.getElementById('modalFallback');
+  const openLink = document.getElementById('modalOpen');
+  const titleEl = document.getElementById('modalTitle');
+  let fallbackTimer;
+
+  document.querySelectorAll('.btn-official').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const m = btn.dataset.model;
+      const info = OFFICIAL[m];
+      titleEl.textContent = info.name + ' · 官方实时配置';
+      openLink.href = info.url;
+      // 尝试 iframe 嵌入
+      fallback.style.display = 'none';
+      frame.style.display = 'block';
+      frame.src = info.url;
+      mask.classList.add('show');
+      // 4 秒后若 iframe 仍无内容（被拦截），显示兜底
+      clearTimeout(fallbackTimer);
+      fallbackTimer = setTimeout(()=>{ fallback.style.display = 'flex'; }, 4000);
+    });
+  });
+  // 尝试检测 iframe 加载失败
+  frame.addEventListener('error', ()=>{ fallback.style.display='flex'; });
+  document.getElementById('modalClose').addEventListener('click', ()=>{
+    mask.classList.remove('show'); frame.src = 'about:blank';
+  });
+  mask.addEventListener('click', e=>{ if(e.target===mask){ mask.classList.remove('show'); frame.src='about:blank'; } });
+
+  /* ===== 机型对比：勾选过滤列 ===== */
+  const pills = document.querySelectorAll('.model-bar .pill');
+  const specTable = document.getElementById('specTable');
+  function applyFilter(){
+    const active = new Set();
+    pills.forEach(p=>{ if(p.classList.contains('on')) active.add(p.dataset.model); });
+    // 表头列
+    specTable.querySelectorAll('thead th[data-model]').forEach(th=>{
+      th.style.display = active.has(th.dataset.model) ? '' : 'none';
+    });
+    // 数据行：第1列保留(规格名)，后续4列按机型
+    specTable.querySelectorAll('tbody tr').forEach(tr=>{
+      const tds = tr.querySelectorAll('td');
+      if(tds.length <= 1) return; // 分组行 colspan 跳过
+      // td[0]=规格名(保留)，td[1..4]对应 x9/pro/spro/ultra
+      const models = ['x9','pro','spro','ultra'];
+      for(let i=0;i<4;i++){
+        if(tds[i+1]) tds[i+1].style.display = active.has(models[i]) ? '' : 'none';
       }
+    });
+  }
+  pills.forEach(p=>{
+    p.addEventListener('click', ()=>{
+      p.classList.toggle('on');
+      applyFilter();
+    });
+  });
 
-      navItems.forEach(item => {
-        item.addEventListener('click', () => switchPanel(item.dataset.panel));
-      });
+  /* ===== 智能助手：关键词搜索定位 ===== */
+  const input = document.getElementById('searchInput');
+  const goBtn = document.getElementById('searchGo');
+  function doSearch(){
+    const q = input.value.trim().toLowerCase();
+    if(!q){ return; }
+    const rows = specTable.querySelectorAll('tbody tr');
+    let hit = null;
+    for(const tr of rows){
+      const key = (tr.dataset.key||'').toLowerCase();
+      const text = tr.textContent.toLowerCase();
+      if(key.includes(q) || text.includes(q)){ hit = tr; break; }
+    }
+    if(hit){
+      // 清除旧高亮
+      specTable.querySelectorAll('tr.highlight').forEach(r=>r.classList.remove('highlight'));
+      hit.classList.add('highlight');
+      hit.scrollIntoView({behavior:'smooth', block:'center'});
+      setTimeout(()=>hit.classList.remove('highlight'), 4000);
+    } else {
+      alert('未找到「'+input.value+'」相关配置，试试：屏幕 / 电池 / 相机 / 长焦 / 价格 / 快充 / 处理器');
+    }
+  }
+  goBtn.addEventListener('click', doSearch);
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(); });
+  document.querySelectorAll('.assistant .suggest b').forEach(b=>{
+    b.addEventListener('click', ()=>{ input.value = b.dataset.q; doSearch(); });
+  });
 
-      // 开屏自动消失
-      const splash = document.querySelector('.splash-screen');
-      if (splash) {
-        splash.addEventListener('animationend', (e) => {
-          if (e.animationName === 'splashFadeOut') splash.style.display = 'none';
-        });
-      }
-      console.log('🏀 东瑶村嘲讽之星刘家如 · 制作人 lyn');
-    })();
-  </script>
+  /* ===== Chart.js 曲线图 ===== */
+  const labels = ['Find X9','X9 Pro','X9s Pro','X9 Ultra'];
+  const cc = ['#1d5fd6','#1a7a37','#b45309','#c1322f'];
+  const ds = (data,color,label,extra={})=>({
+    label, data, borderColor:color, backgroundColor:color+'22',
+    pointBackgroundColor:color, pointRadius:4, pointHoverRadius:6,
+    tension:.4, fill:false, borderWidth:3, ...extra
+  });
+  Chart.defaults.font.family = '"PingFang SC","Microsoft YaHei",Arial,sans-serif';
+  Chart.defaults.color = '#475569';
+  const norm = (v,max)=>Math.round(v/max*100);
+
+  new Chart(document.getElementById('cRadar'),{type:'radar',data:{
+    labels:['电池','屏幕','快充','刷新','主摄','变焦'],
+    datasets:[
+      ds([norm(7025,7500),norm(6.59,6.82),norm(80,100),norm(120,144),norm(50,200),norm(3,10)],cc[0],'X9'),
+      ds([norm(7500,7500),norm(6.78,6.82),norm(80,100),norm(120,144),norm(50,200),norm(3,10)],cc[1],'X9 Pro'),
+      ds([norm(7025,7500),norm(6.32,6.82),norm(80,100),norm(144,144),norm(200,200),norm(2.8,10)],cc[2],'X9s Pro'),
+      ds([norm(7050,7500),norm(6.82,6.82),norm(100,100),norm(144,144),norm(200,200),norm(10,10)],cc[3],'X9 Ultra')
+    ]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{suggestedMin:0,suggestedMax:100,ticks:{stepSize:25},pointLabels:{font:{size:11}}}},plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}}}});
+
+  new Chart(document.getElementById('cBat'),{type:'line',data:{labels,datasets:[
+    ds([7025,7500,7025,7050],cc[0],'电池(mAh)',{yAxisID:'y'}),
+    ds([80,80,80,100],'#c1322f','快充(W)',{yAxisID:'y1',borderDash:[6,4]})
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    scales:{y:{position:'left',title:{display:true,text:'mAh',font:{size:11}},min:6500,max:8000},
+            y1:{position:'right',title:{display:true,text:'W',font:{size:11}},min:60,max:120,grid:{drawOnChartArea:false}}},
+    plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}}}});
+
+  new Chart(document.getElementById('cPrice'),{type:'line',data:{labels,datasets:[
+    ds([4399,5299,5299,7499],'#7c3aed','官方起售价',{yAxisID:'y'}),
+    ds([3899,4799,4799,7499],'#1a7a37','国补到手价(约)',{yAxisID:'y',borderDash:[6,4]})
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    scales:{y:{title:{display:true,text:'元',font:{size:11}},min:3500,max:8000}},
+    plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}}}});
+
+  new Chart(document.getElementById('cMulti'),{type:'line',data:{labels,datasets:[
+    ds([6.59,6.78,6.32,6.82],cc[1],'屏幕(英寸)',{yAxisID:'y'}),
+    ds([203,224,198,236],cc[3],'重量(g)',{yAxisID:'y1',borderDash:[5,3]}),
+    ds([3,3,2.8,10],'#c1322f','光学变焦(倍)',{yAxisID:'y1',borderDash:[2,2]})
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    scales:{y:{position:'left',title:{display:true,text:'英寸',font:{size:11}},min:6,max:7.2},
+            y1:{position:'right',min:0,max:250,grid:{drawOnChartArea:false}}},
+    plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}}}});
+</script>
 </body>
 </html>
