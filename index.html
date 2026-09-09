@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>骆德翻·贪腐人生模拟器</title>
+    <title>校长贪腐人生模拟器</title>
     <style>
         :root {
             --bg: #1a1a2e;
@@ -557,18 +557,18 @@
 
     <div class="game-container" id="gameContainer">
         <div class="header">
-            <h1>🐍 骆德翻</h1>
-            <div class="subtitle">贪腐人生模拟器 · 一生之路</div>
+            <h1>🏫 校长贪腐人生</h1>
+            <div class="subtitle">学校版·权力与诱惑</div>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card age-stat">
                 <div class="stat-label">年龄</div>
-                <div class="stat-value age-val" id="statAge">28</div>
+                <div class="stat-value age-val" id="statAge">35</div>
             </div>
             <div class="stat-card position-stat">
                 <div class="stat-label">职位</div>
-                <div class="stat-value position-val" id="statPosition">科员</div>
+                <div class="stat-value position-val" id="statPosition">教务主任</div>
             </div>
             <div class="stat-card money-stat">
                 <div class="stat-label">赃款（万）</div>
@@ -585,19 +585,19 @@
 
         <div class="current-stage">
             <div class="stage-label">当前阶段</div>
-            <div class="stage-name" id="stageName">基层起步</div>
-            <div class="stage-desc" id="stageDesc">初入官场，谨慎行事</div>
+            <div class="stage-name" id="stageName">主任阶段</div>
+            <div class="stage-desc" id="stageDesc">手中有权，开始接触学校资源</div>
         </div>
 
-        <div class="actions-title">🀄 选择你的贪腐手段</div>
+        <div class="actions-title">📋 选择你的贪腐手段</div>
         <div class="actions-grid" id="actionsGrid">
             <!-- 动态生成 -->
         </div>
 
-        <div class="actions-title">📜 生涯记录</div>
+        <div class="actions-title">📜 校长生涯记录</div>
         <div class="log-area" id="logArea">
-            <div class="log-entry log-info">🔰 骆德翻，男，28岁，进入某机关单位工作，月薪微薄。</div>
-            <div class="log-entry log-info">💭 面对金钱诱惑，他究竟会做出怎样的选择？</div>
+            <div class="log-entry log-info">🔰 骆校长，35岁，担任教务主任，管理学校教学事务。</div>
+            <div class="log-entry log-info">💭 面对学校经费和供应商的诱惑，他会如何选择？</div>
         </div>
 
         <div class="btn-row">
@@ -620,13 +620,13 @@
         (function() {
             // ==================== 游戏状态 ====================
             const state = {
-                age: 28,
-                position: '科员',
-                positionLevel: 0, // 0=科员,1=副科,2=正科,3=副处,4=正处,5=副厅,6=正厅
+                age: 35,
+                position: '教务主任',
+                positionLevel: 0, // 0=教务主任,1=副校长,2=校长,3=教育局副局长,4=教育局局长
                 money: 0, // 万元
                 risk: 0, // 0-100
                 integrity: 50, // 清廉度 0-100，越低越腐败
-                stage: 'early',
+                stage: 'director',
                 alive: true,
                 imprisoned: false,
                 fled: false,
@@ -638,82 +638,80 @@
 
             // ==================== 职位体系 ====================
             const positions = [
-                { name: '科员', level: 0, stage: 'early', desc: '基层小吏，无人关注' },
-                { name: '副科长', level: 1, stage: 'early', desc: '小有权力，开始接触项目' },
-                { name: '科长', level: 2, stage: 'mid', desc: '一科之主，审批权在手' },
-                { name: '副处长', level: 3, stage: 'mid', desc: '处室副职，分管一方' },
-                { name: '处长', level: 4, stage: 'mid', desc: '大权在握，项目资金过手' },
-                { name: '副厅长', level: 5, stage: 'late', desc: '厅级干部，位高权重' },
-                { name: '厅长', level: 6, stage: 'late', desc: '一方诸侯，呼风唤雨' },
+                { name: '教务主任', level: 0, stage: 'director', desc: '管理教学事务，小有实权' },
+                { name: '副校长', level: 1, stage: 'director', desc: '分管后勤与基建，油水渐多' },
+                { name: '校长', level: 2, stage: 'principal', desc: '一校之长，大权在握' },
+                { name: '教育局副局长', level: 3, stage: 'principal', desc: '主管全市学校，资源丰富' },
+                { name: '教育局局长', level: 4, stage: 'bureau', desc: '教育系统最高权力，呼风唤雨' },
             ];
 
             const stages = {
-                early: { name: '基层起步', desc: '初入官场，谨慎行事' },
-                mid: { name: '步步高升', desc: '权力渐长，诱惑增多' },
-                late: { name: '位高权重', desc: '大权在握，风险与利益并存' },
+                director: { name: '主任阶段', desc: '手中有权，开始接触学校资源' },
+                principal: { name: '校长阶段', desc: '一校之主，项目与经费源源不断' },
+                bureau: { name: '局长阶段', desc: '教育系统巨擘，风险与利益并存' },
             };
 
             // ==================== 贪腐行为定义 ====================
             const actionsByStage = {
-                early: [
-                    { id: 'bribe_small', name: '🎁 收受小额礼品', desc: '接受一条烟、两瓶酒，价值不高但积少成多。',
+                director: [
+                    { id: 'textbook_kickback', name: '📚 教材采购回扣', desc: '在教材采购中收取供应商回扣，金额不大。',
                         effects: { money: [2, 8], risk: [3, 8], integrity: -2 },
-                        logGood: '收下礼品，心里有些忐忑，但似乎没人注意。',
-                        logBad: '被人看到收了礼品，虽然金额不大，但已引起注意！', minRisk: 0, maxRisk: 70 },
-                    { id: 'fake_reimburse', name: '📄 虚报差旅费', desc: '出差报销时多报一些费用，小打小闹。',
+                        logGood: '教材回扣到手，数目不大但很稳定。',
+                        logBad: '有老师举报教材价格偏高，引起注意！', minRisk: 0, maxRisk: 70 },
+                    { id: 'uniform_kickback', name: '👕 校服采购提成', desc: '指定校服供应商，按比例拿提成。',
                         effects: { money: [1, 5], risk: [2, 6], integrity: -1 },
-                        logGood: '虚报了一点差旅费，神不知鬼不觉。',
-                        logBad: '财务审计发现了异常，被记了一笔！', minRisk: 0, maxRisk: 65 },
-                    { id: 'eat_drink', name: '🍷 公款吃喝', desc: '借工作名义聚餐，反正不是自己掏钱。',
+                        logGood: '校服提成到账，家长暂时没意见。',
+                        logBad: '家长投诉校服质量，你被约谈！', minRisk: 0, maxRisk: 65 },
+                    { id: 'fake_activity', name: '🎪 虚报活动经费', desc: '虚报学生活动开支，套取学校资金。',
                         effects: { money: [0.5, 3], risk: [1, 4], integrity: -1 },
-                        logGood: '又蹭了一顿好饭，何乐而不为？',
-                        logBad: '有人举报公款吃喝，纪检开始关注！', minRisk: 0, maxRisk: 60 },
-                    { id: 'work_promotion', name: '📈 踏实工作（升职）', desc: '暂时不贪，积累政绩和人脉，为将来铺路。',
+                        logGood: '活动经费虚报了一点，神不知鬼不觉。',
+                        logBad: '财务审计发现漏洞，被记了一笔！', minRisk: 0, maxRisk: 60 },
+                    { id: 'work_promotion', name: '📈 踏实工作（升职）', desc: '暂时收敛，积累业绩，争取升任副校长。',
                         effects: { money: 0, risk: -5, integrity: 5 },
-                        logGood: '努力工作，领导看在眼里，升职有望！',
+                        logGood: '工作出色，领导赏识，升职在望！',
                         logBad: '错过了一些"机会"，但至少睡得安稳。', minRisk: 0, maxRisk: 100,
                     isPromotion: true },
                 ],
-                mid: [
-                    { id: 'bribe_medium', name: '💰 收受工程回扣', desc: '工程项目招标中收取回扣，金额可观。',
+                principal: [
+                    { id: 'construction_kickback', name: '🏗️ 基建工程回扣', desc: '学校教学楼、操场建设，收取工程回扣。',
                         effects: { money: [10, 30], risk: [8, 18], integrity: -5 },
-                        logGood: '一笔回扣到手，数目不小。',
-                        logBad: '工程商被抓，供出了你！风险骤增！', minRisk: 0, maxRisk: 75 },
-                    { id: 'embezzle_fund', name: '🏦 挪用公款', desc: '暂时借用公款去投资，赚了再还回去。',
+                        logGood: '基建回扣到手，数目可观。',
+                        logBad: '工程质量问题被曝光，你被牵连！', minRisk: 0, maxRisk: 75 },
+                    { id: 'canteen_contract', name: '🍱 食堂承包受贿', desc: '将食堂承包给特定公司，收取好处费。',
                         effects: { money: [8, 25], risk: [10, 20], integrity: -6 },
-                        logGood: '挪用公款赚了一笔，及时归还，没人发现。',
-                        logBad: '投资失败，公款无法归还，麻烦大了！', minRisk: 0, maxRisk: 70 },
-                    { id: 'sell_position', name: '🎯 卖官鬻爵', desc: '安排人员岗位，收取"感谢费"。',
+                        logGood: '食堂承包费到账，家长暂时没发现。',
+                        logBad: '学生食物中毒，食堂问题被彻查！', minRisk: 0, maxRisk: 70 },
+                    { id: 'enrollment_bribe', name: '🎓 违规招生收费', desc: '收受家长贿赂，违规录取学生。',
                         effects: { money: [5, 15], risk: [6, 15], integrity: -4 },
-                        logGood: '安排了个岗位，收到一笔"心意"。',
-                        logBad: '被安排的人出了事，牵连到你！', minRisk: 0, maxRisk: 72 },
-                    { id: 'work_promotion', name: '📈 积极表现（升职）', desc: '暂时收敛，表现突出，争取更高职位。',
+                        logGood: '又安排了一个学生，收到一笔"赞助费"。',
+                        logBad: '家长反水举报，招生黑幕曝光！', minRisk: 0, maxRisk: 72 },
+                    { id: 'work_promotion', name: '📈 积极表现（升职）', desc: '创造政绩，争取进入教育局。',
                         effects: { money: 0, risk: -8, integrity: 6 },
-                        logGood: '政绩突出，组织部门开始考察你！',
-                        logBad: '升职路上竞争者众多，还需努力。', minRisk: 0, maxRisk: 100,
+                        logGood: '学校成绩突出，教育局开始考察你！',
+                        logBad: '竞争激烈，还需更多"成绩"。', minRisk: 0, maxRisk: 100,
                     isPromotion: true },
-                    { id: 'bribe_big', name: '💎 收受巨额贿赂', desc: '一次性收下巨额财物，胆子越来越大。',
+                    { id: 'embezzle_fund', name: '💰 挪用教育经费', desc: '将上级拨付的教育经费挪作他用。',
                         effects: { money: [20, 50], risk: [15, 28], integrity: -8 },
-                        logGood: '一笔巨款到手，贪婪之心膨胀。',
-                        logBad: '被行贿人举报，证据确凿！', minRisk: 0, maxRisk: 65 },
+                        logGood: '经费暂时挪用，赚了一笔再还回去。',
+                        logBad: '上级检查发现经费去向不明！', minRisk: 0, maxRisk: 65 },
                 ],
-                late: [
-                    { id: 'bribe_huge', name: '🏆 权钱交易', desc: '利用职务之便，为他人谋取巨大利益，收取天价报酬。',
+                bureau: [
+                    { id: 'project_allocation', name: '🏢 项目审批受贿', desc: '审批学校项目时收取巨额贿赂。',
                         effects: { money: [30, 80], risk: [15, 30], integrity: -10 },
-                        logGood: '一笔天价"交易"达成，财富暴涨。',
-                        logBad: '上级纪委介入调查，情况危急！', minRisk: 0, maxRisk: 70 },
-                    { id: 'embezzle_massive', name: '🏢 侵吞国有资产', desc: '通过复杂操作，将国有资产据为己有。',
+                        logGood: '项目审批通过，好处费到账。',
+                        logBad: '纪委介入调查项目审批流程！', minRisk: 0, maxRisk: 70 },
+                    { id: 'embezzle_massive', name: '💼 侵吞教育专款', desc: '通过复杂操作侵吞教育专项拨款。',
                         effects: { money: [25, 70], risk: [18, 35], integrity: -10 },
-                        logGood: '国有资产被神不知鬼不觉地转移。',
-                        logBad: '审计发现重大漏洞，矛头直指你！', minRisk: 0, maxRisk: 65 },
-                    { id: 'protect_illegal', name: '🛡️ 充当保护伞', desc: '为黑恶势力提供庇护，收取保护费。',
+                        logGood: '教育专款被转移，没人发现。',
+                        logBad: '审计发现重大资金缺口，矛头直指你！', minRisk: 0, maxRisk: 65 },
+                    { id: 'protection', name: '🛡️ 充当学校保护伞', desc: '为问题学校提供庇护，收取保护费。',
                         effects: { money: [15, 40], risk: [12, 25], integrity: -8 },
-                        logGood: '保护费到账，黑白通吃。',
-                        logBad: '扫黑除恶专项行动，你被盯上了！', minRisk: 0, maxRisk: 68 },
-                    { id: 'work_promotion', name: '📈 政绩工程（升迁）', desc: '搞面子工程，虽然花钱但能升迁。',
+                        logGood: '保护费到账，问题学校继续运营。',
+                        logBad: '学校安全事故被曝光，你被追责！', minRisk: 0, maxRisk: 68 },
+                    { id: 'work_promotion', name: '📈 政绩工程（升迁）', desc: '搞教育形象工程，虽然花钱但能升迁。',
                         effects: { money: -5, risk: -10, integrity: 3 },
-                        logGood: '政绩工程见效，上级赏识！',
-                        logBad: '工程被曝质量问题，声誉受损。', minRisk: 0, maxRisk: 100, isPromotion: true },
+                        logGood: '形象工程受到表彰，上级赏识！',
+                        logBad: '工程被曝浪费资金，声誉受损。', minRisk: 0, maxRisk: 100, isPromotion: true },
                     { id: 'flee_attempt', name: '✈️ 转移资产准备外逃', desc: '将资产转移到海外，准备随时跑路。',
                         effects: { money: -10, risk: 5, integrity: -5 },
                         logGood: '资产已转移到海外账户，后路有了。',
@@ -723,19 +721,19 @@
 
             // ==================== 随机事件 ====================
             const randomEvents = [
-                { id: 'audit', name: '📋 审计风暴', desc: '上级突然开展审计，所有账目被翻查。', apply: (s) => { if (s.money > 20) { s
+                { id: 'education_audit', name: '📋 教育局审计', desc: '教育局突然开展财务审计，所有账目被翻查。', apply: (s) => { if (s.money > 20) { s
                             .risk += 15; addLog('审计发现了一些异常，风险上升！', 'log-warn'); } else { addLog(
                             '审计未发现大问题，虚惊一场。', 'log-good'); } }, weight: 3 },
-                { id: 'whistleblower', name: '📢 群众举报', desc: '有人向纪委举报你的贪腐行为。', apply: (s) => { if (s.integrity < 35) { s
+                { id: 'parent_report', name: '📢 家长举报', desc: '有家长向教育局举报学校乱收费。', apply: (s) => { if (s.integrity < 35) { s
                             .risk += 20;
-                        addLog('举报内容翔实，纪委开始调查！', 'log-bad'); } else { addLog('举报内容模糊，暂时未引起重视。', 'log-info'); } },
+                        addLog('举报内容翔实，教育局开始调查！', 'log-bad'); } else { addLog('举报内容模糊，暂时未引起重视。', 'log-info'); } },
                     weight: 3 },
-                { id: 'promotion_chance', name: '🌟 升迁机会', desc: '上级有职位空缺，你有机会晋升。', apply: (s) => { if (s.integrity > 40) { s
+                { id: 'promotion_chance', name: '🌟 升迁机会', desc: '上级职位有空缺，你有机会晋升。', apply: (s) => { if (s.integrity > 40) { s
                             .risk -= 10;
                         addLog('你表现良好，获得升迁机会！', 'log-good');
                         promoteIfPossible(s); } else { addLog('虽然有机会，但你的作风问题被人议论。', 'log-warn'); } },
                     weight: 2 },
-                { id: 'colleague_arrested', name: '🚨 同僚落马', desc: '你的同事因贪腐被纪委带走。', apply: (s) => { if (s.integrity < 30) { s
+                { id: 'colleague_arrested', name: '🚨 同僚落马', desc: '你的同事因贪腐被纪检带走。', apply: (s) => { if (s.integrity < 30) { s
                             .risk += 15;
                         addLog('同僚落马，你坐立不安，风险大增！', 'log-bad'); } else { s.risk -= 5;
                         addLog('同僚落马，你与他的关系并不密切。', 'log-info'); } }, weight: 2 },
@@ -746,12 +744,12 @@
                 { id: 'family_warning', name: '👨‍👩‍👦 家人劝诫', desc: '家人发现你行为异常，劝你悬崖勒马。', apply: (s) => { s.integrity += 5; s
                         .risk -= 5;
                     addLog('家人的话让你有所触动，稍微收敛。', 'log-info'); }, weight: 2 },
-                { id: 'media_expose', name: '📰 媒体曝光', desc: '有媒体开始关注你经手的项目。', apply: (s) => { if (s.money > 50) { s.risk +=
+                { id: 'media_expose', name: '📰 媒体曝光', desc: '有媒体开始关注你学校的问题。', apply: (s) => { if (s.money > 50) { s.risk +=
                             18;
-                        addLog('媒体曝光了项目问题，舆论压力巨大！', 'log-bad'); } else { addLog('媒体报道未涉及你个人。', 'log-info'); } },
+                        addLog('媒体曝光了学校问题，舆论压力巨大！', 'log-bad'); } else { addLog('媒体报道未涉及你个人。', 'log-info'); } },
                     weight: 2 },
-                { id: 'bonus', name: '🎉 意外之财', desc: '投资获得了意外收益（非贪腐）。', apply: (s) => { s.money += 5;
-                        addLog('投资小赚一笔，合法收入。', 'log-good'); }, weight: 2 },
+                { id: 'bonus', name: '🎉 合法收入', desc: '你发表论文或获得奖励，获得合法收入。', apply: (s) => { s.money += 5;
+                        addLog('合法收入到账，心里踏实。', 'log-good'); }, weight: 2 },
             ];
 
             // ==================== 工具函数 ====================
@@ -775,7 +773,6 @@
                 entry.textContent = text;
                 logArea.appendChild(entry);
                 logArea.scrollTop = logArea.scrollHeight;
-                // 限制日志条数
                 while (logArea.children.length > 60) {
                     logArea.removeChild(logArea.firstChild);
                 }
@@ -787,9 +784,9 @@
             }
 
             function getStageByLevel(level) {
-                if (level <= 1) return 'early';
-                if (level <= 4) return 'mid';
-                return 'late';
+                if (level <= 1) return 'director';
+                if (level <= 3) return 'principal';
+                return 'bureau';
             }
 
             function promoteIfPossible(s) {
@@ -812,18 +809,16 @@
                 document.getElementById('statRisk').textContent = Math.round(state.risk);
                 document.getElementById('riskBar').style.width = clamp(state.risk, 0, 100) + '%';
 
-                const stageInfo = stages[state.stage];
+                const stageInfo = stages[state.stage] || stages.director;
                 document.getElementById('stageName').textContent = stageInfo.name;
                 document.getElementById('stageDesc').textContent = stageInfo.desc;
             }
 
             function getAvailableActions() {
                 const stage = state.stage;
-                const actions = actionsByStage[stage] || actionsByStage.early;
-                // 根据风险过滤
+                const actions = actionsByStage[stage] || actionsByStage.director;
                 let available = actions.filter(a => state.risk <= (a.maxRisk || 100));
                 if (available.length === 0) {
-                    // 如果风险太高，只保留风险较低或升职选项
                     available = actions.filter(a => a.isPromotion || (a.effects.risk && a.effects.risk[0] <= 10));
                 }
                 return available;
@@ -856,11 +851,9 @@
                 if (state.gameOver) return;
                 state.actionCount++;
 
-                // 年龄增长
                 state.age += randInt(1, 3);
                 if (state.age > 70) state.age = 70;
 
-                // 应用效果
                 if (action.effects.money) {
                     const val = rand(action.effects.money[0], action.effects.money[1]);
                     state.money += val;
@@ -881,7 +874,6 @@
                 state.money = Math.max(0, state.money);
                 state.integrity = clamp(state.integrity, 0, 100);
 
-                // 升职检查
                 if (action.isPromotion) {
                     if (Math.random() < 0.55) {
                         promoteIfPossible(state);
@@ -890,29 +882,24 @@
                     }
                 }
 
-                // 记录日志
                 if (action.logGood && Math.random() < 0.65) {
                     addLog(action.logGood, 'log-good');
                 } else if (action.logBad) {
                     addLog(action.logBad, 'log-bad');
                 }
 
-                // 随机事件
                 if (Math.random() < 0.35 && state.actionCount > 1) {
                     triggerRandomEvent();
                 }
 
-                // 检查是否被抓
                 checkArrest();
 
-                // 检查结局
                 if (!state.gameOver) {
                     checkEndings();
                 }
 
                 updateUI();
 
-                // 重新渲染动作
                 if (!state.gameOver) {
                     renderActions();
                 }
@@ -936,7 +923,6 @@
                 const arrestChance = state.risk / 100;
                 const roll = Math.random();
                 if (roll < arrestChance * 0.35 && state.risk > 40) {
-                    // 被抓
                     state.gameOver = true;
                     state.imprisoned = true;
                     showEnding('imprisoned');
@@ -945,8 +931,7 @@
                     state.imprisoned = true;
                     showEnding('imprisoned');
                 } else if (state.risk > 70 && Math.random() < 0.1) {
-                    // 严重警告
-                    addLog('🚨 纪委已对你展开初步调查，情况危急！', 'log-bad');
+                    addLog('🚨 纪检已对你展开初步调查，情况危急！', 'log-bad');
                     state.risk += 5;
                 }
             }
@@ -998,17 +983,17 @@
                     imprisoned: {
                         icon: '⛓️',
                         title: '锒铛入狱',
-                        desc: '纪委掌握了确凿证据，你被带走调查。最终因贪污受贿罪被判处有期徒刑。铁窗之内，你回顾一生，悔之晚矣。'
+                        desc: '纪检部门掌握了确凿证据，你被带走调查。最终因贪污受贿罪被判处有期徒刑。铁窗之内，你回顾一生，悔之晚矣。'
                     },
                     retired_safe: {
                         icon: '🏖️',
                         title: '平稳着陆',
-                        desc: '你在官场摸爬滚打一生，虽有小贪但未触及红线，最终安全退休。那些不义之财，成了你晚年的"保障"。'
+                        desc: '你在教育系统摸爬滚打一生，虽有小贪但未触及红线，最终安全退休。那些不义之财，成了你晚年的"保障"。'
                     },
                     retired_risky: {
                         icon: '😰',
                         title: '退休前的噩梦',
-                        desc: '即将退休之际，纪委突然介入调查你早年间的贪腐问题。晚节不保，你的人生以悲剧收场。'
+                        desc: '即将退休之际，纪检突然介入调查你早年间的贪腐问题。晚节不保，你的人生以悲剧收场。'
                     },
                     fled: {
                         icon: '✈️',
@@ -1017,8 +1002,8 @@
                     },
                     mega_corrupt: {
                         icon: '👑',
-                        title: '巨贪之王',
-                        desc: '你贪腐金额超过千万，成为震惊全国的大案。虽然享受了极致的奢华，但最终难逃法网。'
+                        title: '巨贪校长',
+                        desc: '你贪腐金额超过千万，成为震惊教育界的大案。虽然享受了极致的奢华，但最终难逃法网。'
                     },
                     exposed: {
                         icon: '📸',
@@ -1043,13 +1028,13 @@
             }
 
             function resetGame() {
-                state.age = 28;
-                state.position = '科员';
+                state.age = 35;
+                state.position = '教务主任';
                 state.positionLevel = 0;
                 state.money = 0;
                 state.risk = 0;
                 state.integrity = 50;
-                state.stage = 'early';
+                state.stage = 'director';
                 state.alive = true;
                 state.imprisoned = false;
                 state.fled = false;
@@ -1059,8 +1044,8 @@
                 state.currentActions = [];
 
                 document.getElementById('logArea').innerHTML = `
-              <div class="log-entry log-info">🔰 骆德翻，男，28岁，进入某机关单位工作，月薪微薄。</div>
-              <div class="log-entry log-info">💭 面对金钱诱惑，他究竟会做出怎样的选择？</div>
+              <div class="log-entry log-info">🔰 骆校长，35岁，担任教务主任，管理学校教学事务。</div>
+              <div class="log-entry log-info">💭 面对学校经费和供应商的诱惑，他会如何选择？</div>
             `;
                 document.getElementById('modalOverlay').classList.add('hidden');
                 updateUI();
@@ -1075,10 +1060,8 @@
                 document.getElementById('btnRestartModal').addEventListener('click', resetGame);
             }
 
-            // 页面加载完成后初始化
             init();
 
-            // 暴露重置到全局（方便调试）
             window.resetGame = resetGame;
         })();
     </script>
