@@ -1,649 +1,1086 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>OPPO Find X9 系列对比 · 移动版</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<style>
-  :root{
-    /* 加深主题色，保证白底文字对比度 ≥ 4.5:1 */
-    --c-x9:    #1d5fd6; /* 标准版：深蓝 */
-    --c-pro:   #1a7a37; /* Pro：深绿 */
-    --c-spro:  #b45309; /* X9s Pro：深橙（原 #f5a623 作文字看不清，已加深） */
-    --c-ultra: #c1322f; /* Ultra：深红（原 #e5484d 已加深） */
-    --ink:#0f172a;          /* 主文字（极深，对比度最高） */
-    --ink2:#334155;         /* 次级文字 */
-    --muted:#475569;        /* 描述文字（从 #6b7280 加深） */
-    --line:#e2e8f0;
-    --bg:#f1f5f9;
-    --card:#ffffff;
-    --shadow:0 4px 16px rgba(15,23,42,.08);
-    --shadow-lg:0 10px 40px rgba(15,23,42,.18);
-  }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html{scroll-behavior:smooth;}
-  body{
-    margin:0;
-    font-family:"PingFang SC","Microsoft YaHei",-apple-system,"Helvetica Neue",Arial,sans-serif;
-    color:var(--ink);
-    background:var(--bg);
-    line-height:1.6;
-    /* 给底部固定导航留空间 */
-    padding-bottom:64px;
-  }
-  .wrap{max-width:760px;margin:0 auto;padding:0 14px;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>骆德翻·贪腐人生模拟器</title>
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --panel: #16213e;
+            --card: #0f3460;
+            --gold: #e8b923;
+            --red: #e94560;
+            --green: #2ecc71;
+            --text: #eee;
+            --dim: #999;
+            --border: #2a2a4a;
+            --btn-bg: #1a3a5c;
+            --btn-hover: #234a75;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            --radius: 12px;
+        }
 
-  /* ===== 顶部标题 ===== */
-  .topbar{
-    position:sticky;top:0;z-index:50;
-    background:rgba(255,255,255,.92);
-    backdrop-filter:saturate(180%) blur(12px);
-    border-bottom:1px solid var(--line);
-  }
-  .topbar .wrap{display:flex;align-items:center;gap:10px;padding:10px 14px;}
-  .topbar .logo{font-weight:800;font-size:16px;color:var(--ink);white-space:nowrap;}
-  .topbar .logo span{color:var(--c-pro);}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  /* ===== 机型对比选择条 ===== */
-  .model-bar{padding:10px 14px 4px;}
-  .model-bar .lab{font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600;}
-  .model-bar .pills{display:flex;flex-wrap:wrap;gap:8px;}
-  .model-bar .pill{
-    display:inline-flex;align-items:center;gap:6px;
-    padding:7px 12px;border-radius:999px;border:2px solid var(--line);
-    font-size:13px;font-weight:600;color:var(--ink2);background:#fff;
-    cursor:pointer;transition:.15s;
-  }
-  .model-bar .pill .dot{width:10px;height:10px;border-radius:50%;background:var(--mc,#999);}
-  .model-bar .pill.on{border-color:var(--mc);color:var(--mc);background:color-mix(in srgb,var(--mc) 8%,#fff);}
+        body {
+            background: var(--bg);
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text);
+            padding: 20px;
+            background-image:
+                radial-gradient(ellipse at 20% 50%, rgba(232, 185, 35, 0.05) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 50%, rgba(233, 69, 96, 0.05) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 100%, rgba(15, 52, 96, 0.3) 0%, transparent 50%);
+        }
 
-  /* ===== 智能助手搜索 ===== */
-  .assistant{padding:10px 14px 14px;}
-  .assistant .search{
-    display:flex;gap:8px;align-items:center;
-    background:#fff;border:1.5px solid var(--c-x9);border-radius:14px;
-    padding:8px 12px;box-shadow:var(--shadow);
-  }
-  .assistant .search svg{flex:0 0 auto;color:var(--c-x9);}
-  .assistant input{
-    flex:1;border:0;outline:0;font-size:15px;background:transparent;color:var(--ink);
-    min-width:0;
-  }
-  .assistant input::placeholder{color:#94a3b8;}
-  .assistant .go{
-    border:0;background:var(--c-x9);color:#fff;font-weight:700;font-size:13px;
-    padding:7px 14px;border-radius:10px;cursor:pointer;
-  }
-  .assistant .suggest{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
-  .assistant .suggest b{
-    font-size:12px;padding:5px 10px;border-radius:8px;background:#e8eefc;color:var(--c-x9);
-    cursor:pointer;font-weight:600;
-  }
-  .assistant .hint{font-size:12px;color:var(--muted);margin-top:6px;}
+        .game-container {
+            width: 100%;
+            max-width: 820px;
+            background: var(--panel);
+            border-radius: 20px;
+            padding: 28px 30px;
+            box-shadow: var(--shadow), 0 0 60px rgba(232, 185, 35, 0.08);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
 
-  /* ===== Hero ===== */
-  .hero{
-    background:linear-gradient(135deg,#0b1220,#142544 70%);
-    color:#fff;padding:24px 16px 26px;border-radius:0 0 20px 20px;
-  }
-  .hero .eyebrow{font-size:11px;letter-spacing:2px;color:#9bb8e8;}
-  .hero h1{font-size:21px;margin:6px 0 8px;line-height:1.3;font-weight:800;}
-  .hero p{font-size:13px;color:#cdd9ec;margin:0;}
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold), var(--red), var(--gold));
+            background-size: 200% 100%;
+            animation: shimmer 3s linear infinite;
+        }
 
-  /* ===== 区块 ===== */
-  section{padding:18px 0;}
-  .sec-h{margin:4px 0 14px;}
-  .sec-h .k{font-size:11px;font-weight:800;letter-spacing:1.5px;color:var(--c-pro);}
-  .sec-h h2{font-size:18px;margin:3px 0 4px;color:var(--ink);}
-  .sec-h p{font-size:12.5px;color:var(--muted);margin:0;}
+        @keyframes shimmer {
+            0% {
+                background-position: 0% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
 
-  /* ===== 机型速览卡片 ===== */
-  .pcard{
-    background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px;
-    box-shadow:var(--shadow);border-left:5px solid var(--mc);
-  }
-  .pcard .head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
-  .pcard .name{font-size:17px;font-weight:800;color:var(--ink);margin:0;}
-  .pcard .tag{font-size:11px;color:var(--mc);font-weight:700;margin-top:2px;}
-  .pcard .date{font-size:11px;color:var(--muted);margin-top:4px;}
-  .pcard .chips{margin:10px 0;}
-  .pcard .chip{
-    display:inline-block;font-size:11px;padding:3px 8px;border-radius:6px;
-    background:#f1f5f9;color:var(--ink2);margin:0 5px 5px 0;font-weight:600;
-  }
-  .pcard ul{margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--ink2);}
-  .pcard li{margin-bottom:4px;}
+        .header {
+            text-align: center;
+            margin-bottom: 22px;
+            position: relative;
+        }
 
-  /* 价格行 */
-  .price-box{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);}
-  .price-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:13px;}
-  .price-row .lab{color:var(--muted);}
-  .price-row .v{font-weight:700;color:var(--ink);}
-  .price-row.gov .v{color:var(--c-pro);font-size:16px;}
-  .price-row.gov .v.no{color:var(--c-ultra);}
-  .price-note{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4;}
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, var(--gold), #ffd700, var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+            margin-bottom: 4px;
+        }
 
-  .btn-official{
-    display:block;width:100%;margin-top:12px;
-    padding:11px;border:0;border-radius:11px;
-    background:var(--mc);color:#fff;font-size:14px;font-weight:700;cursor:pointer;
-  }
-  .btn-official:active{opacity:.85;}
+        .header .subtitle {
+            color: var(--dim);
+            font-size: 0.9rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+        }
 
-  /* ===== 曲线图 ===== */
-  .chart-card{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow);}
-  .chart-card h3{margin:0 0 2px;font-size:14px;color:var(--ink);}
-  .chart-card .desc{font-size:11.5px;color:var(--muted);margin:0 0 10px;}
-  .chart-wrap{position:relative;height:260px;}
-  .legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
-  .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle;}
-  .legend span{font-size:11.5px;color:var(--ink2);font-weight:600;}
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
 
-  /* ===== 配置表 ===== */
-  .table-card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;}
-  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  table.spec{width:100%;border-collapse:collapse;min-width:560px;}
-  table.spec th,table.spec td{padding:11px 12px;text-align:left;font-size:12.5px;border-bottom:1px solid var(--line);vertical-align:top;}
-  table.spec thead th{
-    background:#0f172a;color:#fff;font-weight:700;position:sticky;top:0;z-index:2;font-size:12px;
-  }
-  table.spec th:first-child{background:#1e293b;color:#cbd5e1;width:96px;font-size:11.5px;}
-  table.spec th .role{display:block;font-size:10px;color:#94a3b8;font-weight:500;margin-top:1px;}
-  table.spec td.k{color:var(--muted);font-weight:600;font-size:11.5px;background:#f8fafc;}
-  table.spec td.v{color:var(--ink);font-weight:500;}
-  table.spec td.v.win{color:var(--c-pro);font-weight:700;}
-  table.spec .grp td{background:#e0e7ef;color:#1e293b;font-weight:800;font-size:11px;letter-spacing:.5px;}
-  table.spec tr.highlight{background:#fff8d6 !important;animation:flash 1.6s ease 2;}
-  @keyframes flash{0%,100%{background:#fff8d6;}50%{background:#ffe066;}}
-  .col-x9{color:var(--c-x9)!important;}
-  .col-pro{color:var(--c-pro)!important;}
-  .col-spro{color:var(--c-spro)!important;}
-  .col-ultra{color:var(--c-ultra)!important;}
+        .stat-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 14px 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
 
-  /* ===== 底部导航 ===== */
-  .tabbar{
-    position:fixed;left:0;right:0;bottom:0;z-index:60;
-    background:rgba(255,255,255,.96);backdrop-filter:blur(12px);
-    border-top:1px solid var(--line);
-    display:flex;max-width:760px;margin:0 auto;
-  }
-  .tabbar a{
-    flex:1;text-align:center;padding:8px 0 10px;font-size:11px;color:var(--muted);
-    text-decoration:none;font-weight:600;
-  }
-  .tabbar a.on{color:var(--c-pro);}
-  .tabbar a svg{display:block;margin:0 auto 2px;}
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: 0 0 var(--radius) var(--radius);
+        }
 
-  /* ===== 官方配置模态框 ===== */
-  .modal-mask{
-    position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:100;
-    display:none;align-items:flex-end;justify-content:center;
-  }
-  .modal-mask.show{display:flex;}
-  .modal{
-    background:#fff;width:100%;max-width:760px;height:88vh;border-radius:18px 18px 0 0;
-    display:flex;flex-direction:column;overflow:hidden;animation:slideUp .25s ease;
-  }
-  @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
-  .modal-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);}
-  .modal-head .t{font-size:15px;font-weight:800;color:var(--ink);}
-  .modal-head .x{font-size:22px;color:var(--muted);background:none;border:0;cursor:pointer;line-height:1;padding:0 4px;}
-  .modal-body{flex:1;overflow:hidden;position:relative;background:#f8fafc;}
-  .modal-body iframe{width:100%;height:100%;border:0;background:#fff;}
-  .modal-fallback{
-    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:30px;text-align:center;gap:14px;
-  }
-  .modal-fallback .ic{font-size:42px;}
-  .modal-fallback .t{font-size:15px;font-weight:700;color:var(--ink);}
-  .modal-fallback .d{font-size:13px;color:var(--muted);line-height:1.6;max-width:340px;}
-  .modal-fallback .open{
-    display:inline-block;padding:11px 24px;border-radius:11px;background:var(--c-x9);color:#fff;
-    font-weight:700;font-size:14px;text-decoration:none;
-  }
+        .stat-card.age-stat::after {
+            background: #3498db;
+        }
+        .stat-card.position-stat::after {
+            background: var(--gold);
+        }
+        .stat-card.money-stat::after {
+            background: var(--green);
+        }
+        .stat-card.risk-stat::after {
+            background: var(--red);
+        }
 
-  .src{font-size:11px;color:var(--muted);padding:14px 4px 6px;line-height:1.6;}
-  .src a{color:var(--c-x9);text-decoration:underline;}
-</style>
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--dim);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .stat-value.age-val {
+            color: #3498db;
+        }
+        .stat-value.position-val {
+            color: var(--gold);
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 2.5rem;
+        }
+        .stat-value.money-val {
+            color: var(--green);
+        }
+        .stat-value.risk-val {
+            color: var(--red);
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #1a1a3a;
+            border-radius: 10px;
+            margin-top: 6px;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .bar-risk {
+            background: linear-gradient(90deg, #e94560, #ff6b6b);
+        }
+        .bar-integrity {
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+        }
+
+        .current-stage {
+            text-align: center;
+            margin: 16px 0 18px;
+            padding: 14px;
+            background: rgba(15, 52, 96, 0.5);
+            border-radius: var(--radius);
+            border: 1px dashed var(--gold);
+            position: relative;
+        }
+
+        .current-stage .stage-label {
+            font-size: 0.8rem;
+            color: var(--dim);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .current-stage .stage-name {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--gold);
+            margin-top: 4px;
+            letter-spacing: 2px;
+        }
+
+        .current-stage .stage-desc {
+            font-size: 0.85rem;
+            color: var(--dim);
+            margin-top: 4px;
+        }
+
+        .actions-title {
+            font-size: 0.9rem;
+            color: var(--dim);
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .actions-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .action-btn {
+            background: var(--btn-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 14px;
+            cursor: pointer;
+            transition: all 0.25s;
+            text-align: left;
+            color: var(--text);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn:hover {
+            background: var(--btn-hover);
+            border-color: var(--gold);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(232, 185, 35, 0.15);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            border-color: var(--border);
+        }
+
+        .action-btn .action-name {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn .action-desc {
+            font-size: 0.8rem;
+            color: var(--dim);
+            line-height: 1.4;
+        }
+
+        .action-btn .action-effects {
+            font-size: 0.75rem;
+            margin-top: 6px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .effect-tag {
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .effect-money {
+            background: rgba(46, 204, 113, 0.2);
+            color: var(--green);
+        }
+        .effect-risk {
+            background: rgba(233, 69, 96, 0.2);
+            color: var(--red);
+        }
+        .effect-integrity {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+        }
+
+        .log-area {
+            background: #0a0a1a;
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            max-height: 180px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .log-area::-webkit-scrollbar {
+            width: 5px;
+        }
+        .log-area::-webkit-scrollbar-track {
+            background: #0a0a1a;
+        }
+        .log-area::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 10px;
+        }
+
+        .log-entry {
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            animation: fadeIn 0.4s ease;
+        }
+
+        .log-entry.log-good {
+            color: var(--green);
+        }
+        .log-entry.log-bad {
+            color: var(--red);
+        }
+        .log-entry.log-warn {
+            color: var(--gold);
+        }
+        .log-entry.log-info {
+            color: #aab;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            justify-content: center;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--dim);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeInBg 0.4s ease;
+        }
+
+        @keyframes fadeInBg {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal {
+            background: var(--panel);
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            border: 2px solid var(--gold);
+            box-shadow: 0 0 60px rgba(232, 185, 35, 0.3);
+            text-align: center;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(40px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal h2 {
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+            color: var(--gold);
+        }
+
+        .modal .ending-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        .modal p {
+            color: var(--dim);
+            line-height: 1.7;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .modal .final-stats {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 16px;
+            margin: 16px 0;
+            text-align: left;
+        }
+
+        .modal .final-stats div {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        .modal .final-stats div:last-child {
+            border-bottom: none;
+        }
+
+        .modal .btn-restart {
+            background: var(--gold);
+            color: #1a1a2e;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+        }
+
+        .modal .btn-restart:hover {
+            background: #ffd700;
+            transform: scale(1.05);
+            box-shadow: 0 6px 25px rgba(232, 185, 35, 0.4);
+        }
+
+        .integrity-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 6px;
+        }
+        .integrity-row .label {
+            font-size: 0.7rem;
+            color: var(--dim);
+            white-space: nowrap;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 16px 14px;
+                border-radius: 14px;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            .actions-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .header h1 {
+                font-size: 1.5rem;
+                letter-spacing: 1px;
+            }
+            .stat-value {
+                font-size: 1.2rem;
+            }
+            .current-stage .stage-name {
+                font-size: 1.2rem;
+            }
+            .modal {
+                padding: 20px;
+            }
+            .modal h2 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<!-- 顶部标题 -->
-<div class="topbar">
-  <div class="wrap">
-    <div class="logo">OPPO <span>Find X9</span> 系列对比</div>
-  </div>
-</div>
-
-<!-- Hero -->
-<div class="hero">
-  <div class="eyebrow">FIND X9 SERIES · 移动版横评</div>
-  <h1>Find X9 · Pro · X9s Pro · Ultra<br/>官方配置 + 实时价格 + 国补价</h1>
-  <p>数据接入 OPPO 官网规格页。可勾选机型对比、用智能助手搜关键词直达对应配置。</p>
-</div>
-
-<!-- 机型对比选择 -->
-<div class="wrap">
-  <div class="model-bar">
-    <div class="lab">勾选要对比的机型（在配置表中过滤显示）</div>
-    <div class="pills">
-      <span class="pill on" data-model="x9" style="--mc:var(--c-x9)"><span class="dot"></span>Find X9</span>
-      <span class="pill on" data-model="pro" style="--mc:var(--c-pro)"><span class="dot"></span>X9 Pro</span>
-      <span class="pill on" data-model="spro" style="--mc:var(--c-spro)"><span class="dot"></span>X9s Pro</span>
-      <span class="pill on" data-model="ultra" style="--mc:var(--c-ultra)"><span class="dot"></span>X9 Ultra</span>
-    </div>
-  </div>
-
-  <!-- 智能助手 -->
-  <div class="assistant">
-    <div class="search">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="searchInput" type="text" placeholder="搜配置：屏幕 / 电池 / 相机 / 价格 / 快充…" />
-      <button class="go" id="searchGo">定位</button>
-    </div>
-    <div class="suggest">
-      <b data-q="屏幕">屏幕</b>
-      <b data-q="电池">电池续航</b>
-      <b data-q="相机">相机影像</b>
-      <b data-q="长焦">长焦变焦</b>
-      <b data-q="处理器">处理器</b>
-      <b data-q="快充">快充</b>
-      <b data-q="价格">价格国补</b>
-      <b data-q="防水">防水</b>
-      <b data-q="重量">重量厚度</b>
-    </div>
-    <div class="hint">输入关键词点「定位」，自动滚动并高亮对应配置行。</div>
-  </div>
-</div>
-
-<!-- 机型速览 + 官方价 + 国补价 -->
-<section id="overview">
-  <div class="wrap">
-    <div class="sec-h">
-      <div class="k">01 · 机型速览</div>
-      <h2>四款机型 · 官方价 & 国补到手价</h2>
-      <p>官方价为 OPPO 官网起售价；国补价按「单件 ≤6000 元、15% 补贴、封顶 500 元」估算，实际以结算页为准。</p>
-    </div>
-
-    <!-- Find X9 -->
-    <div class="pcard" style="--mc:var(--c-x9)">
-      <div class="head">
-        <div>
-          <div class="name">OPPO Find X9</div>
-          <div class="tag">标准版 · 轻薄水桶旗舰</div>
-          <div class="date">2025-10-16 发布 · 入网 PLJ110</div>
+    <div class="game-container" id="gameContainer">
+        <div class="header">
+            <h1>🐍 骆德翻</h1>
+            <div class="subtitle">贪腐人生模拟器 · 一生之路</div>
         </div>
-      </div>
-      <div class="chips">
-        <span class="chip">6.59" 直屏</span><span class="chip">203g / 7.99mm</span>
-        <span class="chip">天玑 9500</span><span class="chip">7025mAh</span>
-      </div>
-      <ul>
-        <li>50MP 主摄 + 50MP 超广角 + 50MP 长焦（3 倍）</li>
-        <li>1.15mm 极窄四等边直屏，单手友好</li>
-      </ul>
-      <div class="price-box">
-        <div class="price-row"><span class="lab">官方起售价</span><span class="v">¥4399</span></div>
-        <div class="price-row gov"><span class="lab">国补到手价（约）</span><span class="v">¥3899</span></div>
-        <div class="price-note">15% 补贴封顶 500 元，起售版本符合国补门槛。</div>
-      </div>
-      <button class="btn-official" data-model="x9">查看官方实时配置</button>
-    </div>
 
-    <!-- Find X9 Pro -->
-    <div class="pcard" style="--mc:var(--c-pro)">
-      <div class="head">
-        <div>
-          <div class="name">OPPO Find X9 Pro</div>
-          <div class="tag">影像进阶 · 哈苏长焦</div>
-          <div class="date">2025-10-16 发布 · 入网 PLG110</div>
+        <div class="stats-grid">
+            <div class="stat-card age-stat">
+                <div class="stat-label">年龄</div>
+                <div class="stat-value age-val" id="statAge">28</div>
+            </div>
+            <div class="stat-card position-stat">
+                <div class="stat-label">职位</div>
+                <div class="stat-value position-val" id="statPosition">科员</div>
+            </div>
+            <div class="stat-card money-stat">
+                <div class="stat-label">赃款（万）</div>
+                <div class="stat-value money-val" id="statMoney">0</div>
+            </div>
+            <div class="stat-card risk-stat">
+                <div class="stat-label">风险值</div>
+                <div class="stat-value risk-val" id="statRisk">0</div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar bar-risk" id="riskBar" style="width:0%"></div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="chips">
-        <span class="chip">6.78" 直屏</span><span class="chip">224g / 8.25mm</span>
-        <span class="chip">天玑 9500</span><span class="chip">7500mAh</span>
-      </div>
-      <ul>
-        <li>50MP 主摄（LYT-828）+ 2 亿像素哈苏长焦</li>
-        <li>瞬时三曝光，4K 120fps 杜比视界</li>
-      </ul>
-      <div class="price-box">
-        <div class="price-row"><span class="lab">官方起售价</span><span class="v">¥5299</span></div>
-        <div class="price-row gov"><span class="lab">国补到手价（约）</span><span class="v">¥4799</span></div>
-        <div class="price-note">起售版本符合 ≤6000 元门槛；百亿补贴叠加后京东实测可低至约 ¥4022（以页面为准）。</div>
-      </div>
-      <button class="btn-official" data-model="pro">查看官方实时配置</button>
-    </div>
 
-    <!-- Find X9s Pro -->
-    <div class="pcard" style="--mc:var(--c-spro)">
-      <div class="head">
-        <div>
-          <div class="name">OPPO Find X9s Pro</div>
-          <div class="tag">小屏双 2 亿 · 旅拍神器</div>
-          <div class="date">2026-04-21 发布</div>
+        <div class="current-stage">
+            <div class="stage-label">当前阶段</div>
+            <div class="stage-name" id="stageName">基层起步</div>
+            <div class="stage-desc" id="stageDesc">初入官场，谨慎行事</div>
         </div>
-      </div>
-      <div class="chips">
-        <span class="chip">6.32" 直屏</span><span class="chip">198g / 8.4mm</span>
-        <span class="chip">天玑 9500</span><span class="chip">144Hz</span>
-      </div>
-      <ul>
-        <li>哈苏 2 亿主摄 + 2 亿潜望长焦（黄金人像）</li>
-        <li>第二代丹霞色彩还原镜头，1nit 护眼屏</li>
-      </ul>
-      <div class="price-box">
-        <div class="price-row"><span class="lab">官方起售价</span><span class="v">¥5299</span></div>
-        <div class="price-row gov"><span class="lab">国补到手价（约）</span><span class="v">¥4799</span></div>
-        <div class="price-note">起售版本符合国补门槛；16+1TB 版（¥6999）超门槛不可享。</div>
-      </div>
-      <button class="btn-official" data-model="spro">查看官方实时配置</button>
-    </div>
 
-    <!-- Find X9 Ultra -->
-    <div class="pcard" style="--mc:var(--c-ultra)">
-      <div class="head">
-        <div>
-          <div class="name">OPPO Find X9 Ultra</div>
-          <div class="tag">顶级旗舰 · 口袋哈苏</div>
-          <div class="date">2026-04-21 发布 · 入网 PMA110</div>
+        <div class="actions-title">🀄 选择你的贪腐手段</div>
+        <div class="actions-grid" id="actionsGrid">
+            <!-- 动态生成 -->
         </div>
-      </div>
-      <div class="chips">
-        <span class="chip">6.82" 2K 直屏</span><span class="chip">235g / 8.65mm</span>
-        <span class="chip">骁龙 8 至尊版</span><span class="chip">100W</span>
-      </div>
-      <ul>
-        <li>双 2 亿大底 + 5000 万 10 倍潜望长焦</li>
-        <li>2K 144Hz，8K 视频，DXOMARK 170 分</li>
-      </ul>
-      <div class="price-box">
-        <div class="price-row"><span class="lab">官方起售价</span><span class="v">¥7499</span></div>
-        <div class="price-row gov"><span class="lab">国补</span><span class="v no">¥7499（不可享）</span></div>
-        <div class="price-note">起售价 7499 元超出 6000 元国补门槛；需靠平台券把实付压到 6000 内才可能领满 500 元。</div>
-      </div>
-      <button class="btn-official" data-model="ultra">查看官方实时配置</button>
-    </div>
-  </div>
-</section>
 
-<!-- 曲线对比 -->
-<section id="charts" style="background:#e8eef6;">
-  <div class="wrap">
-    <div class="sec-h">
-      <div class="k">02 · 曲线对比</div>
-      <h2>关键参数曲线图</h2>
-      <p>曲线越高代表该数值越大，便于一眼看出差距。</p>
-    </div>
-    <div class="legend">
-      <span><i style="background:var(--c-x9)"></i>X9</span>
-      <span><i style="background:var(--c-pro)"></i>X9 Pro</span>
-      <span><i style="background:var(--c-spro)"></i>X9s Pro</span>
-      <span><i style="background:var(--c-ultra)"></i>X9 Ultra</span>
+        <div class="actions-title">📜 生涯记录</div>
+        <div class="log-area" id="logArea">
+            <div class="log-entry log-info">🔰 骆德翻，男，28岁，进入某机关单位工作，月薪微薄。</div>
+            <div class="log-entry log-info">💭 面对金钱诱惑，他究竟会做出怎样的选择？</div>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn-secondary" id="btnReset">🔄 重新开始</button>
+        </div>
     </div>
 
-    <div class="chart-card">
-      <h3>多维综合（归一化 0–100）</h3>
-      <p class="desc">电池/屏幕/快充/刷新/主摄/变焦六维归一化。</p>
-      <div class="chart-wrap"><canvas id="cRadar"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <h3>电池容量 & 有线快充</h3>
-      <p class="desc">左轴 mAh，右轴 W。</p>
-      <div class="chart-wrap"><canvas id="cBat"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <h3>起售价 & 国补价（元）</h3>
-      <p class="desc">Ultra 起售超门槛，国补不可享。</p>
-      <div class="chart-wrap"><canvas id="cPrice"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <h3>屏幕尺寸 / 重量 / 光学变焦</h3>
-      <p class="desc">三维度同图对比。</p>
-      <div class="chart-wrap"><canvas id="cMulti"></canvas></div>
-    </div>
-  </div>
-</section>
-
-<!-- 详细配置表 -->
-<section id="spec">
-  <div class="wrap">
-    <div class="sec-h">
-      <div class="k">03 · 详细配置</div>
-      <h2>官方规格对比表</h2>
-      <p>数据接入 OPPO 官网规格页。点击机型标签可过滤列；用智能助手搜索关键词可定位行。</p>
+    <!-- 结局弹窗 -->
+    <div class="modal-overlay hidden" id="modalOverlay">
+        <div class="modal">
+            <div class="ending-icon" id="endingIcon">🏛️</div>
+            <h2 id="endingTitle">结局</h2>
+            <div class="final-stats" id="finalStats"></div>
+            <p id="endingDesc"></p>
+            <button class="btn-restart" id="btnRestartModal">🔄 再来一世</button>
+        </div>
     </div>
 
-    <div class="table-card">
-      <div class="table-scroll">
-        <table class="spec" id="specTable">
-          <thead>
-            <tr>
-              <th>规格</th>
-              <th class="col-x9" data-model="x9">Find X9<span class="role">标准版</span></th>
-              <th class="col-pro" data-model="pro">X9 Pro<span class="role">PLG110</span></th>
-              <th class="col-spro" data-model="spro">X9s Pro<span class="role">小屏双2亿</span></th>
-              <th class="col-ultra" data-model="ultra">X9 Ultra<span class="role">PMA110</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="grp" data-key="外观 尺寸 重量 厚度 手感 轻薄"><td colspan="5">基本与外观</td></tr>
-            <tr data-key="发布时间 上市"><td class="k">发布</td><td class="v">2025-10-16</td><td class="v">2025-10-16</td><td class="v">2026-04-21</td><td class="v">2026-04-21</td></tr>
-            <tr data-key="尺寸 厚度 mm"><td class="k">尺寸(mm)</td><td class="v">156.98×73.93×7.99</td><td class="v">161.26×76.46×8.25</td><td class="v">约150×71.72×8.4</td><td class="v">163.16×76.97×8.65</td></tr>
-            <tr data-key="重量 克 g 轻薄"><td class="k">重量</td><td class="v">约203g</td><td class="v">约224g</td><td class="v win">约198g（最轻）</td><td class="v">约235g</td></tr>
-            <tr data-key="防水 ip68 ip69 防尘"><td class="k">防水</td><td class="v">IP69</td><td class="v">IP69</td><td class="v">IP68/IP69</td><td class="v">IP69</td></tr>
-            <tr data-key="指纹 解锁 识别"><td class="k">指纹</td><td class="v">3D 超声波</td><td class="v">3D 超声波</td><td class="v">3D 超声波</td><td class="v">3D 超声波</td></tr>
+    <script>
+        (function() {
+            // ==================== 游戏状态 ====================
+            const state = {
+                age: 28,
+                position: '科员',
+                positionLevel: 0, // 0=科员,1=副科,2=正科,3=副处,4=正处,5=副厅,6=正厅
+                money: 0, // 万元
+                risk: 0, // 0-100
+                integrity: 50, // 清廉度 0-100，越低越腐败
+                stage: 'early',
+                alive: true,
+                imprisoned: false,
+                fled: false,
+                log: [],
+                gameOver: false,
+                currentActions: [],
+                actionCount: 0,
+            };
 
-            <tr class="grp" data-key="屏幕 显示 分辨率 刷新率 亮度 护眼 ppi"><td colspan="5">屏幕</td></tr>
-            <tr data-key="屏幕 尺寸 英寸"><td class="k">屏幕</td><td class="v">6.59"</td><td class="v">6.78"</td><td class="v">6.32"（最小）</td><td class="v win">6.82"（最大）</td></tr>
-            <tr data-key="分辨率 ppi 2k"><td class="k">分辨率</td><td class="v">FHD+ 2760×1256 / 460</td><td class="v">FHD+ 2772×1272 / 450</td><td class="v">FHD+ 2640×1216</td><td class="v win">QHD+ 3168×1440 / 510</td></tr>
-            <tr data-key="刷新率 hz"><td class="k">刷新率</td><td class="v">120Hz</td><td class="v">120Hz LTPO</td><td class="v win">144Hz</td><td class="v win">144Hz</td></tr>
-            <tr data-key="亮度 nit"><td class="k">亮度</td><td class="v">1800nit</td><td class="v">1800nit</td><td class="v">—</td><td class="v win">1800nit（峰3600）</td></tr>
+            // ==================== 职位体系 ====================
+            const positions = [
+                { name: '科员', level: 0, stage: 'early', desc: '基层小吏，无人关注' },
+                { name: '副科长', level: 1, stage: 'early', desc: '小有权力，开始接触项目' },
+                { name: '科长', level: 2, stage: 'mid', desc: '一科之主，审批权在手' },
+                { name: '副处长', level: 3, stage: 'mid', desc: '处室副职，分管一方' },
+                { name: '处长', level: 4, stage: 'mid', desc: '大权在握，项目资金过手' },
+                { name: '副厅长', level: 5, stage: 'late', desc: '厅级干部，位高权重' },
+                { name: '厅长', level: 6, stage: 'late', desc: '一方诸侯，呼风唤雨' },
+            ];
 
-            <tr class="grp" data-key="处理器 芯片 性能 cpu 天玑 骁龙 内存 存储"><td colspan="5">性能</td></tr>
-            <tr data-key="处理器 芯片 cpu 天玑 骁龙"><td class="k">处理器</td><td class="v">天玑9500</td><td class="v">天玑9500</td><td class="v">天玑9500</td><td class="v win">骁龙8至尊版(5代)</td></tr>
-            <tr data-key="主频 ghz 制程"><td class="k">主频</td><td class="v">4.21GHz</td><td class="v">4.21GHz</td><td class="v">4.21GHz</td><td class="v win">4.608GHz</td></tr>
-            <tr data-key="内存 闪存 存储 容量 lpddr ufs"><td class="k">内存/闪存</td><td class="v">LPDDR5X/UFS4.1</td><td class="v">LPDDR5X/UFS4.1</td><td class="v">LPDDR5X/UFS4.1</td><td class="v">LPDDR5X/UFS4.1</td></tr>
+            const stages = {
+                early: { name: '基层起步', desc: '初入官场，谨慎行事' },
+                mid: { name: '步步高升', desc: '权力渐长，诱惑增多' },
+                late: { name: '位高权重', desc: '大权在握，风险与利益并存' },
+            };
 
-            <tr class="grp" data-key="相机 影像 拍照 主摄 长焦 广角 变焦 像素"><td colspan="5">后置影像</td></tr>
-            <tr data-key="主摄 像素 光圈 传感器"><td class="k">主摄</td><td class="v">50MP f/1.6 LYT-808</td><td class="v">50MP f/1.5 LYT-828</td><td class="v win">2亿 f/1.6 HPE</td><td class="v win">2亿 f/1.5 LYT-901(1/1.12")</td></tr>
-            <tr data-key="超广角 广角"><td class="k">超广角</td><td class="v">50MP 120°</td><td class="v">50MP 120°</td><td class="v">50MP</td><td class="v">50MP 123°</td></tr>
-            <tr data-key="长焦 变焦 潜望"><td class="k">长焦</td><td class="v">50MP 3× LYT-600</td><td class="v">2亿 3× HP5哈苏</td><td class="v">2亿 2.8× HP5潜望</td><td class="v win">2亿 3× + 5000万 10×潜望</td></tr>
-            <tr data-key="光学变焦 数码变焦 倍数"><td class="k">变焦</td><td class="v">3倍光变/120倍数</td><td class="v">3倍光变/120倍数</td><td class="v">2.8倍光变</td><td class="v win">3倍+10倍光变/120倍数</td></tr>
-            <tr data-key="视频 8k 4k 杜比"><td class="k">视频</td><td class="v">4K 120fps</td><td class="v">4K 120fps 杜比</td><td class="v">8K电影级</td><td class="v win">8K 30fps + 4K120杜比</td></tr>
+            // ==================== 贪腐行为定义 ====================
+            const actionsByStage = {
+                early: [
+                    { id: 'bribe_small', name: '🎁 收受小额礼品', desc: '接受一条烟、两瓶酒，价值不高但积少成多。',
+                        effects: { money: [2, 8], risk: [3, 8], integrity: -2 },
+                        logGood: '收下礼品，心里有些忐忑，但似乎没人注意。',
+                        logBad: '被人看到收了礼品，虽然金额不大，但已引起注意！', minRisk: 0, maxRisk: 70 },
+                    { id: 'fake_reimburse', name: '📄 虚报差旅费', desc: '出差报销时多报一些费用，小打小闹。',
+                        effects: { money: [1, 5], risk: [2, 6], integrity: -1 },
+                        logGood: '虚报了一点差旅费，神不知鬼不觉。',
+                        logBad: '财务审计发现了异常，被记了一笔！', minRisk: 0, maxRisk: 65 },
+                    { id: 'eat_drink', name: '🍷 公款吃喝', desc: '借工作名义聚餐，反正不是自己掏钱。',
+                        effects: { money: [0.5, 3], risk: [1, 4], integrity: -1 },
+                        logGood: '又蹭了一顿好饭，何乐而不为？',
+                        logBad: '有人举报公款吃喝，纪检开始关注！', minRisk: 0, maxRisk: 60 },
+                    { id: 'work_promotion', name: '📈 踏实工作（升职）', desc: '暂时不贪，积累政绩和人脉，为将来铺路。',
+                        effects: { money: 0, risk: -5, integrity: 5 },
+                        logGood: '努力工作，领导看在眼里，升职有望！',
+                        logBad: '错过了一些"机会"，但至少睡得安稳。', minRisk: 0, maxRisk: 100,
+                    isPromotion: true },
+                ],
+                mid: [
+                    { id: 'bribe_medium', name: '💰 收受工程回扣', desc: '工程项目招标中收取回扣，金额可观。',
+                        effects: { money: [10, 30], risk: [8, 18], integrity: -5 },
+                        logGood: '一笔回扣到手，数目不小。',
+                        logBad: '工程商被抓，供出了你！风险骤增！', minRisk: 0, maxRisk: 75 },
+                    { id: 'embezzle_fund', name: '🏦 挪用公款', desc: '暂时借用公款去投资，赚了再还回去。',
+                        effects: { money: [8, 25], risk: [10, 20], integrity: -6 },
+                        logGood: '挪用公款赚了一笔，及时归还，没人发现。',
+                        logBad: '投资失败，公款无法归还，麻烦大了！', minRisk: 0, maxRisk: 70 },
+                    { id: 'sell_position', name: '🎯 卖官鬻爵', desc: '安排人员岗位，收取"感谢费"。',
+                        effects: { money: [5, 15], risk: [6, 15], integrity: -4 },
+                        logGood: '安排了个岗位，收到一笔"心意"。',
+                        logBad: '被安排的人出了事，牵连到你！', minRisk: 0, maxRisk: 72 },
+                    { id: 'work_promotion', name: '📈 积极表现（升职）', desc: '暂时收敛，表现突出，争取更高职位。',
+                        effects: { money: 0, risk: -8, integrity: 6 },
+                        logGood: '政绩突出，组织部门开始考察你！',
+                        logBad: '升职路上竞争者众多，还需努力。', minRisk: 0, maxRisk: 100,
+                    isPromotion: true },
+                    { id: 'bribe_big', name: '💎 收受巨额贿赂', desc: '一次性收下巨额财物，胆子越来越大。',
+                        effects: { money: [20, 50], risk: [15, 28], integrity: -8 },
+                        logGood: '一笔巨款到手，贪婪之心膨胀。',
+                        logBad: '被行贿人举报，证据确凿！', minRisk: 0, maxRisk: 65 },
+                ],
+                late: [
+                    { id: 'bribe_huge', name: '🏆 权钱交易', desc: '利用职务之便，为他人谋取巨大利益，收取天价报酬。',
+                        effects: { money: [30, 80], risk: [15, 30], integrity: -10 },
+                        logGood: '一笔天价"交易"达成，财富暴涨。',
+                        logBad: '上级纪委介入调查，情况危急！', minRisk: 0, maxRisk: 70 },
+                    { id: 'embezzle_massive', name: '🏢 侵吞国有资产', desc: '通过复杂操作，将国有资产据为己有。',
+                        effects: { money: [25, 70], risk: [18, 35], integrity: -10 },
+                        logGood: '国有资产被神不知鬼不觉地转移。',
+                        logBad: '审计发现重大漏洞，矛头直指你！', minRisk: 0, maxRisk: 65 },
+                    { id: 'protect_illegal', name: '🛡️ 充当保护伞', desc: '为黑恶势力提供庇护，收取保护费。',
+                        effects: { money: [15, 40], risk: [12, 25], integrity: -8 },
+                        logGood: '保护费到账，黑白通吃。',
+                        logBad: '扫黑除恶专项行动，你被盯上了！', minRisk: 0, maxRisk: 68 },
+                    { id: 'work_promotion', name: '📈 政绩工程（升迁）', desc: '搞面子工程，虽然花钱但能升迁。',
+                        effects: { money: -5, risk: -10, integrity: 3 },
+                        logGood: '政绩工程见效，上级赏识！',
+                        logBad: '工程被曝质量问题，声誉受损。', minRisk: 0, maxRisk: 100, isPromotion: true },
+                    { id: 'flee_attempt', name: '✈️ 转移资产准备外逃', desc: '将资产转移到海外，准备随时跑路。',
+                        effects: { money: -10, risk: 5, integrity: -5 },
+                        logGood: '资产已转移到海外账户，后路有了。',
+                        logBad: '资产转移被监控，惊动了有关部门！', minRisk: 0, maxRisk: 60 },
+                ],
+            };
 
-            <tr class="grp" data-key="电池 续航 充电 快充 无线"><td colspan="5">电池与快充</td></tr>
-            <tr data-key="电池 容量 续航 mah"><td class="k">电池</td><td class="v">7025mAh</td><td class="v win">7500mAh（最大）</td><td class="v">7025mAh</td><td class="v">7050mAh</td></tr>
-            <tr data-key="快充 有线 充电 w"><td class="k">有线快充</td><td class="v">80W</td><td class="v">80W</td><td class="v">80W</td><td class="v win">100W（最快）</td></tr>
-            <tr data-key="无线充电 无线快充"><td class="k">无线快充</td><td class="v">50W</td><td class="v">50W</td><td class="v">50W</td><td class="v">50W</td></tr>
+            // ==================== 随机事件 ====================
+            const randomEvents = [
+                { id: 'audit', name: '📋 审计风暴', desc: '上级突然开展审计，所有账目被翻查。', apply: (s) => { if (s.money > 20) { s
+                            .risk += 15; addLog('审计发现了一些异常，风险上升！', 'log-warn'); } else { addLog(
+                            '审计未发现大问题，虚惊一场。', 'log-good'); } }, weight: 3 },
+                { id: 'whistleblower', name: '📢 群众举报', desc: '有人向纪委举报你的贪腐行为。', apply: (s) => { if (s.integrity < 35) { s
+                            .risk += 20;
+                        addLog('举报内容翔实，纪委开始调查！', 'log-bad'); } else { addLog('举报内容模糊，暂时未引起重视。', 'log-info'); } },
+                    weight: 3 },
+                { id: 'promotion_chance', name: '🌟 升迁机会', desc: '上级有职位空缺，你有机会晋升。', apply: (s) => { if (s.integrity > 40) { s
+                            .risk -= 10;
+                        addLog('你表现良好，获得升迁机会！', 'log-good');
+                        promoteIfPossible(s); } else { addLog('虽然有机会，但你的作风问题被人议论。', 'log-warn'); } },
+                    weight: 2 },
+                { id: 'colleague_arrested', name: '🚨 同僚落马', desc: '你的同事因贪腐被纪委带走。', apply: (s) => { if (s.integrity < 30) { s
+                            .risk += 15;
+                        addLog('同僚落马，你坐立不安，风险大增！', 'log-bad'); } else { s.risk -= 5;
+                        addLog('同僚落马，你与他的关系并不密切。', 'log-info'); } }, weight: 2 },
+                { id: 'lucky_escape', name: '🍀 侥幸过关', desc: '一次检查中，你的问题差点被发现。', apply: (s) => { if (s.risk > 50) { s.risk -=
+                            10;
+                        addLog('运气不错，暂时躲过一劫。', 'log-good'); } else { addLog('检查平淡无奇，没有异常。', 'log-info'); } },
+                    weight: 3 },
+                { id: 'family_warning', name: '👨‍👩‍👦 家人劝诫', desc: '家人发现你行为异常，劝你悬崖勒马。', apply: (s) => { s.integrity += 5; s
+                        .risk -= 5;
+                    addLog('家人的话让你有所触动，稍微收敛。', 'log-info'); }, weight: 2 },
+                { id: 'media_expose', name: '📰 媒体曝光', desc: '有媒体开始关注你经手的项目。', apply: (s) => { if (s.money > 50) { s.risk +=
+                            18;
+                        addLog('媒体曝光了项目问题，舆论压力巨大！', 'log-bad'); } else { addLog('媒体报道未涉及你个人。', 'log-info'); } },
+                    weight: 2 },
+                { id: 'bonus', name: '🎉 意外之财', desc: '投资获得了意外收益（非贪腐）。', apply: (s) => { s.money += 5;
+                        addLog('投资小赚一笔，合法收入。', 'log-good'); }, weight: 2 },
+            ];
 
-            <tr class="grp" data-key="价格 多少钱 国补 补贴 便宜 售价"><td colspan="5">价格与国补</td></tr>
-            <tr data-key="起售价 官方价 价格"><td class="k">官方起售</td><td class="v">¥4399</td><td class="v">¥5299</td><td class="v">¥5299</td><td class="v">¥7499</td></tr>
-            <tr data-key="国补 补贴 到手价"><td class="k">国补到手(约)</td><td class="v win">¥3899</td><td class="v win">¥4799</td><td class="v win">¥4799</td><td class="v" style="color:var(--c-ultra)">不可享</td></tr>
-            <tr data-key="顶配价"><td class="k">顶配(16+1T)</td><td class="v">¥5799</td><td class="v">¥6699</td><td class="v">¥6999</td><td class="v">¥9299</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+            // ==================== 工具函数 ====================
+            function rand(min, max) {
+                return Math.random() * (max - min) + min;
+            }
 
-    <p class="src">
-      数据来源：OPPO 官网规格页（接入展示）。
-      <a href="https://www.oppo.com/cn/smartphones/series-find-x/find-x9/specs/" target="_blank" rel="noopener">X9 官网</a> ·
-      <a href="https://www.oppo.com/cn/smartphones/series-find-x/find-x9-pro/specs/" target="_blank" rel="noopener">X9 Pro 官网</a> ·
-      <a href="https://www.oppo.com/cn/smartphones/series-find-x/find-x9s-pro/" target="_blank" rel="noopener">X9s Pro 官网</a> ·
-      <a href="https://www.oppo.com/cn/smartphones/series-find-x/find-x9-ultra/specs/" target="_blank" rel="noopener">X9 Ultra 官网</a>。
-      国补规则：单件≤6000元、15%补贴、封顶500元；Ultra 起售超门槛不可享。价格实时变动，以订单结算页为准。
-    </p>
-  </div>
-</section>
+            function randInt(min, max) {
+                return Math.floor(rand(min, max + 1));
+            }
 
-<!-- 底部导航 -->
-<div class="tabbar">
-  <a href="#overview" class="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>速览</a>
-  <a href="#charts"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m7 14 3-4 3 3 5-6"/></svg>曲线</a>
-  <a href="#spec"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>配置</a>
-</div>
+            function clamp(val, min, max) {
+                return Math.max(min, Math.min(max, val));
+            }
 
-<!-- 官方配置模态框 -->
-<div class="modal-mask" id="modalMask">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="t" id="modalTitle">官方实时配置</div>
-      <button class="x" id="modalClose">×</button>
-    </div>
-    <div class="modal-body">
-      <iframe id="modalFrame" src="" referrerpolicy="no-referrer" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
-      <div class="modal-fallback" id="modalFallback">
-        <div class="ic">🔗</div>
-        <div class="t">官方页面无法在站内嵌入显示</div>
-        <div class="d">OPPO 官网启用了防嵌入安全策略（X-Frame-Options），禁止被其他网页 iframe 加载。这是浏览器安全限制，无法绕过。请点击下方按钮在新窗口打开官方实时配置页。</div>
-        <a class="open" id="modalOpen" href="#" target="_blank" rel="noopener">在新窗口打开官网配置</a>
-      </div>
-    </div>
-  </div>
-</div>
+            function addLog(text, cls = 'log-info') {
+                state.log.push({ text, cls });
+                const logArea = document.getElementById('logArea');
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${cls}`;
+                entry.textContent = text;
+                logArea.appendChild(entry);
+                logArea.scrollTop = logArea.scrollHeight;
+                // 限制日志条数
+                while (logArea.children.length > 60) {
+                    logArea.removeChild(logArea.firstChild);
+                }
+            }
 
-<script>
-  const OFFICIAL = {
-    x9:    { name:'OPPO Find X9',        url:'https://www.oppo.com/cn/smartphones/series-find-x/find-x9/specs/' },
-    pro:   { name:'OPPO Find X9 Pro',    url:'https://www.oppo.com/cn/smartphones/series-find-x/find-x9-pro/specs/' },
-    spro:  { name:'OPPO Find X9s Pro',   url:'https://www.oppo.com/cn/smartphones/series-find-x/find-x9s-pro/' },
-    ultra: { name:'OPPO Find X9 Ultra',  url:'https://www.oppo.com/cn/smartphones/series-find-x/find-x9-ultra/specs/' }
-  };
+            function getPositionByLevel(level) {
+                const idx = clamp(level, 0, positions.length - 1);
+                return positions[idx];
+            }
 
-  /* ===== 官方配置模态框 ===== */
-  const mask = document.getElementById('modalMask');
-  const frame = document.getElementById('modalFrame');
-  const fallback = document.getElementById('modalFallback');
-  const openLink = document.getElementById('modalOpen');
-  const titleEl = document.getElementById('modalTitle');
-  let fallbackTimer;
+            function getStageByLevel(level) {
+                if (level <= 1) return 'early';
+                if (level <= 4) return 'mid';
+                return 'late';
+            }
 
-  document.querySelectorAll('.btn-official').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const m = btn.dataset.model;
-      const info = OFFICIAL[m];
-      titleEl.textContent = info.name + ' · 官方实时配置';
-      openLink.href = info.url;
-      // 尝试 iframe 嵌入
-      fallback.style.display = 'none';
-      frame.style.display = 'block';
-      frame.src = info.url;
-      mask.classList.add('show');
-      // 4 秒后若 iframe 仍无内容（被拦截），显示兜底
-      clearTimeout(fallbackTimer);
-      fallbackTimer = setTimeout(()=>{ fallback.style.display = 'flex'; }, 4000);
-    });
-  });
-  // 尝试检测 iframe 加载失败
-  frame.addEventListener('error', ()=>{ fallback.style.display='flex'; });
-  document.getElementById('modalClose').addEventListener('click', ()=>{
-    mask.classList.remove('show'); frame.src = 'about:blank';
-  });
-  mask.addEventListener('click', e=>{ if(e.target===mask){ mask.classList.remove('show'); frame.src='about:blank'; } });
+            function promoteIfPossible(s) {
+                if (s.positionLevel < positions.length - 1) {
+                    s.positionLevel++;
+                    const pos = getPositionByLevel(s.positionLevel);
+                    s.position = pos.name;
+                    s.stage = pos.stage;
+                    addLog(`🚀 晋升为【${pos.name}】！`, 'log-good');
+                    updateUI();
+                    return true;
+                }
+                return false;
+            }
 
-  /* ===== 机型对比：勾选过滤列 ===== */
-  const pills = document.querySelectorAll('.model-bar .pill');
-  const specTable = document.getElementById('specTable');
-  function applyFilter(){
-    const active = new Set();
-    pills.forEach(p=>{ if(p.classList.contains('on')) active.add(p.dataset.model); });
-    // 表头列
-    specTable.querySelectorAll('thead th[data-model]').forEach(th=>{
-      th.style.display = active.has(th.dataset.model) ? '' : 'none';
-    });
-    // 数据行：第1列保留(规格名)，后续4列按机型
-    specTable.querySelectorAll('tbody tr').forEach(tr=>{
-      const tds = tr.querySelectorAll('td');
-      if(tds.length <= 1) return; // 分组行 colspan 跳过
-      // td[0]=规格名(保留)，td[1..4]对应 x9/pro/spro/ultra
-      const models = ['x9','pro','spro','ultra'];
-      for(let i=0;i<4;i++){
-        if(tds[i+1]) tds[i+1].style.display = active.has(models[i]) ? '' : 'none';
-      }
-    });
-  }
-  pills.forEach(p=>{
-    p.addEventListener('click', ()=>{
-      p.classList.toggle('on');
-      applyFilter();
-    });
-  });
+            function updateUI() {
+                document.getElementById('statAge').textContent = state.age;
+                document.getElementById('statPosition').textContent = state.position;
+                document.getElementById('statMoney').textContent = state.money.toFixed(1);
+                document.getElementById('statRisk').textContent = Math.round(state.risk);
+                document.getElementById('riskBar').style.width = clamp(state.risk, 0, 100) + '%';
 
-  /* ===== 智能助手：关键词搜索定位 ===== */
-  const input = document.getElementById('searchInput');
-  const goBtn = document.getElementById('searchGo');
-  function doSearch(){
-    const q = input.value.trim().toLowerCase();
-    if(!q){ return; }
-    const rows = specTable.querySelectorAll('tbody tr');
-    let hit = null;
-    for(const tr of rows){
-      const key = (tr.dataset.key||'').toLowerCase();
-      const text = tr.textContent.toLowerCase();
-      if(key.includes(q) || text.includes(q)){ hit = tr; break; }
-    }
-    if(hit){
-      // 清除旧高亮
-      specTable.querySelectorAll('tr.highlight').forEach(r=>r.classList.remove('highlight'));
-      hit.classList.add('highlight');
-      hit.scrollIntoView({behavior:'smooth', block:'center'});
-      setTimeout(()=>hit.classList.remove('highlight'), 4000);
-    } else {
-      alert('未找到「'+input.value+'」相关配置，试试：屏幕 / 电池 / 相机 / 长焦 / 价格 / 快充 / 处理器');
-    }
-  }
-  goBtn.addEventListener('click', doSearch);
-  input.addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(); });
-  document.querySelectorAll('.assistant .suggest b').forEach(b=>{
-    b.addEventListener('click', ()=>{ input.value = b.dataset.q; doSearch(); });
-  });
+                const stageInfo = stages[state.stage];
+                document.getElementById('stageName').textContent = stageInfo.name;
+                document.getElementById('stageDesc').textContent = stageInfo.desc;
+            }
 
-  /* ===== Chart.js 曲线图 ===== */
-  const labels = ['Find X9','X9 Pro','X9s Pro','X9 Ultra'];
-  const cc = ['#1d5fd6','#1a7a37','#b45309','#c1322f'];
-  const ds = (data,color,label,extra={})=>({
-    label, data, borderColor:color, backgroundColor:color+'22',
-    pointBackgroundColor:color, pointRadius:4, pointHoverRadius:6,
-    tension:.4, fill:false, borderWidth:3, ...extra
-  });
-  Chart.defaults.font.family = '"PingFang SC","Microsoft YaHei",Arial,sans-serif';
-  Chart.defaults.color = '#475569';
-  const norm = (v,max)=>Math.round(v/max*100);
+            function getAvailableActions() {
+                const stage = state.stage;
+                const actions = actionsByStage[stage] || actionsByStage.early;
+                // 根据风险过滤
+                let available = actions.filter(a => state.risk <= (a.maxRisk || 100));
+                if (available.length === 0) {
+                    // 如果风险太高，只保留风险较低或升职选项
+                    available = actions.filter(a => a.isPromotion || (a.effects.risk && a.effects.risk[0] <= 10));
+                }
+                return available;
+            }
 
-  new Chart(document.getElementById('cRadar'),{type:'radar',data:{
-    labels:['电池','屏幕','快充','刷新','主摄','变焦'],
-    datasets:[
-      ds([norm(7025,7500),norm(6.59,6.82),norm(80,100),norm(120,144),norm(50,200),norm(3,10)],cc[0],'X9'),
-      ds([norm(7500,7500),norm(6.78,6.82),norm(80,100),norm(120,144),norm(50,200),norm(3,10)],cc[1],'X9 Pro'),
-      ds([norm(7025,7500),norm(6.32,6.82),norm(80,100),norm(144,144),norm(200,200),norm(2.8,10)],cc[2],'X9s Pro'),
-      ds([norm(7050,7500),norm(6.82,6.82),norm(100,100),norm(144,144),norm(200,200),norm(10,10)],cc[3],'X9 Ultra')
-    ]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{suggestedMin:0,suggestedMax:100,ticks:{stepSize:25},pointLabels:{font:{size:11}}}},plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}}}});
+            function renderActions() {
+                const grid = document.getElementById('actionsGrid');
+                grid.innerHTML = '';
+                const actions = getAvailableActions();
+                state.currentActions = actions;
 
-  new Chart(document.getElementById('cBat'),{type:'line',data:{labels,datasets:[
-    ds([7025,7500,7025,7050],cc[0],'电池(mAh)',{yAxisID:'y'}),
-    ds([80,80,80,100],'#c1322f','快充(W)',{yAxisID:'y1',borderDash:[6,4]})
-  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-    scales:{y:{position:'left',title:{display:true,text:'mAh',font:{size:11}},min:6500,max:8000},
-            y1:{position:'right',title:{display:true,text:'W',font:{size:11}},min:60,max:120,grid:{drawOnChartArea:false}}},
-    plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}}}});
+                actions.forEach(action => {
+                    const btn = document.createElement('button');
+                    btn.className = 'action-btn';
+                    btn.innerHTML = `
+                <div class="action-name">${action.name}</div>
+                <div class="action-desc">${action.desc}</div>
+                <div class="action-effects">
+                  ${action.effects.money ? `<span class="effect-tag effect-money">💰 ${action.effects.money[0]}-${action.effects.money[1]}万</span>` : ''}
+                  ${action.effects.risk ? `<span class="effect-tag effect-risk">⚠️ 风险 ${action.effects.risk[0]}-${action.effects.risk[1]}</span>` : ''}
+                  ${action.effects.integrity ? `<span class="effect-tag effect-integrity">🧭 清廉 ${action.effects.integrity > 0 ? '+' : ''}${action.effects.integrity}</span>` : ''}
+                </div>
+              `;
+                    btn.addEventListener('click', () => performAction(action));
+                    grid.appendChild(btn);
+                });
+            }
 
-  new Chart(document.getElementById('cPrice'),{type:'line',data:{labels,datasets:[
-    ds([4399,5299,5299,7499],'#7c3aed','官方起售价',{yAxisID:'y'}),
-    ds([3899,4799,4799,7499],'#1a7a37','国补到手价(约)',{yAxisID:'y',borderDash:[6,4]})
-  ]},options:{responsive:true,maintainAspectRatio:false,
-    scales:{y:{title:{display:true,text:'元',font:{size:11}},min:3500,max:8000}},
-    plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}}}});
+            function performAction(action) {
+                if (state.gameOver) return;
+                state.actionCount++;
 
-  new Chart(document.getElementById('cMulti'),{type:'line',data:{labels,datasets:[
-    ds([6.59,6.78,6.32,6.82],cc[1],'屏幕(英寸)',{yAxisID:'y'}),
-    ds([203,224,198,236],cc[3],'重量(g)',{yAxisID:'y1',borderDash:[5,3]}),
-    ds([3,3,2.8,10],'#c1322f','光学变焦(倍)',{yAxisID:'y1',borderDash:[2,2]})
-  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-    scales:{y:{position:'left',title:{display:true,text:'英寸',font:{size:11}},min:6,max:7.2},
-            y1:{position:'right',min:0,max:250,grid:{drawOnChartArea:false}}},
-    plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}}}});
-</script>
+                // 年龄增长
+                state.age += randInt(1, 3);
+                if (state.age > 70) state.age = 70;
+
+                // 应用效果
+                if (action.effects.money) {
+                    const val = rand(action.effects.money[0], action.effects.money[1]);
+                    state.money += val;
+                    if (val > 0) addLog(`+${val.toFixed(1)}万 赃款入账。`, 'log-info');
+                    if (val < 0) addLog(`支出 ${Math.abs(val).toFixed(1)}万。`, 'log-info');
+                }
+                if (action.effects.risk) {
+                    const val = rand(action.effects.risk[0], action.effects.risk[1]);
+                    state.risk += val;
+                    if (val > 0) addLog(`⚠️ 风险上升 ${val.toFixed(1)}。`, 'log-warn');
+                    if (val < 0) addLog(`✅ 风险下降 ${Math.abs(val).toFixed(1)}。`, 'log-good');
+                }
+                if (action.effects.integrity) {
+                    state.integrity = clamp(state.integrity + action.effects.integrity, 0, 100);
+                }
+
+                state.risk = clamp(state.risk, 0, 100);
+                state.money = Math.max(0, state.money);
+                state.integrity = clamp(state.integrity, 0, 100);
+
+                // 升职检查
+                if (action.isPromotion) {
+                    if (Math.random() < 0.55) {
+                        promoteIfPossible(state);
+                    } else {
+                        addLog('升迁暂时无望，继续努力。', 'log-warn');
+                    }
+                }
+
+                // 记录日志
+                if (action.logGood && Math.random() < 0.65) {
+                    addLog(action.logGood, 'log-good');
+                } else if (action.logBad) {
+                    addLog(action.logBad, 'log-bad');
+                }
+
+                // 随机事件
+                if (Math.random() < 0.35 && state.actionCount > 1) {
+                    triggerRandomEvent();
+                }
+
+                // 检查是否被抓
+                checkArrest();
+
+                // 检查结局
+                if (!state.gameOver) {
+                    checkEndings();
+                }
+
+                updateUI();
+
+                // 重新渲染动作
+                if (!state.gameOver) {
+                    renderActions();
+                }
+            }
+
+            function triggerRandomEvent() {
+                const totalWeight = randomEvents.reduce((sum, e) => sum + e.weight, 0);
+                let roll = Math.random() * totalWeight;
+                for (const ev of randomEvents) {
+                    roll -= ev.weight;
+                    if (roll <= 0) {
+                        addLog(`【事件】${ev.name}：${ev.desc}`, 'log-warn');
+                        ev.apply(state);
+                        break;
+                    }
+                }
+                updateUI();
+            }
+
+            function checkArrest() {
+                const arrestChance = state.risk / 100;
+                const roll = Math.random();
+                if (roll < arrestChance * 0.35 && state.risk > 40) {
+                    // 被抓
+                    state.gameOver = true;
+                    state.imprisoned = true;
+                    showEnding('imprisoned');
+                } else if (state.risk >= 100) {
+                    state.gameOver = true;
+                    state.imprisoned = true;
+                    showEnding('imprisoned');
+                } else if (state.risk > 70 && Math.random() < 0.1) {
+                    // 严重警告
+                    addLog('🚨 纪委已对你展开初步调查，情况危急！', 'log-bad');
+                    state.risk += 5;
+                }
+            }
+
+            function checkEndings() {
+                if (state.gameOver) return;
+                if (state.age >= 60 && state.risk < 30) {
+                    state.gameOver = true;
+                    showEnding('retired_safe');
+                    return;
+                }
+                if (state.age >= 65) {
+                    if (state.risk > 50) {
+                        state.gameOver = true;
+                        showEnding('retired_risky');
+                    } else {
+                        state.gameOver = true;
+                        showEnding('retired_safe');
+                    }
+                    return;
+                }
+                if (state.money >= 500 && state.risk > 60) {
+                    state.gameOver = true;
+                    showEnding('fled');
+                    return;
+                }
+                if (state.money >= 1000) {
+                    state.gameOver = true;
+                    showEnding('mega_corrupt');
+                    return;
+                }
+                if (state.integrity <= 10 && state.risk > 50) {
+                    state.gameOver = true;
+                    showEnding('exposed');
+                    return;
+                }
+            }
+
+            function showEnding(type) {
+                const overlay = document.getElementById('modalOverlay');
+                overlay.classList.remove('hidden');
+
+                const iconEl = document.getElementById('endingIcon');
+                const titleEl = document.getElementById('endingTitle');
+                const statsEl = document.getElementById('finalStats');
+                const descEl = document.getElementById('endingDesc');
+
+                const endings = {
+                    imprisoned: {
+                        icon: '⛓️',
+                        title: '锒铛入狱',
+                        desc: '纪委掌握了确凿证据，你被带走调查。最终因贪污受贿罪被判处有期徒刑。铁窗之内，你回顾一生，悔之晚矣。'
+                    },
+                    retired_safe: {
+                        icon: '🏖️',
+                        title: '平稳着陆',
+                        desc: '你在官场摸爬滚打一生，虽有小贪但未触及红线，最终安全退休。那些不义之财，成了你晚年的"保障"。'
+                    },
+                    retired_risky: {
+                        icon: '😰',
+                        title: '退休前的噩梦',
+                        desc: '即将退休之际，纪委突然介入调查你早年间的贪腐问题。晚节不保，你的人生以悲剧收场。'
+                    },
+                    fled: {
+                        icon: '✈️',
+                        title: '卷款外逃',
+                        desc: '你察觉到风声不对，带着巨额赃款潜逃海外。虽然暂时逃脱了法律制裁，但余生都在恐惧和悔恨中度过。'
+                    },
+                    mega_corrupt: {
+                        icon: '👑',
+                        title: '巨贪之王',
+                        desc: '你贪腐金额超过千万，成为震惊全国的大案。虽然享受了极致的奢华，但最终难逃法网。'
+                    },
+                    exposed: {
+                        icon: '📸',
+                        title: '东窗事发',
+                        desc: '你的贪腐行为被全面曝光，身败名裂。不仅失去了所有，还连累了家人。'
+                    },
+                };
+
+                const ending = endings[type] || endings.imprisoned;
+                iconEl.textContent = ending.icon;
+                titleEl.textContent = ending.title;
+                descEl.textContent = ending.desc;
+
+                statsEl.innerHTML = `
+              <div><span>最终年龄</span><span>${state.age} 岁</span></div>
+              <div><span>最终职位</span><span>${state.position}</span></div>
+              <div><span>贪污金额</span><span>${state.money.toFixed(1)} 万元</span></div>
+              <div><span>风险值</span><span>${Math.round(state.risk)} / 100</span></div>
+              <div><span>清廉度</span><span>${Math.round(state.integrity)} / 100</span></div>
+              <div><span>人生选择次数</span><span>${state.actionCount} 次</span></div>
+            `;
+            }
+
+            function resetGame() {
+                state.age = 28;
+                state.position = '科员';
+                state.positionLevel = 0;
+                state.money = 0;
+                state.risk = 0;
+                state.integrity = 50;
+                state.stage = 'early';
+                state.alive = true;
+                state.imprisoned = false;
+                state.fled = false;
+                state.gameOver = false;
+                state.actionCount = 0;
+                state.log = [];
+                state.currentActions = [];
+
+                document.getElementById('logArea').innerHTML = `
+              <div class="log-entry log-info">🔰 骆德翻，男，28岁，进入某机关单位工作，月薪微薄。</div>
+              <div class="log-entry log-info">💭 面对金钱诱惑，他究竟会做出怎样的选择？</div>
+            `;
+                document.getElementById('modalOverlay').classList.add('hidden');
+                updateUI();
+                renderActions();
+            }
+
+            // ==================== 初始化 ====================
+            function init() {
+                updateUI();
+                renderActions();
+                document.getElementById('btnReset').addEventListener('click', resetGame);
+                document.getElementById('btnRestartModal').addEventListener('click', resetGame);
+            }
+
+            // 页面加载完成后初始化
+            init();
+
+            // 暴露重置到全局（方便调试）
+            window.resetGame = resetGame;
+        })();
+    </script>
 </body>
 </html>
