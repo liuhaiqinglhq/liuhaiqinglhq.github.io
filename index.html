@@ -2,526 +2,484 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>2亿像素 · 多帧合成相机 v2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#000000">
+<title>多帧超分辨率相机 v3</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body { width:100%; height:100%; background:#000; color:#fff; font-family:-apple-system,"PingFang SC","HarmonyOS Sans",sans-serif; overflow:hidden; }
-  #app { position:fixed; inset:0; display:flex; flex-direction:column; }
-
-  #stage { position:relative; flex:1; overflow:hidden; background:#000; }
-  #videoBox { position:absolute; left:50%; top:50%; width:100%; height:100%; transform:translate(-50%,-50%); }
-  #video { width:100%; height:100%; object-fit:cover; transform-origin:center; }
-  #grid { position:absolute; inset:0; pointer-events:none; opacity:.35;
-    background:
-      linear-gradient(to right, transparent 33.3%, rgba(255,255,255,.5) 33.3%, rgba(255,255,255,.5) 33.5%, transparent 33.5%, transparent 66.6%, rgba(255,255,255,.5) 66.6%, rgba(255,255,255,.5) 66.8%, transparent 66.8%),
-      linear-gradient(to bottom, transparent 33.3%, rgba(255,255,255,.5) 33.3%, rgba(255,255,255,.5) 33.5%, transparent 33.5%, transparent 66.6%, rgba(255,255,255,.5) 66.6%, rgba(255,255,255,.5) 66.8%, transparent 66.8%); }
-  #focusBox { position:absolute; width:72px; height:72px; border:2px solid #ffd400; border-radius:8px; display:none; pointer-events:none; box-shadow:0 0 12px rgba(255,212,0,.6); z-index:5; }
-
-  #hud { position:absolute; top:calc(env(safe-area-inset-top,0px) + 10px); left:0; right:0; display:flex; justify-content:space-between; padding:0 14px; pointer-events:none; z-index:6; }
-  .hud-chip { pointer-events:auto; background:rgba(0,0,0,.55); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,.15); border-radius:10px; padding:6px 12px; font-size:12px; line-height:1.5; }
-  #resChip { color:#ffd400; font-weight:600; }
-  #rotBtn { cursor:pointer; color:#fff; }
-
-  #modeBar { position:absolute; top:calc(env(safe-area-inset-top,0px) + 10px); left:50%; transform:translateX(-50%); display:flex; background:rgba(0,0,0,.55); backdrop-filter:blur(10px); border-radius:999px; padding:4px; border:1px solid rgba(255,255,255,.15); z-index:6; }
-  .mode-btn { border:none; background:transparent; color:#bbb; font-size:13px; font-weight:600; padding:8px 18px; border-radius:999px; cursor:pointer; transition:all .2s; white-space:nowrap; }
-  .mode-btn.active { background:#ffd400; color:#000; }
-
-  #controls { padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 18px); background:linear-gradient(to top, rgba(0,0,0,.92), rgba(0,0,0,.55)); position:relative; z-index:7; }
-  #frameRow { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
-  #frameRow label { font-size:12px; color:#aaa; white-space:nowrap; }
-  #frameVal { font-size:12px; color:#ffd400; font-weight:700; min-width:36px; text-align:right; }
-  input[type=range] { flex:1; accent-color:#ffd400; height:4px; }
-
-  #shutterRow { display:flex; align-items:center; justify-content:space-between; }
-  #thumbWrap { width:52px; height:52px; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,.25); background:#111; }
-  #thumb { width:100%; height:100%; object-fit:cover; display:block; }
-  #shutter { width:76px; height:76px; border-radius:50%; border:4px solid #fff; background:transparent; position:relative; cursor:pointer; }
-  #shutter::after { content:""; position:absolute; inset:5px; border-radius:50%; background:#fff; transition:transform .12s, background .12s; }
-  #shutter:active::after { transform:scale(.82); }
-  #shutter.busy::after { background:#ffd400; animation:pulse 1s infinite; }
-  @keyframes pulse { 50% { transform:scale(.88); opacity:.7; } }
-  #dlBtn { width:52px; height:52px; border-radius:12px; border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.08); color:#fff; font-size:22px; cursor:pointer; }
-  #dlBtn:disabled { opacity:.3; }
-
-  #overlay { position:fixed; inset:0; background:rgba(0,0,0,.85); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; z-index:50; flex-direction:column; gap:18px; }
-  #overlay.show { display:flex; }
-  .ring { width:74px; height:74px; border-radius:50%; border:4px solid rgba(255,255,255,.15); border-top-color:#ffd400; animation:spin 1s linear infinite; }
-  @keyframes spin { to { transform:rotate(360deg); } }
-  #ovText { font-size:14px; color:#eee; text-align:center; line-height:1.7; padding:0 20px; }
-  #ovBarWrap { width:70%; max-width:320px; height:6px; background:rgba(255,255,255,.12); border-radius:99px; overflow:hidden; }
-  #ovBar { height:100%; width:0%; background:#ffd400; border-radius:99px; transition:width .15s; }
-
-  #resultView { position:fixed; inset:0; background:#000; display:none; z-index:60; flex-direction:column; }
-  #resultView.show { display:flex; }
-  #resultImgWrap { flex:1; overflow:auto; display:flex; align-items:flex-start; justify-content:center; touch-action:none; }
-  #resultImg { width:100%; height:auto; display:block; transform-origin:0 0; }
-  #resultBar { display:flex; gap:10px; padding:10px 16px calc(env(safe-area-inset-bottom,0px) + 14px); }
-  .rbtn { flex:1; border:none; border-radius:12px; padding:14px 0; font-size:15px; font-weight:700; cursor:pointer; }
-  #saveBtn { background:#ffd400; color:#000; }
-  #backBtn { background:rgba(255,255,255,.12); color:#fff; }
-  #metaLine { text-align:center; font-size:11px; color:#888; padding-bottom:6px; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+#stage{position:relative;flex:1;min-height:0;overflow:hidden;background:#000}
+#videoBox{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+#video{width:100%;height:100%;object-fit:cover;transform-origin:center}
+#grid{position:absolute;inset:0;pointer-events:none;opacity:.28;background:linear-gradient(to right,transparent 33.2%,#fff 33.3%,transparent 33.5%,transparent 66.5%,#fff 66.7%,transparent 66.9%),linear-gradient(to bottom,transparent 33.2%,#fff 33.3%,transparent 33.5%,transparent 66.5%,#fff 66.7%,transparent 66.9%)}
+#focus{position:absolute;width:72px;height:72px;border:2px solid #ffd400;border-radius:8px;display:none;pointer-events:none;box-shadow:0 0 12px #ffd40088;z-index:4}
+#hud{position:absolute;top:calc(env(safe-area-inset-top) + 10px);left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;z-index:5;pointer-events:none;gap:8px}
+.chip{background:#0009;border:1px solid #ffffff2b;border-radius:10px;padding:7px 10px;font-size:11px;line-height:1.5;backdrop-filter:blur(8px)}
+#resChip{color:#ffd400;text-align:right;max-width:58%;overflow-wrap:anywhere}
+#rotBtn{pointer-events:auto;color:#fff}
+#modeBar{position:absolute;top:calc(env(safe-area-inset-top) + 62px);left:50%;transform:translateX(-50%);display:flex;background:#0009;border:1px solid #ffffff30;border-radius:99px;padding:4px;z-index:5;white-space:nowrap}
+.mode{border:0;background:transparent;color:#bbb;padding:8px 16px;border-radius:99px;font-size:13px;font-weight:700}
+.mode.active{background:#ffd400;color:#000}
+#controls{padding:12px 16px calc(env(safe-area-inset-bottom) + 16px);background:linear-gradient(#0008,#000f);z-index:6}
+#frameRow{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+#frameRow label{font-size:12px;color:#bbb;white-space:nowrap}
+#slider{flex:1;min-width:0;accent-color:#ffd400}
+#frameVal{font-size:12px;color:#ffd400;min-width:44px;text-align:right}
+#shutterRow{display:flex;align-items:center;justify-content:space-between}
+#thumbWrap{width:50px;height:50px;border-radius:10px;overflow:hidden;background:#151515;border:1px solid #ffffff44}
+#thumb{width:100%;height:100%;object-fit:cover}
+#shutter{width:74px;height:74px;border:4px solid white;border-radius:50%;background:transparent;position:relative}
+#shutter:after{content:"";position:absolute;inset:5px;background:#fff;border-radius:50%}
+#shutter.busy:after{background:#ffd400;animation:pulse .9s infinite}
+@keyframes pulse{50%{transform:scale(.85);opacity:.65}}
+#download{width:50px;height:50px;border-radius:10px;border:1px solid #ffffff44;background:#ffffff12;color:white;font-size:22px}
+#download:disabled{opacity:.3}
+#notice{font-size:10px;color:#aaa;text-align:center;margin-top:10px;line-height:1.45}
+#overlay{position:fixed;inset:0;background:#000e;z-index:20;display:none;flex-direction:column;align-items:center;justify-content:center;gap:15px;padding:24px}
+#overlay.show{display:flex}
+.ring{width:64px;height:64px;border:4px solid #ffffff26;border-top-color:#ffd400;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#ovText{text-align:center;font-size:14px;line-height:1.6}
+#barWrap{width:80%;max-width:320px;height:6px;border-radius:9px;background:#ffffff22;overflow:hidden}
+#bar{height:100%;width:0;background:#ffd400;transition:width .15s}
+#result{position:fixed;inset:0;background:#000;z-index:30;display:none;flex-direction:column}
+#result.show{display:flex}
+#imgWrap{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;touch-action:pan-x pan-y}
+#resultImg{display:block;width:100%;height:auto;transform-origin:0 0}
+#meta{padding:7px 12px;color:#aaa;font-size:11px;text-align:center;line-height:1.5}
+#resultBar{display:flex;gap:10px;padding:8px 14px calc(env(safe-area-inset-bottom) + 12px)}
+.rbtn{flex:1;border:0;border-radius:11px;padding:14px 5px;font-size:14px;font-weight:700}
+#back{background:#ffffff1c;color:white}
+#save{background:#ffd400;color:#000}
+#help{position:absolute;bottom:12px;left:12px;right:12px;text-align:center;font-size:10px;color:#aaa;pointer-events:none}
 </style>
 </head>
 <body>
 <div id="app">
   <div id="stage">
     <div id="videoBox"><video id="video" autoplay playsinline muted></video></div>
-    <div id="grid"></div>
-    <div id="focusBox"></div>
+    <div id="grid"></div><div id="focus"></div>
     <div id="hud">
-      <div class="hud-chip" id="camChip">相机初始化…</div>
-      <div style="display:flex;gap:8px;">
-        <div class="hud-chip" id="rotBtn">⟳ <span id="rotVal">0°</span></div>
-        <div class="hud-chip" id="resChip">—</div>
+      <div class="chip" id="camChip">相机初始化…</div>
+      <div style="display:flex;gap:6px">
+        <div class="chip" id="rotBtn">⟳ <span id="rotVal">0°</span></div>
+        <div class="chip" id="resChip">—</div>
       </div>
     </div>
     <div id="modeBar">
-      <button class="mode-btn" data-mode="mp200">2亿像素</button>
-      <button class="mode-btn active" data-mode="k4">4K 超解析</button>
+      <button class="mode active" data-mode="200">2 亿像素</button>
+      <button class="mode" data-mode="400">4 亿像素</button>
     </div>
+    <div id="help">点击画面可显示对焦提示；浏览器实际对焦能力取决于设备</div>
   </div>
-
   <div id="controls">
-    <div id="frameRow">
-      <label>多帧合成</label>
-      <input type="range" id="frameSlider" min="4" max="32" step="2" value="16">
-      <span id="frameVal">16 帧</span>
-    </div>
+    <div id="frameRow"><label>多帧合成</label><input id="slider" type="range" min="4" max="16" step="2" value="8"><span id="frameVal">8 帧</span></div>
     <div id="shutterRow">
       <div id="thumbWrap"><img id="thumb" alt=""></div>
       <button id="shutter" aria-label="拍摄"></button>
-      <button id="dlBtn" disabled>⬇</button>
+      <button id="download" disabled aria-label="下载">⬇</button>
     </div>
+    <div id="notice">亚像素平移配准 · 鲁棒多帧融合 · 分块处理。输出尺寸受浏览器画布与设备内存限制。</div>
   </div>
 </div>
-
-<div id="overlay">
-  <div class="ring"></div>
-  <div id="ovText">准备中…</div>
-  <div id="ovBarWrap"><div id="ovBar"></div></div>
+<div id="overlay"><div class="ring"></div><div id="ovText">准备中…</div><div id="barWrap"><div id="bar"></div></div></div>
+<div id="result">
+  <div id="imgWrap"><img id="resultImg" alt="合成照片" draggable="false"></div>
+  <div id="meta"></div>
+  <div id="resultBar"><button class="rbtn" id="back">返回重拍</button><button class="rbtn" id="save">保存照片</button></div>
 </div>
-
-<div id="resultView">
-  <div id="resultImgWrap"><img id="resultImg" alt="合成结果" draggable="false"></div>
-  <div id="metaLine"></div>
-  <div id="resultBar">
-    <button class="rbtn" id="backBtn">返回重拍</button>
-    <button class="rbtn" id="saveBtn">保存到相册</button>
-  </div>
-</div>
-
 <script>
-(function(){
-  "use strict";
+"use strict";
+(() => {
+  const $ = id => document.getElementById(id);
+  const video = $("video"), stage = $("stage"), videoBox = $("videoBox");
+  const overlay = $("overlay"), ovText = $("ovText"), bar = $("bar");
+  const shutter = $("shutter"), result = $("result"), resultImg = $("resultImg");
+  const slider = $("slider");
+  let stream = null, vw = 0, vh = 0, rotation = 0, mode = "200";
+  let frameCount = 8, busy = false, lastUrl = null, lastBlob = null;
+  let currentBlob = null;
 
-  /* ================= 配置 ================= */
-  // mp200：保持传感器比例，总像素≈2亿，长边不超过 16384（浏览器画布安全上限）
-  // k4：长边 3840，保持传感器比例（4:3 传感器 → 3840×2880）
-  var MODES = {
-    mp200: { type:"area",  pixels: 2e8,   maxSide: 16384, name: "2亿像素" },
-    k4:    { type:"edge",  longEdge: 3840,                name: "4K 超解析" }
-  };
-  var mode = "k4";
-  var FRAME_COUNT = 16;
-  var busy = false;
-  var lastBlobUrl = null;
-  var ROT = 0;           // 0/90/180/270，部分机型需手动校正
-  var VW = 0, VH = 0;    // 相机帧实际尺寸
+  // 保守的输出像素预算，避免移动浏览器因大型 RGBA 画布而崩溃。
+  // deviceMemory 只是粗略提示，不代表浏览器真正可用内存。
+  const deviceGB = Number(navigator.deviceMemory || 4);
+  const SAFE_PIXELS = deviceGB >= 8 ? 40000000 : 24000000;
+  const MAX_SIDE = 12000;
+  const TILE = 384;
 
-  var video = document.getElementById("video");
-  var videoBox = document.getElementById("videoBox");
-  var stage = document.getElementById("stage");
-  var camChip = document.getElementById("camChip");
-  var resChip = document.getElementById("resChip");
-  var shutter = document.getElementById("shutter");
-  var overlay = document.getElementById("overlay");
-  var ovText = document.getElementById("ovText");
-  var ovBar = document.getElementById("ovBar");
-  var resultView = document.getElementById("resultView");
-  var resultImgWrap = document.getElementById("resultImgWrap");
-  var resultImg = document.getElementById("resultImg");
-  var metaLine = document.getElementById("metaLine");
-
-  /* ================= 目标尺寸计算（保持传感器比例，不再硬裁） ================= */
-  function computeTarget(vw, vh){
-    var m = MODES[mode];
-    var f;
-    if (m.type === "area"){
-      f = Math.sqrt(m.pixels / (vw * vh));
-      var fCap = m.maxSide / Math.max(vw, vh);
-      if (f > fCap) f = fCap;
-    } else {
-      f = m.longEdge / Math.max(vw, vh);
+  function setProgress(p, text) {
+    bar.style.width = (Math.max(0, Math.min(1, p)) * 100).toFixed(1) + "%";
+    if (text) ovText.textContent = text;
+  }
+  function showOverlay(text) { overlay.classList.add("show"); setProgress(0, text); }
+  function hideOverlay() { overlay.classList.remove("show"); }
+  function targetSize(w, h) {
+    const wanted = mode === "200" ? 200000000 : 400000000;
+    let scale = Math.sqrt(wanted / (w * h));
+    scale = Math.min(scale, MAX_SIDE / Math.max(w, h));
+    let tw = Math.max(1, Math.round(w * scale));
+    let th = Math.max(1, Math.round(h * scale));
+    const actual = tw * th;
+    if (actual > SAFE_PIXELS) {
+      const capScale = Math.sqrt(SAFE_PIXELS / (w * h));
+      tw = Math.max(1, Math.round(w * capScale));
+      th = Math.max(1, Math.round(h * capScale));
     }
-    return { w: Math.round(vw * f), h: Math.round(vh * f) };
+    return { w: tw, h: th, wanted, capped: tw * th < wanted * 0.98 };
   }
-
-  function updateResChip(){
-    var t = computeTarget(VW || 4000, VH || 3000);
-    var mp = (t.w * t.h / 1e8).toFixed(2);
-    resChip.textContent = MODES[mode].name + " · " + t.w + "×" + t.h + "（" + mp + " 亿）";
+  function updateInfo() {
+    const t = targetSize(vw || 4000, vh || 3000);
+    const mp = (t.w * t.h / 1e6).toFixed(1);
+    $("resChip").textContent = `${mode === "200" ? "2亿目标" : "4亿目标"} · 当前安全输出约 ${mp}MP`;
   }
-
-  /* ================= 相机启动 ================= */
-  var stream = null;
-  function startCamera(){
-    var constraints = {
-      audio: false,
-      video: { facingMode: { ideal: "environment" }, width: { ideal: 99999 }, height: { ideal: 99999 } }
-    };
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-      navigator.mediaDevices.getUserMedia(constraints).then(onStream).catch(function(){
-        navigator.mediaDevices.getUserMedia({ audio:false, video:{ facingMode:"environment" } })
-          .then(onStream).catch(showErr);
-      });
-    } else showErr();
-  }
-  function onStream(s){
-    stream = s;
-    video.srcObject = s;
-    video.onloadedmetadata = function(){
-      var t = s.getVideoTracks()[0];
-      var caps = {};
-      try { caps = t.getCapabilities ? t.getCapabilities() : {}; } catch(e){}
-      var cw = caps.width ? caps.width.max : video.videoWidth;
-      var ch = caps.height ? caps.height.max : video.videoHeight;
-      VW = video.videoWidth; VH = video.videoHeight;
-      camChip.textContent = "原生 " + VW + "×" + VH;
-      // 自动猜测旋转：竖持手机但帧是横的 → 转 90
-      var portrait = window.innerHeight > window.innerWidth;
-      if (portrait && VW > VH && ROT === 0){ ROT = 90; }
-      applyRotation();
-      updateResChip();
-    };
-  }
-  function showErr(){
-    camChip.textContent = "无法访问相机";
-    ovText.textContent = "请授权相机权限，并通过 HTTPS 访问本页面";
-    overlay.classList.add("show");
-  }
-
-  /* ================= 旋转校正 ================= */
-  function applyRotation(){
-    document.getElementById("rotVal").textContent = ROT + "°";
-    if (ROT % 180 !== 0){
-      // 交换盒子的宽高再旋转，让画面铺满屏幕
+  function applyRotation() {
+    $("rotVal").textContent = rotation + "°";
+    video.style.transform = `rotate(${rotation}deg)`;
+    if (rotation % 180) {
       videoBox.style.width = stage.clientHeight + "px";
       videoBox.style.height = stage.clientWidth + "px";
     } else {
       videoBox.style.width = "100%";
       videoBox.style.height = "100%";
     }
-    video.style.transform = "rotate(" + ROT + "deg)";
   }
-  document.getElementById("rotBtn").addEventListener("click", function(){
+  async function startCamera() {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      $("camChip").textContent = "浏览器不支持相机";
+      alert("请使用支持相机的现代浏览器，并通过 HTTPS 或 localhost 打开本页面。");
+      return;
+    }
+    const base = { audio: false, video: { facingMode: { ideal: "environment" }, width: { ideal: 3840 }, height: { ideal: 2160 } } };
+    try {
+      stream = await navigator.mediaDevices.getUserMedia(base);
+    } catch (e) {
+      try { stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: "environment" } }); }
+      catch (err) {
+        $("camChip").textContent = "无法访问相机";
+        alert("无法访问相机。请检查相机权限，并通过 HTTPS 或 localhost 访问。");
+        return;
+      }
+    }
+    video.srcObject = stream;
+    await new Promise(resolve => {
+      if (video.readyState >= 1) return resolve();
+      video.onloadedmetadata = resolve;
+    });
+    await video.play();
+    vw = video.videoWidth; vh = video.videoHeight;
+    $("camChip").textContent = `原生帧 ${vw}×${vh}`;
+    if (innerHeight > innerWidth && vw > vh) rotation = 90;
+    applyRotation(); updateInfo();
+  }
+
+  $("rotBtn").addEventListener("click", () => {
     if (busy) return;
-    ROT = (ROT + 90) % 360;
+    rotation = (rotation + 90) % 360;
     applyRotation();
   });
   window.addEventListener("resize", applyRotation);
-
-  /* ================= 模式切换 ================= */
-  var modeBtns = document.querySelectorAll(".mode-btn");
-  modeBtns.forEach(function(b){
-    b.addEventListener("click", function(){
-      if (busy) return;
-      modeBtns.forEach(function(x){ x.classList.remove("active"); });
-      b.classList.add("active");
-      mode = b.getAttribute("data-mode");
-      updateResChip();
-    });
+  document.querySelectorAll(".mode").forEach(btn => btn.addEventListener("click", () => {
+    if (busy) return;
+    mode = btn.dataset.mode;
+    document.querySelectorAll(".mode").forEach(b => b.classList.toggle("active", b === btn));
+    updateInfo();
+  }));
+  slider.addEventListener("input", () => {
+    frameCount = Number(slider.value);
+    $("frameVal").textContent = frameCount + " 帧";
+  });
+  stage.addEventListener("click", e => {
+    if (e.target.closest("#hud,#modeBar")) return;
+    const r = stage.getBoundingClientRect(), f = $("focus");
+    f.style.left = (e.clientX - r.left - 36) + "px";
+    f.style.top = (e.clientY - r.top - 36) + "px";
+    f.style.display = "block";
+    setTimeout(() => f.style.display = "none", 750);
   });
 
-  /* ================= 帧数滑块 ================= */
-  var slider = document.getElementById("frameSlider");
-  var frameVal = document.getElementById("frameVal");
-  slider.addEventListener("input", function(){
-    FRAME_COUNT = +slider.value;
-    frameVal.textContent = FRAME_COUNT + " 帧";
-  });
-
-  /* ================= 对焦框 ================= */
-  stage.addEventListener("click", function(e){
-    if (e.target.closest("#modeBar,#hud")) return;
-    var box = document.getElementById("focusBox");
-    var r = stage.getBoundingClientRect();
-    box.style.display = "block";
-    box.style.left = (e.clientX - r.left - 36) + "px";
-    box.style.top  = (e.clientY - r.top  - 36) + "px";
-    setTimeout(function(){ box.style.display = "none"; }, 800);
-  });
-
-  /* ================= 工具 ================= */
-  function setProgress(p, text){
-    ovBar.style.width = (p*100).toFixed(1) + "%";
-    if (text) ovText.textContent = text;
-  }
-  function nextFrame(){
-    return new Promise(function(res){ requestAnimationFrame(function(){ requestAnimationFrame(res); }); });
-  }
-
-  /* ================= 多帧连拍（带旋转校正） ================= */
-  function drawRotated(ctx, vw, vh){
-    var rad = ROT * Math.PI / 180;
+  // 将视频帧按当前旋转方向画到正确尺寸的画布。
+  function drawVideoFrame(canvas) {
+    const swap = rotation % 180 !== 0;
+    canvas.width = swap ? vh : vw;
+    canvas.height = swap ? vw : vh;
+    const ctx = canvas.getContext("2d", { alpha: false });
     ctx.save();
-    ctx.translate(vw/2, vh/2);
-    ctx.rotate(rad);
-    ctx.drawImage(video, -vw/2, -vh/2);
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(rotation * Math.PI / 180);
+    ctx.drawImage(video, -vw / 2, -vh / 2, vw, vh);
     ctx.restore();
+    return canvas;
   }
-  function captureFrames(n){
-    return new Promise(function(resolve){
-      var frames = [];
-      var count = 0;
-      function snap(){
-        var c = document.createElement("canvas");
-        c.width = VW; c.height = VH;
-        var ctx = c.getContext("2d", { willReadFrequently: true });
-        drawRotated(ctx, VW, VH);
-        frames.push({ canvas: c, ctx: ctx });
-        count++;
-        setProgress(count / n * 0.45, "连拍采帧 " + count + " / " + n);
-        if (count < n) setTimeout(snap, 60);
-        else resolve(frames);
-      }
-      snap();
+  function canvasBlob(canvas, type = "image/jpeg", quality = .94) {
+    return new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error("图像编码失败")), type, quality));
+  }
+  function makeThumb(blob, maxEdge = 720) {
+    return createImageBitmap(blob).then(bitmap => {
+      const s = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+      const c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(bitmap.width * s));
+      c.height = Math.max(1, Math.round(bitmap.height * s));
+      c.getContext("2d", { alpha: false }).drawImage(bitmap, 0, 0, c.width, c.height);
+      bitmap.close?.();
+      return c;
     });
   }
 
-  /* ================= 帧对齐（块匹配平移估计） ================= */
-  function alignFrames(frames){
-    var rw = frames[0].canvas.width, rh = frames[0].canvas.height;
-    var ref = frames[0].ctx.getImageData(0, 0, rw, rh);
-    var aligned = [frames[0]];
-    var SEARCH = 6, STEP = 2;
-    for (var i = 1; i < frames.length; i++){
-      var f = frames[i];
-      var img = f.ctx.getImageData(0, 0, rw, rh);
-      var bestDx = 0, bestDy = 0, bestErr = Infinity;
-      for (var dy = -SEARCH; dy <= SEARCH; dy += STEP){
-        for (var dx = -SEARCH; dx <= SEARCH; dx += STEP){
-          var err = 0, cnt = 0;
-          for (var sy = rh*0.25; sy < rh*0.75; sy += 24){
-            for (var sx = rw*0.25; sx < rw*0.75; sx += 24){
-              var x1 = sx + dx, y1 = sy + dy;
-              if (x1 < 0 || y1 < 0 || x1 >= rw || y1 >= rh) continue;
-              var p0 = (sy*rw + sx) * 4, p1 = (y1*rw + x1) * 4;
-              err += Math.abs(ref.data[p0]   - img.data[p1])
-                   + Math.abs(ref.data[p0+1] - img.data[p1+1])
-                   + Math.abs(ref.data[p0+2] - img.data[p1+2]);
-              cnt++;
-            }
+  // 多尺度全局平移估计：在缩小的灰度图上搜索整数位移，再用抛物线拟合细化到亚像素。
+  function grayAt(data, width, x, y) {
+    const ix = Math.max(0, Math.min(width - 1, Math.round(x)));
+    const iy = Math.max(0, Math.min(data.height - 1, Math.round(y)));
+    const k = (iy * width + ix) * 4;
+    return (data.data[k] * 0.299 + data.data[k + 1] * 0.587 + data.data[k + 2] * 0.114);
+  }
+  function estimateShift(refCanvas, srcCanvas) {
+    const w = Math.min(refCanvas.width, srcCanvas.width), h = Math.min(refCanvas.height, srcCanvas.height);
+    const a = refCanvas.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, w, h);
+    const b = srcCanvas.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, w, h);
+    const levels = [4, 2, 1];
+    let dx = 0, dy = 0;
+    const score = (ox, oy, step) => {
+      let sum = 0, count = 0;
+      const margin = 12;
+      for (let y = margin; y < h - margin; y += Math.max(3, 6 * step)) {
+        for (let x = margin; x < w - margin; x += Math.max(3, 6 * step)) {
+          const x2 = x + ox, y2 = y + oy;
+          if (x2 < 0 || y2 < 0 || x2 >= w || y2 >= h) continue;
+          const i = (y * w + x) * 4, j = (Math.round(y2) * w + Math.round(x2)) * 4;
+          const ga = a.data[i] * .299 + a.data[i+1] * .587 + a.data[i+2] * .114;
+          const gb = b.data[j] * .299 + b.data[j+1] * .587 + b.data[j+2] * .114;
+          sum += Math.abs(ga - gb); count++;
+        }
+      }
+      return count ? sum / count : Infinity;
+    };
+    for (const step of levels) {
+      const radius = step === 4 ? 16 : step === 2 ? 6 : 2;
+      let best = Infinity, bx = dx, by = dy;
+      for (let oy = Math.round(dy) - radius; oy <= Math.round(dy) + radius; oy += step) {
+        for (let ox = Math.round(dx) - radius; ox <= Math.round(dx) + radius; ox += step) {
+          const s = score(ox, oy, step);
+          if (s < best) { best = s; bx = ox; by = oy; }
+        }
+      }
+      dx = bx; dy = by;
+    }
+    // 在最终整数峰值周围做一维抛物线亚像素拟合。
+    const c = score(dx, dy, 1), lx = score(dx - 1, dy, 1), rx = score(dx + 1, dy, 1);
+    const ty = score(dx, dy - 1, 1), by = score(dx, dy + 1, 1);
+    const parabola = (l, m, r) => {
+      const den = l - 2 * m + r;
+      return Math.abs(den) < 1e-6 ? 0 : Math.max(-.5, Math.min(.5, .5 * (l - r) / den));
+    };
+    dx += parabola(lx, c, rx);
+    dy += parabola(ty, c, by);
+    return { dx, dy };
+  }
+
+  async function captureFrames(n) {
+    const frames = [];
+    const baseCanvas = document.createElement("canvas");
+    for (let i = 0; i < n; i++) {
+      // 等待不同视频帧，避免连续读取到同一帧。
+      if ("requestVideoFrameCallback" in HTMLVideoElement.prototype) {
+        await new Promise(resolve => video.requestVideoFrameCallback(() => resolve()));
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 70));
+      }
+      drawVideoFrame(baseCanvas);
+      const blob = await canvasBlob(baseCanvas, "image/jpeg", .96);
+      const thumb = await makeThumb(blob);
+      frames.push({ blob, thumb, shift: { dx: 0, dy: 0 } });
+      setProgress(.05 + .25 * (i + 1) / n, `采集照片 ${i + 1}/${n}`);
+    }
+    return frames;
+  }
+
+  async function alignFrames(frames) {
+    const ref = frames[0].thumb;
+    for (let i = 1; i < frames.length; i++) {
+      const thumbShift = estimateShift(ref, frames[i].thumb);
+      // 配准在缩略图上估计，换算回原始帧像素坐标。
+      frames[i].shift = { dx: thumbShift.dx, dy: thumbShift.dy };
+      const bmp = await createImageBitmap(frames[i].blob);
+      frames[i].shift.dx *= bmp.width / ref.width;
+      frames[i].shift.dy *= bmp.height / ref.height;
+      bmp.close?.();
+      setProgress(.30 + .12 * i / (frames.length - 1), `亚像素配准 ${i}/${frames.length - 1}`);
+    }
+    return frames;
+  }
+
+  // 按瓦片逐帧解码与融合，避免同时把全部原始帧解码到内存。
+  async function fuseFrames(frames, width, height) {
+    const out = document.createElement("canvas");
+    out.width = width; out.height = height;
+    const octx = out.getContext("2d", { alpha: false });
+    const tileCanvas = document.createElement("canvas");
+    const tctx = tileCanvas.getContext("2d", { willReadFrequently: true, alpha: false });
+    const n = frames.length;
+    let tileNo = 0;
+    const totalTiles = Math.ceil(width / TILE) * Math.ceil(height / TILE);
+    for (let y = 0; y < height; y += TILE) {
+      for (let x = 0; x < width; x += TILE) {
+        const tw = Math.min(TILE, width - x), th = Math.min(TILE, height - y);
+        tileCanvas.width = tw; tileCanvas.height = th;
+        const samples = [];
+        for (let i = 0; i < n; i++) {
+          const bmp = await createImageBitmap(frames[i].blob);
+          tctx.clearRect(0, 0, tw, th);
+          const scaleX = width / bmp.width, scaleY = height / bmp.height;
+          const sx = x / scaleX + frames[i].shift.dx;
+          const sy = y / scaleY + frames[i].shift.dy;
+          const sw = tw / scaleX, sh = th / scaleY;
+          tctx.drawImage(bmp, sx, sy, sw, sh, 0, 0, tw, th);
+          bmp.close?.();
+          samples.push(new Uint8ClampedArray(tctx.getImageData(0, 0, tw, th).data));
+        }
+        const outData = tctx.createImageData(tw, th);
+        const d = outData.data;
+        for (let p = 0; p < d.length; p += 4) {
+          for (let c = 0; c < 3; c++) {
+            let vals = [];
+            for (let i = 0; i < n; i++) vals.push(samples[i][p + c]);
+            vals.sort((a, b) => a - b);
+            // 截尾均值抑制少量异常帧；帧数较少时保留全部样本。
+            const cut = n >= 8 ? 1 : 0;
+            let sum = 0;
+            for (let k = cut; k < n - cut; k++) sum += vals[k];
+            d[p + c] = sum / (n - 2 * cut);
           }
-          if (cnt && err / cnt < bestErr){ bestErr = err / cnt; bestDx = dx; bestDy = dy; }
+          d[p + 3] = 255;
         }
-      }
-      var ac = document.createElement("canvas");
-      ac.width = rw; ac.height = rh;
-      var actx = ac.getContext("2d", { willReadFrequently: true });
-      actx.drawImage(f.canvas, bestDx, bestDy);
-      aligned.push({ canvas: ac, ctx: actx });
-      setProgress(0.45 + i / frames.length * 0.25, "帧对齐 " + i + " / " + (frames.length - 1));
-    }
-    return aligned;
-  }
-
-  /* ================= 分块均值叠加降噪 ================= */
-  function averageStack(aligned){
-    var rw = aligned[0].canvas.width, rh = aligned[0].canvas.height;
-    var TILE = 512;
-    var out = document.createElement("canvas");
-    out.width = rw; out.height = rh;
-    var octx = out.getContext("2d");
-    var n = aligned.length;
-    for (var ty = 0; ty < rh; ty += TILE){
-      var th = Math.min(TILE, rh - ty);
-      for (var tx = 0; tx < rw; tx += TILE){
-        var tw = Math.min(TILE, rw - tx);
-        var acc = new Float32Array(tw * th * 4);
-        for (var i = 0; i < n; i++){
-          var d = aligned[i].ctx.getImageData(tx, ty, tw, th).data;
-          for (var j = 0; j < d.length; j++) acc[j] += d[j];
-        }
-        var res = octx.createImageData(tw, th);
-        var rd = res.data;
-        for (var k = 0; k < rd.length; k++) rd[k] = acc[k] / n;
-        octx.putImageData(res, tx, ty);
-        setProgress(0.7 + (ty / rh) * 0.15, "多帧降噪叠加…");
+        octx.putImageData(outData, x, y);
+        tileNo++;
+        setProgress(.42 + .32 * tileNo / totalTiles, `多帧鲁棒融合 ${tileNo}/${totalTiles}`);
+        await new Promise(resolve => setTimeout(resolve, 0));
       }
     }
     return out;
   }
 
-  /* ================= 超分放大（保持传感器比例） ================= */
-  function superResolve(cleanCanvas, targetW, targetH){
-    var out = document.createElement("canvas");
-    out.width = targetW; out.height = targetH;
-    var ctx = out.getContext("2d");
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(cleanCanvas, 0, 0, targetW, targetH);
-    setProgress(0.88, "超分辨率重建 " + targetW + "×" + targetH + "…");
-    return out;
-  }
-
-  /* ================= 全分块 USM 锐化（不爆内存） ================= */
-  function unsharp(canvas, amount, radius, threshold){
-    var w = canvas.width, h = canvas.height;
-    var ctx = canvas.getContext("2d");
-    var TILE = 512;
-    var PAD = Math.ceil(radius * 2) + 2;
-    var tmp = document.createElement("canvas");
-    for (var ty = 0; ty < h; ty += TILE){
-      var th = Math.min(TILE, h - ty);
-      for (var tx = 0; tx < w; tx += TILE){
-        var tw = Math.min(TILE, w - tx);
-        var sw = tw + PAD * 2, sh = th + PAD * 2;
-        tmp.width = sw; tmp.height = sh;
-        var tctx = tmp.getContext("2d", { willReadFrequently: true });
-        tctx.filter = "blur(" + radius + "px)";
-        tctx.drawImage(canvas, tx - PAD, ty - PAD, sw, sh, 0, 0, sw, sh);
+  // 温和的分块细节增强：只增强局部高频，不声称生成不存在的纹理。
+  function detailEnhance(canvas) {
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    const w = canvas.width, h = canvas.height, tile = 512, radius = 1;
+    const temp = document.createElement("canvas");
+    const tctx = temp.getContext("2d", { willReadFrequently: true });
+    for (let y = 0; y < h; y += tile) {
+      for (let x = 0; x < w; x += tile) {
+        const tw = Math.min(tile, w - x), th = Math.min(tile, h - y), pad = 3;
+        temp.width = tw + pad * 2; temp.height = th + pad * 2;
+        tctx.filter = `blur(${radius}px)`;
+        tctx.drawImage(canvas, x - pad, y - pad, tw + pad * 2, th + pad * 2, 0, 0, temp.width, temp.height);
         tctx.filter = "none";
-        var a = ctx.getImageData(tx, ty, tw, th);
-        var b = tctx.getImageData(PAD, PAD, tw, th);
-        var ad = a.data, bd = b.data;
-        for (var i = 0; i < ad.length; i += 4){
-          for (var c = 0; c < 3; c++){
-            var diff = ad[i+c] - bd[i+c];
-            if (diff >= threshold || diff <= -threshold){
-              var v = ad[i+c] + amount * diff;
-              ad[i+c] = v < 0 ? 0 : v > 255 ? 255 : v;
-            }
+        const orig = ctx.getImageData(x, y, tw, th);
+        const blur = tctx.getImageData(pad, pad, tw, th);
+        for (let i = 0; i < orig.data.length; i += 4) {
+          for (let c = 0; c < 3; c++) {
+            const diff = orig.data[i+c] - blur.data[i+c];
+            if (Math.abs(diff) > 3) orig.data[i+c] = Math.max(0, Math.min(255, orig.data[i+c] + diff * .55));
           }
         }
-        ctx.putImageData(a, tx, ty);
+        ctx.putImageData(orig, x, y);
       }
-      setProgress(0.9 + (ty / h) * 0.08, "细节增强…");
+      setProgress(.76 + .08 * y / h, "细节增强…");
     }
     return canvas;
   }
 
-  /* ================= 主流程 ================= */
-  async function shoot(){
-    if (busy || !stream) return;
-    busy = true;
-    shutter.classList.add("busy");
-    overlay.classList.add("show");
-    setProgress(0, "准备拍摄…");
+  async function shoot() {
+    if (busy || !stream || !vw || !vh) return;
+    busy = true; shutter.classList.add("busy"); showOverlay("准备拍摄…");
+    let frames = [];
     try {
-      var target = computeTarget(VW, VH);
-
-      var frames = await captureFrames(FRAME_COUNT);
-      var aligned = alignFrames(frames);
-      await nextFrame();
-
-      var clean = averageStack(aligned);
-      await nextFrame();
-
-      var big = superResolve(clean, target.w, target.h);
-      await nextFrame();
-
-      var amt = mode === "mp200" ? 0.9 : 1.4;
-      var rad = mode === "mp200" ? 1.2 : 1.6;
-      unsharp(big, amt, rad, 2);
-
-      setProgress(0.99, "编码输出…");
-      await nextFrame();
-
-      var blob = await new Promise(function(res){ big.toBlob(res, "image/jpeg", 0.95); });
-      if (!blob) throw new Error("编码失败（可能超出浏览器画布上限，请换 4K 模式）");
-      if (lastBlobUrl) URL.revokeObjectURL(lastBlobUrl);
-      lastBlobUrl = URL.createObjectURL(blob);
-
-      document.getElementById("thumb").src = lastBlobUrl;
-      document.getElementById("dlBtn").disabled = false;
-
-      resultImg.src = lastBlobUrl;
-      resetResultView();
-      var mp = (target.w * target.h / 1e8).toFixed(2);
-      metaLine.textContent = MODES[mode].name + " · " + target.w + "×" + target.h
-        + "（" + mp + " 亿像素）· " + FRAME_COUNT + " 帧合成 · "
-        + (blob.size/1024/1024).toFixed(1) + " MB · 双指可放大";
-      resultView.classList.add("show");
-    } catch(err){
-      alert("合成失败：" + (err && err.message ? err.message : err));
+      const orientedW = rotation % 180 ? vh : vw;
+      const orientedH = rotation % 180 ? vw : vh;
+      const target = targetSize(orientedW, orientedH);
+      frames = await captureFrames(frameCount);
+      await alignFrames(frames);
+      // 融合先在相机原生尺寸完成；随后才进行受内存预算约束的放大。
+      const clean = await fuseFrames(frames, orientedW, orientedH);
+      detailEnhance(clean);
+      setProgress(.86, "计算输出尺寸…");
+      const out = document.createElement("canvas");
+      out.width = target.w; out.height = target.h;
+      const outCtx = out.getContext("2d", { alpha: false });
+      if (!outCtx) throw new Error("无法创建输出画布");
+      outCtx.imageSmoothingEnabled = true;
+      outCtx.imageSmoothingQuality = "high";
+      outCtx.drawImage(clean, 0, 0, target.w, target.h);
+      setProgress(.94, "编码 JPEG…");
+      const blob = await canvasBlob(out, "image/jpeg", .97);
+      lastBlob = blob;
+      if (lastUrl) URL.revokeObjectURL(lastUrl);
+      lastUrl = URL.createObjectURL(blob);
+      $("thumb").src = lastUrl;
+      $("download").disabled = false;
+      resultImg.src = lastUrl;
+      resultImg.style.transform = "none";
+      const mp = (target.w * target.h / 1e6).toFixed(1);
+      const mb = (blob.size / 1024 / 1024).toFixed(1);
+      const note = target.capped
+        ? `设备安全上限已生效：请求 ${mode === "200" ? "2亿" : "4亿"}，实际输出 ${mp}MP。`
+        : `输出达到目标尺寸。`;
+      $("meta").textContent = `${target.w}×${target.h} · ${mp}MP · ${frameCount}帧 · JPEG ${mb}MB。${note} 双指可缩放。`;
+      result.classList.add("show");
+      setProgress(1, "完成");
+    } catch (err) {
+      console.error(err);
+      alert("合成失败：" + (err?.message || err) + "\n可尝试减少帧数、切换 2 亿模式，或关闭其他应用后重试。");
     } finally {
-      overlay.classList.remove("show");
-      shutter.classList.remove("busy");
-      busy = false;
+      // 释放缩略图与临时引用；Blob 本身只保留最终结果。
+      frames.forEach(f => { f.thumb.width = 1; f.thumb.height = 1; });
+      frames = [];
+      hideOverlay(); shutter.classList.remove("busy"); busy = false;
     }
   }
 
-  /* ================= 成片查看：双指缩放 + 双击放大 ================= */
-  var zoom = 1, minZoom = 1;
-  function applyZoom(){
-    resultImg.style.transform = "scale(" + zoom + ")";
+  function downloadResult() {
+    if (!lastUrl) return;
+    const a = document.createElement("a");
+    a.href = lastUrl;
+    a.download = `多帧超分_${mode === "200" ? "2亿目标" : "4亿目标"}_${Date.now()}.jpg`;
+    document.body.appendChild(a); a.click(); a.remove();
   }
-  function resetResultView(){
-    zoom = 1; applyZoom();
-    resultImgWrap.scrollTop = 0; resultImgWrap.scrollLeft = 0;
-  }
-  (function(){
-    var pointers = new Map();
-    var lastDist = 0, lastTap = 0;
-    resultImgWrap.addEventListener("pointerdown", function(e){
-      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      if (pointers.size === 2){
-        var pts = Array.from(pointers.values());
-        lastDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-      }
-      var now = Date.now();
-      if (now - lastTap < 300 && pointers.size === 1){
-        zoom = (zoom > 1.5) ? 1 : 4;   // 双击：100% ↔ 400%
-        applyZoom();
-      }
-      lastTap = now;
-    });
-    resultImgWrap.addEventListener("pointermove", function(e){
-      if (!pointers.has(e.pointerId)) return;
-      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      if (pointers.size === 2){
-        var pts = Array.from(pointers.values());
-        var dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-        if (lastDist > 0){
-          zoom = Math.min(8, Math.max(1, zoom * dist / lastDist));
-          applyZoom();
-        }
-        lastDist = dist;
-      }
-    });
-    function up(e){ pointers.delete(e.pointerId); lastDist = 0; }
-    resultImgWrap.addEventListener("pointerup", up);
-    resultImgWrap.addEventListener("pointercancel", up);
-    resultImgWrap.addEventListener("wheel", function(e){
-      e.preventDefault();
-      zoom = Math.min(8, Math.max(1, zoom * (e.deltaY < 0 ? 1.1 : 0.9)));
-      applyZoom();
-    }, { passive:false });
-  })();
+  $("download").addEventListener("click", downloadResult);
+  $("save").addEventListener("click", downloadResult);
+  $("back").addEventListener("click", () => result.classList.remove("show"));
+  $("shutter").addEventListener("click", shoot);
 
-  /* ================= 事件绑定 ================= */
-  shutter.addEventListener("click", shoot);
-  document.getElementById("dlBtn").addEventListener("click", function(){
-    if (!lastBlobUrl) return;
-    var a = document.createElement("a");
-    a.href = lastBlobUrl;
-    a.download = MODES[mode].name + "_" + Date.now() + ".jpg";
-    a.click();
+  // 结果图缩放：双指缩放与滚轮缩放。
+  let zoom = 1, pinchDist = 0, pts = new Map();
+  const imgWrap = $("imgWrap");
+  function setZoom(z) { zoom = Math.max(1, Math.min(6, z)); resultImg.style.transform = `scale(${zoom})`; }
+  imgWrap.addEventListener("pointerdown", e => {
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.size === 2) {
+      const a = [...pts.values()];
+      pinchDist = Math.hypot(a[0].x-a[1].x, a[0].y-a[1].y);
+    }
   });
-  document.getElementById("saveBtn").addEventListener("click", function(){
-    var a = document.createElement("a");
-    a.href = lastBlobUrl;
-    a.download = MODES[mode].name + "_" + Date.now() + ".jpg";
-    a.click();
+  imgWrap.addEventListener("pointermove", e => {
+    if (!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.size === 2) {
+      const a = [...pts.values()], d = Math.hypot(a[0].x-a[1].x, a[0].y-a[1].y);
+      if (pinchDist) setZoom(zoom * d / pinchDist);
+      pinchDist = d;
+    }
   });
-  document.getElementById("backBtn").addEventListener("click", function(){
-    resultView.classList.remove("show");
-  });
-  document.addEventListener("dblclick", function(e){ e.preventDefault(); }, { passive:false });
+  function pointerEnd(e) { pts.delete(e.pointerId); pinchDist = 0; }
+  imgWrap.addEventListener("pointerup", pointerEnd);
+  imgWrap.addEventListener("pointercancel", pointerEnd);
+  imgWrap.addEventListener("wheel", e => { e.preventDefault(); setZoom(zoom * (e.deltaY < 0 ? 1.12 : .89)); }, { passive: false });
 
+  window.addEventListener("beforeunload", () => {
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    if (lastUrl) URL.revokeObjectURL(lastUrl);
+  });
   startCamera();
-  updateResChip();
 })();
 </script>
 </body>
