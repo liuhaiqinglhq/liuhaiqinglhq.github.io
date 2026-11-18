@@ -1,221 +1,185 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#000">
-<title>100MP 极致画质多帧相机 v4</title>
+<meta name="theme-color" content="#111827">
+<title>原生高分辨率无损相机</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}
-#app{position:fixed;inset:0;display:flex;flex-direction:column}
-#stage{position:relative;flex:1;min-height:0;overflow:hidden;background:#000}
-#videoBox{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-#video{width:100%;height:100%;object-fit:cover;transform-origin:center}
-#grid{position:absolute;inset:0;pointer-events:none;opacity:.3;background:linear-gradient(to right,transparent 33.2%,#fff 33.3%,transparent 33.5%,transparent 66.5%,#fff 66.7%,transparent 66.9%),linear-gradient(to bottom,transparent 33.2%,#fff 33.3%,transparent 33.5%,transparent 66.5%,#fff 66.7%,transparent 66.9%)}
-#hud{position:absolute;top:calc(env(safe-area-inset-top) + 10px);left:10px;right:10px;display:flex;justify-content:space-between;gap:8px;z-index:5;pointer-events:none}
-.chip{background:#0009;border:1px solid #ffffff30;border-radius:10px;padding:7px 10px;font-size:11px;line-height:1.5;backdrop-filter:blur(8px)}
-#rotBtn{pointer-events:auto}
-#resChip{color:#ffd400;text-align:right}
-#controls{padding:13px 16px calc(env(safe-area-inset-bottom) + 16px);background:linear-gradient(#0008,#000f)}
-#frameRow{display:flex;align-items:center;gap:10px;margin-bottom:13px;font-size:12px;color:#bbb}
-#slider{flex:1;accent-color:#ffd400}
-#frameVal{color:#ffd400;min-width:40px;text-align:right}
-#shutterRow{display:flex;align-items:center;justify-content:space-between}
-#thumbWrap{width:50px;height:50px;border-radius:10px;overflow:hidden;background:#111;border:1px solid #ffffff44}
-#thumb{width:100%;height:100%;object-fit:cover}
-#shutter{width:74px;height:74px;border:4px solid #fff;border-radius:50%;background:transparent;position:relative}
-#shutter:after{content:"";position:absolute;inset:5px;background:#fff;border-radius:50%}
-#shutter.busy:after{background:#ffd400;animation:pulse 1s infinite}
-@keyframes pulse{50%{transform:scale(.86);opacity:.7}}
-#download{width:50px;height:50px;border-radius:10px;border:1px solid #ffffff44;background:#ffffff12;color:#fff;font-size:22px}
-#download:disabled{opacity:.3}
-#hint{text-align:center;color:#999;font-size:10px;line-height:1.5;margin-top:9px}
-#overlay{position:fixed;inset:0;background:#000e;z-index:20;display:none;flex-direction:column;align-items:center;justify-content:center;gap:15px;padding:24px}
-#overlay.show{display:flex}
-.ring{width:64px;height:64px;border:4px solid #ffffff25;border-top-color:#ffd400;border-radius:50%;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-#ovText{text-align:center;font-size:14px;line-height:1.6}
-#barWrap{width:80%;max-width:320px;height:6px;background:#ffffff22;border-radius:9px;overflow:hidden}
-#bar{height:100%;width:0;background:#ffd400;transition:width .15s}
-#result{position:fixed;inset:0;background:#000;z-index:30;display:none;flex-direction:column}
-#result.show{display:flex}
-#imgWrap{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;touch-action:pan-x pan-y}
-#resultImg{width:100%;height:auto;display:block;transform-origin:0 0}
-#meta{font-size:11px;color:#aaa;text-align:center;padding:8px 12px;line-height:1.5}
-#resultBar{display:flex;gap:10px;padding:8px 14px calc(env(safe-area-inset-bottom) + 12px)}
-.rbtn{flex:1;border:0;border-radius:11px;padding:14px 5px;font-size:14px;font-weight:700}
-#back{background:#ffffff1c;color:white}#save{background:#ffd400;color:#000}
+:root{color-scheme:dark;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:#0b1020;color:#f3f4f6}
+main{max-width:760px;margin:auto;padding:18px}
+h1{font-size:22px;margin:4px 0 8px}.sub{color:#aab4c5;font-size:14px;line-height:1.55}
+.panel{background:#151d30;border:1px solid #29344b;border-radius:16px;padding:14px;margin:14px 0}
+video{width:100%;max-height:55vh;object-fit:contain;background:#05070c;border-radius:12px}
+button,select{font:inherit;border-radius:12px;padding:12px 14px;border:1px solid #3b4964;background:#24314a;color:white}
+button.primary{background:#2563eb;border-color:#2563eb;font-weight:700}
+button:disabled{opacity:.45}
+.controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+.status{white-space:pre-wrap;line-height:1.6;font-size:14px;color:#d3dbea}
+.metric{font-size:19px;font-weight:700}.muted{color:#9aa8bd;font-size:12px}
+.warning{color:#fbbf24}.good{color:#86efac}
+label{display:block;margin:8px 0;color:#cbd5e1;font-size:14px}
+a{color:#93c5fd;word-break:break-all}
 </style>
 </head>
 <body>
-<div id="app">
- <div id="stage">
-  <div id="videoBox"><video id="video" autoplay playsinline muted></video></div><div id="grid"></div>
-  <div id="hud"><div class="chip" id="camChip">相机初始化…</div><div style="display:flex;gap:6px"><div class="chip" id="rotBtn">⟳ <span id="rotVal">0°</span></div><div class="chip" id="resChip">100MP 目标</div></div></div>
- </div>
- <div id="controls">
-  <div id="frameRow"><label for="slider">多帧合成（32–128）</label><input id="slider" type="range" min="32" max="128" step="32" value="64"><span id="frameVal">64 帧</span></div>
-  <div id="shutterRow"><div id="thumbWrap"><img id="thumb" alt=""></div><button id="shutter" aria-label="拍摄"></button><button id="download" disabled>⬇</button></div>
-  <div id="hint">请固定手机、锁定对焦并拍摄静止场景 · 帧数越多耗时和内存越高 · 100MP 输出尺寸不等于 100MP 原生细节</div>
- </div>
-</div>
-<div id="overlay"><div class="ring"></div><div id="ovText">准备中…</div><div id="barWrap"><div id="bar"></div></div></div>
-<div id="result"><div id="imgWrap"><img id="resultImg" alt="100MP 合成结果"></div><div id="meta"></div><div id="resultBar"><button class="rbtn" id="back">返回重拍</button><button class="rbtn" id="save">保存 1 亿像素照片</button></div></div>
+<main>
+<h1>原生高分辨率 · PNG 无损保存</h1>
+<p class="sub">优先使用设备的原生拍照接口。不会把小图插值放大，也不会把输出尺寸冒充成真实细节。PNG 保存的是相机照片解码后的像素，不代表传感器 RAW。</p>
+
+<section class="panel">
+  <video id="preview" autoplay playsinline muted></video>
+  <div class="controls">
+    <button id="start" class="primary">启动摄像头</button>
+    <button id="stop" disabled>关闭摄像头</button>
+  </div>
+  <div id="capability" class="status" style="margin-top:12px">尚未读取设备能力。</div>
+</section>
+
+<section class="panel">
+  <label for="count">连拍张数（逐张原生拍摄）</label>
+  <select id="count">
+    <option value="1">1 张</option><option value="3">3 张</option>
+    <option value="5" selected>5 张</option><option value="8">8 张</option>
+  </select>
+  <p class="muted">多张拍摄用于挑选清晰度最高的一张，不做简单平均，避免运动造成重影。此版本不会声称多帧融合已创造额外真实分辨率。</p>
+  <div class="controls">
+    <button id="shoot" class="primary" disabled>原生拍照并保存 PNG</button>
+  </div>
+  <div id="result" class="status" style="margin-top:12px">等待拍摄。</div>
+</section>
+
+<section class="panel">
+  <div class="metric" id="resolution">实际照片分辨率：未知</div>
+  <div class="muted" id="filesize">文件大小：未知</div>
+  <p class="sub warning">重要：网页能否调用原生高像素拍照，取决于浏览器、手机系统和摄像头驱动。若接口不可用，会提示原因；不会退回视频截图后伪称原生高像素。</p>
+</section>
+</main>
 <script>
-"use strict";
-(() => {
- const $=id=>document.getElementById(id), video=$("video"), stage=$("stage");
- let stream=null,vw=0,vh=0,rotation=0,busy=false,frameCount=64,lastUrl=null,lastBlob=null;
- const TARGET_PIXELS=100000000, MAX_SIDE=16384;
- const setProgress=(p,t)=>{$("bar").style.width=(p*100).toFixed(1)+"%";if(t)$("ovText").textContent=t};
- let lastPresentedFrames = -1;
- const waitFrame=()=>new Promise(resolve=>{
-   if(video.requestVideoFrameCallback) {
-     video.requestVideoFrameCallback((now, meta)=> {
-       lastPresentedFrames = meta.presentedFrames ?? lastPresentedFrames + 1;
-       resolve();
-     });
-   } else setTimeout(resolve, Math.max(80, 1000 / 12));
- });
- function outputSize(w,h){
-   let scale=Math.sqrt(TARGET_PIXELS/(w*h));
-   scale=Math.min(scale,MAX_SIDE/Math.max(w,h));
-   return {w:Math.round(w*scale),h:Math.round(h*scale)};
- }
- function updateSize(){
-   const swap=rotation%180!==0, w=swap?vh:vw,h=swap?vw:vh;
-   if(w&&h){const s=outputSize(w,h);$("resChip").textContent=`目标 ${s.w}×${s.h} · ${(s.w*s.h/1e6).toFixed(1)}MP`;}
- }
- function applyRotation(){
-   $("rotVal").textContent=rotation+"°";
-   video.style.transform=`rotate(${rotation}deg)`;
-   if(rotation%180){$("videoBox").style.width=stage.clientHeight+"px";$("videoBox").style.height=stage.clientWidth+"px";}
-   else{$("videoBox").style.width="100%";$("videoBox").style.height="100%";}
-   updateSize();
- }
- async function startCamera(){
-   if(!navigator.mediaDevices?.getUserMedia){$("camChip").textContent="浏览器不支持相机";return}
-   const constraints={audio:false,video:{facingMode:{ideal:"environment"},width:{ideal:4096},height:{ideal:3072}}};
-   try{stream=await navigator.mediaDevices.getUserMedia(constraints)}
-   catch(e){try{stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:"environment"}})}catch(err){$("camChip").textContent="无法访问相机";alert("请允许相机权限，并通过 HTTPS 或 localhost 打开。");return}}
-   video.srcObject=stream;await new Promise(r=>{if(video.readyState>=1)r();else video.onloadedmetadata=r});await video.play();
-   // Request stable exposure/white balance where the browser and camera expose these controls.
-   try {
-     const track=stream.getVideoTracks()[0], caps=track.getCapabilities?.()||{}, adv={};
-     if(caps.exposureMode?.includes("continuous")) adv.exposureMode="continuous";
-     if(caps.whiteBalanceMode?.includes("continuous")) adv.whiteBalanceMode="continuous";
-     if(Object.keys(adv).length) await track.applyConstraints({advanced:[adv]});
-   } catch(e) { console.warn("相机未开放曝光/白平衡控制",e); }
-   vw=video.videoWidth;vh=video.videoHeight;$("camChip").textContent=`视频输入 ${vw}×${vh}`;
-   if(innerHeight>innerWidth&&vw>vh)rotation=90;applyRotation();
- }
- $("rotBtn").onclick=()=>{if(!busy){rotation=(rotation+90)%360;applyRotation()}};
- addEventListener("resize",applyRotation);
- $("slider").oninput=e=>{frameCount=+e.target.value;$("frameVal").textContent=frameCount+" 帧"};
- function drawFrame(){
-   const c=document.createElement("canvas"),swap=rotation%180!==0;
-   c.width=swap?vh:vw;c.height=swap?vw:vh;
-   const x=c.getContext("2d",{willReadFrequently:true});
-   x.translate(c.width/2,c.height/2);x.rotate(rotation*Math.PI/180);x.drawImage(video,-vw/2,-vh/2,vw,vh);
-   return c;
- }
- async function capture(n){
-   const frames=[];
-   for(let i=0;i<n;i++){
-     await waitFrame();
-     const c=drawFrame(),ctx=c.getContext("2d",{willReadFrequently:true});
-     frames.push({canvas:c,ctx});
-     setProgress(.08+.25*(i+1)/n,`采集 ${i+1}/${n}`);
-   }
-   return frames;
- }
- function align(frames){
-   const w=frames[0].canvas.width,h=frames[0].canvas.height;
-   const ref=frames[0].ctx.getImageData(0,0,w,h).data, out=[frames[0]];
-   const search=6,step=1;
-   for(let i=1;i<frames.length;i++){
-     const src=frames[i].ctx.getImageData(0,0,w,h).data;
-     let best=Infinity,dxBest=0,dyBest=0;
-     for(let dy=-search;dy<=search;dy+=step)for(let dx=-search;dx<=search;dx+=step){
-       let err=0,count=0;
-       for(let y=Math.floor(h*.3);y<h*.7;y+=32)for(let x=Math.floor(w*.3);x<w*.7;x+=32){
-         const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=w||yy>=h)continue;
-         const a=(y*w+x)*4,b=(yy*w+xx)*4;
-         err+=Math.abs(ref[a]-src[b])+Math.abs(ref[a+1]-src[b+1])+Math.abs(ref[a+2]-src[b+2]);count++;
-       }
-       if(count&&err/count<best){best=err/count;dxBest=dx;dyBest=dy}
-     }
-     const c=document.createElement("canvas");c.width=w;c.height=h;
-     c.getContext("2d").drawImage(frames[i].canvas,dxBest,dyBest);
-     out.push({canvas:c,ctx:c.getContext("2d",{willReadFrequently:true})});
-     setProgress(.33+.17*i/(frames.length-1),`帧对齐 ${i}/${frames.length-1}`);
-   }
-   return out;
- }
- function averageStack(frames){
-   const w=frames[0].canvas.width,h=frames[0].canvas.height,out=document.createElement("canvas");
-   out.width=w;out.height=h;const ox=out.getContext("2d");
-   const tile=256,n=frames.length;
-   for(let y=0;y<h;y+=tile)for(let x=0;x<w;x+=tile){
-     const tw=Math.min(tile,w-x),th=Math.min(tile,h-y),acc=new Float32Array(tw*th*4);
-     for(let i=0;i<n;i++){const d=frames[i].ctx.getImageData(x,y,tw,th).data;for(let j=0;j<d.length;j++)acc[j]+=d[j]}
-     const image=ox.createImageData(tw,th),d=image.data;
-     for(let j=0;j<d.length;j++)d[j]=acc[j]/n;
-     ox.putImageData(image,x,y);
-     setProgress(.5+.22*(y/h),`多帧降噪合成 ${Math.min(100,Math.round(100*y/h))}%`);
-   }
-   return out;
- }
- function sharpen(canvas){
-   const w=canvas.width,h=canvas.height,ctx=canvas.getContext("2d",{willReadFrequently:true});
-   const tile=256,pad=4,tmp=document.createElement("canvas");
-   for(let y=0;y<h;y+=tile)for(let x=0;x<w;x+=tile){
-     const tw=Math.min(tile,w-x),th=Math.min(tile,h-y);tmp.width=tw+pad*2;tmp.height=th+pad*2;
-     const t=tmp.getContext("2d",{willReadFrequently:true});t.filter="blur(1.2px)";
-     t.drawImage(canvas,x-pad,y-pad,tw+pad*2,th+pad*2,0,0,tmp.width,tmp.height);t.filter="none";
-     const a=ctx.getImageData(x,y,tw,th),b=t.getImageData(pad,pad,tw,th),ad=a.data,bd=b.data;
-     for(let i=0;i<ad.length;i+=4)for(let c=0;c<3;c++){const diff=ad[i+c]-bd[i+c];if(Math.abs(diff)>2)ad[i+c]=Math.max(0,Math.min(255,ad[i+c]+1.0*diff))}
-     ctx.putImageData(a,x,y);
-   }
-   return canvas;
- }
- function blobOf(canvas){return new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("JPEG 编码失败：浏览器可能无法分配 1 亿像素画布")), "image/jpeg",.96))}
- async function shoot(){
-   if(busy||!stream)return;busy=true;$("shutter").classList.add("busy");$("overlay").classList.add("show");setProgress(0,"准备拍摄…");
-   let frames=[];
-   try{
-     const swap=rotation%180!==0,srcW=swap?vh:vw,srcH=swap?vw:vh;
-     const target=outputSize(srcW,srcH),pixels=target.w*target.h;
-     if(Math.max(target.w,target.h)>MAX_SIDE)throw new Error("目标尺寸超过浏览器画布长边限制。");
-     frames=await capture(frameCount);
-     const aligned=align(frames);
-     const clean=averageStack(aligned);
-     sharpen(clean);
-     await new Promise(r=>setTimeout(r,0));
-     const out=document.createElement("canvas");out.width=target.w;out.height=target.h;
-     const ctx=out.getContext("2d");
-     if(!ctx)throw new Error("浏览器无法创建输出画布。");
-     ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";
-     ctx.drawImage(clean,0,0,target.w,target.h);
-     setProgress(.82,"分块细节增强…");
-     // 输出画布过大时，不执行全尺寸 getImageData，避免一次性申请超大内存。
-     // 锐化在原生分辨率完成后，再进行一次高质量放大。
-     setProgress(.90,"编码 1 亿像素 JPEG…");
-     const blob=await blobOf(out);
-     if(pixels<TARGET_PIXELS*.985)throw new Error(`浏览器画布限制导致输出只有 ${(pixels/1e6).toFixed(2)}MP，未达到 1 亿像素；本次不保存为成功成片。`);
-     lastBlob=blob;if(lastUrl)URL.revokeObjectURL(lastUrl);lastUrl=URL.createObjectURL(blob);
-     $("thumb").src=lastUrl;$("download").disabled=false;$("resultImg").src=lastUrl;
-     $("meta").textContent=`${target.w}×${target.h} · ${(pixels/1e6).toFixed(2)}MP · ${frameCount} 帧 · ${(blob.size/1048576).toFixed(1)}MB JPEG。注意：这是 1 亿像素输出尺寸，真实细节仍受原生相机分辨率限制。`;
-     $("result").classList.add("show");setProgress(1,"完成");
-   }catch(e){console.error(e);alert("未能生成合格的 1 亿像素照片：\n"+(e.message||e)+"\n建议在内存更大的设备或桌面浏览器测试。不会把低分辨率结果冒充 1 亿像素。")}
-   finally{frames=[];$("overlay").classList.remove("show");$("shutter").classList.remove("busy");busy=false}
- }
- function download(){if(!lastUrl)return;const a=document.createElement("a");a.href=lastUrl;a.download=`100MP_${Date.now()}.jpg`;document.body.appendChild(a);a.click();a.remove()}
- $("shutter").onclick=shoot;$("download").onclick=download;$("save").onclick=download;$("back").onclick=()=>$("result").classList.remove("show");
- addEventListener("beforeunload",()=>{stream?.getTracks().forEach(t=>t.stop());if(lastUrl)URL.revokeObjectURL(lastUrl)});
- startCamera();
-})();
+const $ = id => document.getElementById(id);
+let stream = null, track = null, imageCapture = null, lastUrl = null;
+const preview = $('preview');
+
+function setStatus(id, text){ $(id).textContent = text; }
+function megapixels(w,h){ return (w*h/1e6).toFixed(2); }
+
+async function startCamera(){
+  try{
+    if(!navigator.mediaDevices?.getUserMedia) throw new Error('当前浏览器不支持摄像头访问。请使用 HTTPS 页面或 localhost。');
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio:false,
+      video:{facingMode:{ideal:'environment'},width:{ideal:4096},height:{ideal:3072}}
+    });
+    preview.srcObject = stream;
+    track = stream.getVideoTracks()[0];
+    const caps = track.getCapabilities ? track.getCapabilities() : {};
+    let lines = ['摄像头预览已启动。'];
+    if(caps.width) lines.push(`视频流支持宽度范围：${caps.width.min}–${caps.width.max}`);
+    if(caps.height) lines.push(`视频流支持高度范围：${caps.height.min}–${caps.height.max}`);
+    if('ImageCapture' in window){
+      imageCapture = new ImageCapture(track);
+      try{
+        const photo = await imageCapture.getPhotoCapabilities();
+        lines.push('原生拍照接口：可用');
+        if(photo.imageWidth) lines.push(`原生照片宽度范围：${photo.imageWidth.min}–${photo.imageWidth.max}`);
+        if(photo.imageHeight) lines.push(`原生照片高度范围：${photo.imageHeight.min}–${photo.imageHeight.max}`);
+      }catch(e){ lines.push('原生拍照能力读取失败：'+e.message); }
+    }else{
+      imageCapture = null;
+      lines.push('原生拍照接口 ImageCapture：当前浏览器不支持');
+    }
+    setStatus('capability',lines.join('\n'));
+    $('start').disabled=true; $('stop').disabled=false; $('shoot').disabled=false;
+  }catch(e){
+    setStatus('capability','启动失败：'+e.message+'\n请检查浏览器摄像头权限，并通过 HTTPS 打开页面。');
+  }
+}
+function stopCamera(){
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  stream=null;track=null;imageCapture=null;preview.srcObject=null;
+  $('start').disabled=false;$('stop').disabled=true;$('shoot').disabled=true;
+  setStatus('capability','摄像头已关闭。');
+}
+function sharpnessScore(imageData){
+  const {data,width,height}=imageData;
+  const step=Math.max(1,Math.floor(Math.min(width,height)/500));
+  let sum=0,sum2=0,n=0;
+  const gray=(x,y)=>{
+    const i=(y*width+x)*4;
+    return .299*data[i]+.587*data[i+1]+.114*data[i+2];
+  };
+  for(let y=step;y<height-step;y+=step){
+    for(let x=step;x<width-step;x+=step){
+      const c=gray(x,y)*4-gray(x-step,y)-gray(x+step,y)-gray(x,y-step)-gray(x,y+step);
+      sum+=c;sum2+=c*c;n++;
+    }
+  }
+  return n ? sum2/n-(sum/n)**2 : 0;
+}
+async function blobToPng(blob){
+  const bitmap=await createImageBitmap(blob);
+  const canvas=document.createElement('canvas');
+  canvas.width=bitmap.width;canvas.height=bitmap.height;
+  const ctx=canvas.getContext('2d',{alpha:false});
+  ctx.drawImage(bitmap,0,0);
+  bitmap.close?.();
+  const png=await new Promise((resolve,reject)=>{
+    canvas.toBlob(b=>b?resolve(b):reject(new Error('PNG 编码失败')), 'image/png');
+  });
+  return {blob:png,width:canvas.width,height:canvas.height};
+}
+async function shoot(){
+  if(!imageCapture){
+    setStatus('result','无法进行原生高分辨率拍照：当前浏览器没有 ImageCapture.takePhoto() 支持。\n为避免虚报像素，本程序不会用预览视频截图替代。');
+    return;
+  }
+  $('shoot').disabled=true;
+  const total=Number($('count').value);
+  let best=null, logs=[];
+  try{
+    for(let i=0;i<total;i++){
+      setStatus('result',`正在原生拍摄：${i+1}/${total}…`);
+      const photoBlob=await imageCapture.takePhoto();
+      const decoded=await createImageBitmap(photoBlob);
+      const w=decoded.width,h=decoded.height;
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      const cx=c.getContext('2d',{willReadFrequently:true,alpha:false});
+      cx.drawImage(decoded,0,0);decoded.close?.();
+      const sampleW=Math.min(1000,w),sampleH=Math.max(1,Math.round(h*sampleW/w));
+      const sample=document.createElement('canvas');sample.width=sampleW;sample.height=sampleH;
+      const sx=sample.getContext('2d',{willReadFrequently:true});
+      sx.drawImage(c,0,0,sampleW,sampleH);
+      const score=sharpnessScore(sx.getImageData(0,0,sampleW,sampleH));
+      logs.push({w,h,score,blob:photoBlob});
+      if(!best || score>best.score) best={w,h,score,blob:photoBlob};
+      await new Promise(r=>setTimeout(r,180));
+    }
+    const converted=await blobToPng(best.blob);
+    const url=URL.createObjectURL(converted.blob);
+    if(lastUrl) URL.revokeObjectURL(lastUrl);
+    lastUrl=url;
+    const a=document.createElement('a');
+    a.href=url;a.download=`native_${best.w}x${best.h}_${Date.now()}.png`;
+    document.body.appendChild(a);a.click();a.remove();
+    const mp=megapixels(best.w,best.h);
+    $('resolution').textContent=`实际照片分辨率：${best.w} × ${best.h}（${mp} MP）`;
+    $('filesize').textContent=`PNG 文件大小：${(converted.blob.size/1024/1024).toFixed(2)} MB`;
+    const genuine=best.w*best.h>=100000000;
+    setStatus('result',
+      `完成：从 ${total} 张原生照片中选出清晰度评分最高的一张。\n`+
+      `照片像素：${best.w} × ${best.h} = ${mp} MP\n`+
+      `保存格式：PNG（无损编码）\n`+
+      (genuine?'设备输出达到 1 亿像素尺寸。':'设备本次原生照片未达到 1 亿像素；没有进行插值扩图。')+
+      `\n注意：PNG 无损指保存过程不再进行有损压缩；若相机原始照片本身为 JPEG，原始传感器信息已在相机编码阶段处理。`);
+  }catch(e){
+    setStatus('result','拍摄失败：'+e.message+'\n可能是设备/浏览器不支持原生拍照，或相机正被其他程序占用。');
+  }finally{$('shoot').disabled=false;}
+}
+$('start').addEventListener('click',startCamera);
+$('stop').addEventListener('click',stopCamera);
+$('shoot').addEventListener('click',shoot);
+window.addEventListener('pagehide',stopCamera);
 </script>
 </body>
 </html>
