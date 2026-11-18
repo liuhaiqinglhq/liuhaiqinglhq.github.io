@@ -1,804 +1,528 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>黄龙辉的一生 - 选择题人生模拟器</title>
-    <style>
-        :root {
-            --bg: #0f0f1a;
-            --card: #1a1a2e;
-            --accent: #e94560;
-            --gold: #f5c518;
-            --text: #eee;
-            --subtext: #aaa;
-            --success: #2ecc71;
-            --danger: #e74c3c;
-            --info: #3498db;
-            --border: #2a2a4a;
-            --shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 16px;
-            background-image: radial-gradient(ellipse at 30% 20%, rgba(233, 69, 96, 0.06) 0%, transparent 60%),
-                radial-gradient(ellipse at 70% 80%, rgba(245, 197, 24, 0.04) 0%, transparent 50%);
-        }
-        .game-container {
-            max-width: 700px;
-            width: 100%;
-            background: var(--card);
-            border-radius: 24px;
-            padding: 25px 20px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s;
-        }
-        .game-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent), var(--gold), var(--info), var(--accent));
-            background-size: 300% 100%;
-            animation: shimmer 4s linear infinite;
-        }
-        @keyframes shimmer {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 300% 0%; }
-        }
-        .header { text-align: center; margin-bottom: 18px; }
-        .header h1 {
-            font-size: 2em; font-weight: 800;
-            background: linear-gradient(135deg, var(--gold), #ff8c00, var(--accent));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-            letter-spacing: 2px; margin-bottom: 4px;
-        }
-        .header .subtitle { color: var(--subtext); font-size: 0.85em; letter-spacing: 3px; }
-        .status-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.3); border-radius: 12px; padding: 10px 16px;
-            margin-bottom: 15px; border: 1px solid var(--border); flex-wrap: wrap; gap: 8px;
-        }
-        .age-badge { font-size: 1.4em; font-weight: 700; color: var(--gold); }
-        .stage-badge { background: rgba(245,197,24,0.15); color: var(--gold); padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: 600; letter-spacing: 1px; }
-        .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 15px; }
-        .stat-item { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 8px 4px; text-align: center; border: 1px solid var(--border); }
-        .stat-item .stat-icon { font-size: 1.2em; }
-        .stat-item .stat-value { font-size: 0.9em; font-weight: 700; margin: 2px 0; }
-        .stat-item .stat-name { font-size: 0.65em; color: var(--subtext); letter-spacing: 1px; }
-        .progress-mini { height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 3px; overflow: hidden; }
-        .progress-mini .bar { height: 100%; border-radius: 2px; transition: width 0.4s; }
-        .stat-value.high { color: var(--success); }
-        .stat-value.medium { color: var(--gold); }
-        .stat-value.low { color: var(--danger); }
-        .event-panel { background: rgba(0,0,0,0.35); border-radius: 16px; padding: 18px; margin-bottom: 16px; border: 1px solid var(--border); min-height: 80px; }
-        .event-text { font-size: 1.05em; line-height: 1.7; color: var(--text); margin-bottom: 8px; }
-        .event-hint { font-size: 0.8em; color: var(--subtext); font-style: italic; }
-        .choices-area { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
-        .choice-btn {
-            background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 12px;
-            padding: 14px 18px; color: var(--text); font-size: 0.95em; cursor: pointer;
-            transition: all 0.25s; text-align: left; font-weight: 500; letter-spacing: 0.3px;
-            position: relative; overflow: hidden; display: flex; align-items: center; gap: 10px;
-        }
-        .choice-btn:hover { background: rgba(245,197,24,0.1); border-color: var(--gold); transform: translateX(5px); box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
-        .choice-btn:active { transform: scale(0.97); }
-        .choice-btn .choice-emoji { font-size: 1.6em; flex-shrink: 0; }
-        .choice-btn .choice-detail { display: flex; flex-direction: column; }
-        .choice-btn .choice-hint { font-size: 0.75em; color: var(--subtext); margin-top: 2px; }
-        .btn-group { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
-        .main-btn {
-            padding: 12px 24px; border-radius: 12px; border: none; font-size: 0.95em; font-weight: 700;
-            cursor: pointer; transition: all 0.3s; letter-spacing: 1px; background: rgba(255,255,255,0.1);
-            color: var(--text); border: 1px solid var(--border);
-        }
-        .main-btn.primary { background: linear-gradient(135deg, var(--accent), #c0392b); color: #fff; box-shadow: 0 5px 25px rgba(233,69,96,0.4); }
-        .main-btn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.2); }
-        .main-btn.primary:hover { background: linear-gradient(135deg, #ff5e7e, #e74c3c); }
-        .history-log { margin-top: 15px; padding-top: 12px; border-top: 1px solid var(--border); max-height: 180px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
-        .history-log::-webkit-scrollbar { width: 4px; }
-        .history-log::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-        .log-title { font-size: 0.8em; color: var(--subtext); letter-spacing: 2px; margin-bottom: 8px; }
-        .log-item { font-size: 0.8em; color: var(--subtext); padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.03); display: flex; gap: 8px; }
-        .log-age { font-weight: 700; color: var(--gold); min-width: 40px; }
-        .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:1000; animation: fadeIn 0.3s; }
-        .modal { background: var(--card); border-radius: 24px; padding: 30px; max-width: 550px; width: 90%; text-align: center; box-shadow: var(--shadow); border: 1px solid var(--border); animation: slideUp 0.4s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .modal h2 { font-size: 1.8em; margin-bottom: 12px; color: var(--gold); }
-        .modal .final-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 15px 0; }
-        .modal .final-stat { background: rgba(255,255,255,0.06); border-radius: 10px; padding: 10px 5px; }
-        .modal .final-stat .fs-value { font-size: 1.2em; font-weight: 700; color: var(--gold); }
-        .modal .life-summary { text-align: left; background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px; margin: 15px 0; line-height: 1.8; font-size: 0.85em; max-height: 250px; overflow-y: auto; }
-        .hidden { display: none !important; }
-        @media (max-width: 500px) {
-            .game-container { padding: 16px 12px; border-radius: 16px; }
-            .stats-row { grid-template-columns: repeat(3, 1fr); gap: 5px; }
-            .stat-item { padding: 6px 2px; }
-            .header h1 { font-size: 1.5em; }
-            .choice-btn { padding: 12px 14px; font-size: 0.85em; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>2亿像素 · 多帧合成相机 v2</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { width:100%; height:100%; background:#000; color:#fff; font-family:-apple-system,"PingFang SC","HarmonyOS Sans",sans-serif; overflow:hidden; }
+  #app { position:fixed; inset:0; display:flex; flex-direction:column; }
+
+  #stage { position:relative; flex:1; overflow:hidden; background:#000; }
+  #videoBox { position:absolute; left:50%; top:50%; width:100%; height:100%; transform:translate(-50%,-50%); }
+  #video { width:100%; height:100%; object-fit:cover; transform-origin:center; }
+  #grid { position:absolute; inset:0; pointer-events:none; opacity:.35;
+    background:
+      linear-gradient(to right, transparent 33.3%, rgba(255,255,255,.5) 33.3%, rgba(255,255,255,.5) 33.5%, transparent 33.5%, transparent 66.6%, rgba(255,255,255,.5) 66.6%, rgba(255,255,255,.5) 66.8%, transparent 66.8%),
+      linear-gradient(to bottom, transparent 33.3%, rgba(255,255,255,.5) 33.3%, rgba(255,255,255,.5) 33.5%, transparent 33.5%, transparent 66.6%, rgba(255,255,255,.5) 66.6%, rgba(255,255,255,.5) 66.8%, transparent 66.8%); }
+  #focusBox { position:absolute; width:72px; height:72px; border:2px solid #ffd400; border-radius:8px; display:none; pointer-events:none; box-shadow:0 0 12px rgba(255,212,0,.6); z-index:5; }
+
+  #hud { position:absolute; top:calc(env(safe-area-inset-top,0px) + 10px); left:0; right:0; display:flex; justify-content:space-between; padding:0 14px; pointer-events:none; z-index:6; }
+  .hud-chip { pointer-events:auto; background:rgba(0,0,0,.55); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,.15); border-radius:10px; padding:6px 12px; font-size:12px; line-height:1.5; }
+  #resChip { color:#ffd400; font-weight:600; }
+  #rotBtn { cursor:pointer; color:#fff; }
+
+  #modeBar { position:absolute; top:calc(env(safe-area-inset-top,0px) + 10px); left:50%; transform:translateX(-50%); display:flex; background:rgba(0,0,0,.55); backdrop-filter:blur(10px); border-radius:999px; padding:4px; border:1px solid rgba(255,255,255,.15); z-index:6; }
+  .mode-btn { border:none; background:transparent; color:#bbb; font-size:13px; font-weight:600; padding:8px 18px; border-radius:999px; cursor:pointer; transition:all .2s; white-space:nowrap; }
+  .mode-btn.active { background:#ffd400; color:#000; }
+
+  #controls { padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 18px); background:linear-gradient(to top, rgba(0,0,0,.92), rgba(0,0,0,.55)); position:relative; z-index:7; }
+  #frameRow { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  #frameRow label { font-size:12px; color:#aaa; white-space:nowrap; }
+  #frameVal { font-size:12px; color:#ffd400; font-weight:700; min-width:36px; text-align:right; }
+  input[type=range] { flex:1; accent-color:#ffd400; height:4px; }
+
+  #shutterRow { display:flex; align-items:center; justify-content:space-between; }
+  #thumbWrap { width:52px; height:52px; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,.25); background:#111; }
+  #thumb { width:100%; height:100%; object-fit:cover; display:block; }
+  #shutter { width:76px; height:76px; border-radius:50%; border:4px solid #fff; background:transparent; position:relative; cursor:pointer; }
+  #shutter::after { content:""; position:absolute; inset:5px; border-radius:50%; background:#fff; transition:transform .12s, background .12s; }
+  #shutter:active::after { transform:scale(.82); }
+  #shutter.busy::after { background:#ffd400; animation:pulse 1s infinite; }
+  @keyframes pulse { 50% { transform:scale(.88); opacity:.7; } }
+  #dlBtn { width:52px; height:52px; border-radius:12px; border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.08); color:#fff; font-size:22px; cursor:pointer; }
+  #dlBtn:disabled { opacity:.3; }
+
+  #overlay { position:fixed; inset:0; background:rgba(0,0,0,.85); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; z-index:50; flex-direction:column; gap:18px; }
+  #overlay.show { display:flex; }
+  .ring { width:74px; height:74px; border-radius:50%; border:4px solid rgba(255,255,255,.15); border-top-color:#ffd400; animation:spin 1s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  #ovText { font-size:14px; color:#eee; text-align:center; line-height:1.7; padding:0 20px; }
+  #ovBarWrap { width:70%; max-width:320px; height:6px; background:rgba(255,255,255,.12); border-radius:99px; overflow:hidden; }
+  #ovBar { height:100%; width:0%; background:#ffd400; border-radius:99px; transition:width .15s; }
+
+  #resultView { position:fixed; inset:0; background:#000; display:none; z-index:60; flex-direction:column; }
+  #resultView.show { display:flex; }
+  #resultImgWrap { flex:1; overflow:auto; display:flex; align-items:flex-start; justify-content:center; touch-action:none; }
+  #resultImg { width:100%; height:auto; display:block; transform-origin:0 0; }
+  #resultBar { display:flex; gap:10px; padding:10px 16px calc(env(safe-area-inset-bottom,0px) + 14px); }
+  .rbtn { flex:1; border:none; border-radius:12px; padding:14px 0; font-size:15px; font-weight:700; cursor:pointer; }
+  #saveBtn { background:#ffd400; color:#000; }
+  #backBtn { background:rgba(255,255,255,.12); color:#fff; }
+  #metaLine { text-align:center; font-size:11px; color:#888; padding-bottom:6px; }
+</style>
 </head>
 <body>
-    <div class="game-container" id="gameContainer">
-        <div class="header">
-            <h1>🏆 黄龙辉的一生</h1>
-            <div class="subtitle">选择题人生模拟器 · 200+ 情境</div>
-        </div>
-        <div class="status-bar">
-            <span class="age-badge" id="ageDisplay">0岁</span>
-            <span class="stage-badge" id="stageDisplay">👶 婴儿期</span>
-            <span style="color:var(--subtext);font-size:0.8em;">已选 <span id="choiceCount">0</span> 次</span>
-        </div>
-        <div class="stats-row" id="statsRow"></div>
-        <div class="event-panel">
-            <div class="event-text" id="eventText">点击下方按钮开始人生...</div>
-            <div class="event-hint" id="eventHint"></div>
-        </div>
-        <div class="choices-area" id="choicesArea"></div>
-        <div class="btn-group">
-            <button class="main-btn primary" id="btnStart" onclick="startGame()">🎮 开始人生</button>
-            <button class="main-btn" id="btnRestart" onclick="restartGame()" style="display:none;">🔄 重新开始</button>
-        </div>
-        <div class="history-log" id="historyLog" style="display:none;">
-            <div class="log-title">📜 人生记录</div>
-            <div id="logItems"></div>
-        </div>
+<div id="app">
+  <div id="stage">
+    <div id="videoBox"><video id="video" autoplay playsinline muted></video></div>
+    <div id="grid"></div>
+    <div id="focusBox"></div>
+    <div id="hud">
+      <div class="hud-chip" id="camChip">相机初始化…</div>
+      <div style="display:flex;gap:8px;">
+        <div class="hud-chip" id="rotBtn">⟳ <span id="rotVal">0°</span></div>
+        <div class="hud-chip" id="resChip">—</div>
+      </div>
     </div>
-    <div class="modal-overlay hidden" id="gameOverModal">
-        <div class="modal">
-            <h2>🏁 黄龙辉的一生完结</h2>
-            <div id="finalAgeText" style="font-size:1.1em;color:var(--subtext);margin-bottom:8px;"></div>
-            <div class="final-stats" id="finalStats"></div>
-            <div class="life-summary" id="lifeSummary"></div>
-            <button class="main-btn primary" onclick="restartGame()">🔄 再来一世</button>
-        </div>
+    <div id="modeBar">
+      <button class="mode-btn" data-mode="mp200">2亿像素</button>
+      <button class="mode-btn active" data-mode="k4">4K 超解析</button>
     </div>
-    <script>
-        // ==================== 游戏核心状态 ====================
-        let game = {
-            age: 0, health: 80, intelligence: 20, wealth: 0, happiness: 70, looks: 50,
-            socialCredit: 60, isAlive: true, usedEvents: new Set(), choiceCount: 0,
-            log: [], gameStarted: false, currentEventId: null,
-            spouse: null, children: 0, house: '无', car: '无', education: '无', career: '无',
-            pet: null, hobby: null, luckyCount: 0, unluckyCount: 0,
-        };
-        function clamp(v, min=0, max=100) { return Math.max(min, Math.min(max, v)); }
-        function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-        function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-        function formatMoney(amount) { if (amount >= 10000) return (amount/10000).toFixed(1)+'万'; if (amount >= 1000) return (amount/1000).toFixed(1)+'千'; return amount.toFixed(0); }
-        function getLifeStage(age) { if(age<3) return '👶 婴儿期'; if(age<6) return '🧒 幼儿期'; if(age<12) return '🎒 童年期'; if(age<18) return '📚 青少年'; if(age<22) return '🎓 青年期'; if(age<30) return '💼 奋斗期'; if(age<40) return '🏠 成家立业'; if(age<50) return '👨‍👩‍👧 中年期'; if(age<60) return '🌅 成熟期'; if(age<70) return '🧓 老年期'; if(age<80) return '👴 古稀之年'; if(age<90) return '🕊️ 耄耋之年'; return '🌟 人瑞'; }
-        function getStatColor(val) { if(val>=70) return 'high'; if(val>=40) return 'medium'; return 'low'; }
-        function addLog(age, text) { game.log.push({age, text}); const lc = document.getElementById('logItems'); const item = document.createElement('div'); item.className='log-item'; item.innerHTML=`<span class="log-age">${age}岁</span><span>${text}</span>`; lc.prepend(item); while(lc.children.length>40) lc.removeChild(lc.lastChild); }
-        function updateUI() {
-            document.getElementById('ageDisplay').textContent = game.age + '岁';
-            document.getElementById('stageDisplay').textContent = getLifeStage(game.age);
-            document.getElementById('choiceCount').textContent = game.choiceCount;
-            const statsData = [
-                {key:'health', icon:'❤️', color:'#2ecc71', name:'健康'},
-                {key:'intelligence', icon:'🧠', color:'#3498db', name:'智力'},
-                {key:'wealth', icon:'💰', color:'#f5c518', name:'财富'},
-                {key:'happiness', icon:'😊', color:'#e94560', name:'快乐'},
-                {key:'looks', icon:'✨', color:'#9b59b6', name:'颜值'},
-            ];
-            const statsRow = document.getElementById('statsRow'); statsRow.innerHTML='';
-            statsData.forEach(({key,icon,color,name}) => {
-                let val = game[key]; let displayVal = key==='wealth' ? formatMoney(val) : Math.round(clamp(val,0,100));
-                let pct = key==='wealth' ? Math.min(100, val/5) : clamp(val,0,100);
-                const div = document.createElement('div'); div.className='stat-item';
-                div.innerHTML=`<div class="stat-icon">${icon}</div><div class="stat-value ${getStatColor(clamp(val,0,100))}">${displayVal}</div><div class="progress-mini"><div class="bar" style="width:${pct}%;background:${color};"></div></div><div class="stat-name">${name}</div>`;
-                statsRow.appendChild(div);
-            });
-        }
-        function showEvent(event) {
-            document.getElementById('eventText').textContent = event.text;
-            document.getElementById('eventHint').textContent = event.hint || '';
-            const ca = document.getElementById('choicesArea'); ca.innerHTML='';
-            event.choices.forEach((choice, idx) => {
-                const btn = document.createElement('button'); btn.className='choice-btn';
-                btn.innerHTML=`<span class="choice-emoji">${choice.emoji||'👉'}</span><span class="choice-detail"><span>${choice.text}</span>${choice.hint?`<span class="choice-hint">${choice.hint}</span>`:''}</span>`;
-                btn.onclick = () => handleChoice(event, idx); ca.appendChild(btn);
-            });
-        }
-        function handleChoice(event, choiceIdx) {
-            const choice = event.choices[choiceIdx];
-            if(choice.effects) { for(let [key,val] of Object.entries(choice.effects)) { if(key==='wealth') game.wealth=Math.max(0, game.wealth+val); else if(key==='socialCredit') game.socialCredit=clamp(game.socialCredit+val,0,100); else game[key]=clamp(game[key]+val,0,100); } }
-            if(choice.setFlag) { for(let [k,v] of Object.entries(choice.setFlag)) game[k]=v; }
-            if(choice.log) addLog(game.age, choice.log);
-            const inc = choice.ageIncrement || 1; game.age += inc; game.choiceCount++;
-            game.usedEvents.add(event.id);
-            if(choice.triggerDeath || game.health<=0 || game.age>100) { game.isAlive=false; showGameOver(); return; }
-            if(game.age>100) { game.isAlive=false; showGameOver(); return; }
-            nextTurn();
-        }
-        function nextTurn() {
-            if(!game.isAlive) return; updateUI();
-            const ne = getNextEvent();
-            if(ne) { game.currentEventId=ne.id; showEvent(ne); }
-            else { defaultYear(); }
-        }
-        function defaultYear() {
-            game.age += 1; game.choiceCount++; addLog(game.age-1, '平淡的一年过去了');
-            game.health=clamp(game.health+rand(-2,1)); game.happiness=clamp(game.happiness+rand(-2,0));
-            if(game.health<=0||game.age>100) { game.isAlive=false; showGameOver(); return; }
-            updateUI(); nextTurn();
-        }
-        function getNextEvent() {
-            const available = eventPool.filter(ev => !game.usedEvents.has(ev.id) && game.age>=ev.minAge && game.age<=ev.maxAge && (ev.condition?ev.condition(game):true));
-            if(available.length===0) return null;
-            return available[Math.floor(Math.random()*available.length)];
-        }
-        function startGame() {
-            if(game.gameStarted) return; game.gameStarted=true;
-            document.getElementById('btnStart').style.display='none';
-            document.getElementById('btnRestart').style.display='inline-block';
-            document.getElementById('historyLog').style.display='block';
-            const be = eventPool.find(e=>e.id==='birth');
-            if(be) { game.usedEvents.add('birth'); showEvent(be); }
-            else nextTurn();
-            updateUI();
-        }
-        function restartGame() {
-            game = { age:0, health:80, intelligence:20, wealth:0, happiness:70, looks:50, socialCredit:60,
-                isAlive:true, usedEvents:new Set(), choiceCount:0, log:[], gameStarted:false, currentEventId:null,
-                spouse:null, children:0, house:'无', car:'无', education:'无', career:'无', pet:null, hobby:null,
-                luckyCount:0, unluckyCount:0 };
-            document.getElementById('btnStart').style.display='inline-block';
-            document.getElementById('btnRestart').style.display='none';
-            document.getElementById('historyLog').style.display='none';
-            document.getElementById('logItems').innerHTML='';
-            document.getElementById('gameOverModal').classList.add('hidden');
-            document.getElementById('choicesArea').innerHTML='';
-            document.getElementById('eventText').textContent='点击下方按钮开始人生...';
-            document.getElementById('eventHint').textContent='';
-            updateUI();
-        }
-        function showGameOver() {
-            document.getElementById('gameOverModal').classList.remove('hidden');
-            document.getElementById('finalAgeText').textContent=`黄龙辉享年 ${game.age} 岁`;
-            const sd = [
-                {key:'health',label:'❤️ 健康',val:Math.round(game.health)},
-                {key:'intelligence',label:'🧠 智力',val:Math.round(game.intelligence)},
-                {key:'wealth',label:'💰 财富',val:formatMoney(game.wealth)},
-                {key:'happiness',label:'😊 快乐',val:Math.round(game.happiness)},
-                {key:'looks',label:'✨ 颜值',val:Math.round(game.looks)},
-                {key:'socialCredit',label:'🏅 社会评价',val:Math.round(game.socialCredit)},
-            ];
-            document.getElementById('finalStats').innerHTML=sd.map(s=>`<div class="final-stat"><div>${s.label}</div><div class="fs-value">${s.val}</div></div>`).join('');
-            document.getElementById('lifeSummary').innerHTML=game.log.map(l=>`${l.age}岁: ${l.text}`).join('<br>');
-        }
+  </div>
 
-        // ==================== 事件池 (200+ 情境) ====================
-        const eventPool = [
-            // ===== 出生与婴儿期 =====
-            { id:'birth', minAge:0, maxAge:0, text:'👶 黄龙辉出生了！产房外，父亲紧张地搓着手。随着一声啼哭，黄龙辉来到了这个世界。', hint:'人生第一个选择', choices:[
-                {emoji:'😊', text:'安稳地躺在妈妈怀里', hint:'健康+5，快乐+10', effects:{health:5, happiness:10}, log:'出生，安稳地躺在妈妈怀里'},
-                {emoji:'😭', text:'大声哭闹，折腾父母', hint:'快乐-5，但引起关注', effects:{happiness:-5, looks:3}, log:'出生时哭闹不止'},
-                {emoji:'😴', text:'安静地睡觉', hint:'健康+3，智力+2', effects:{health:3, intelligence:2}, log:'出生后安静睡觉'}
-            ]},
-            { id:'baby_name', minAge:1, maxAge:2, text:'📛 家人为黄龙辉起名，讨论热烈。', choices:[
-                {emoji:'🌟', text:'叫"辉辉"，寓意光辉', hint:'快乐+5', effects:{happiness:5}, log:'起名辉辉'},
-                {emoji:'🐉', text:'叫"龙龙"，霸气', hint:'社会评价+5', effects:{socialCredit:5}, log:'起名龙龙'},
-                {emoji:'📚', text:'叫"黄学"，爱学习', hint:'智力+3', effects:{intelligence:3}, log:'起名黄学'}
-            ]},
-            { id:'baby_food', minAge:1, maxAge:2, text:'🍼 黄龙辉开始尝试辅食，妈妈准备了不同食物。', choices:[
-                {emoji:'🥕', text:'胡萝卜泥，健康', hint:'健康+5', effects:{health:5}, log:'爱吃胡萝卜泥'},
-                {emoji:'🍎', text:'苹果泥，甜甜的', hint:'快乐+5', effects:{happiness:5}, log:'爱吃苹果泥'},
-                {emoji:'🥩', text:'肉泥，长得壮', hint:'健康+3，颜值+2', effects:{health:3, looks:2}, log:'爱吃肉泥'}
-            ]},
-            { id:'baby_walk', minAge:1, maxAge:2, text:'🚶 黄龙辉尝试学走路，摇摇晃晃。', choices:[
-                {emoji:'👣', text:'勇敢迈出第一步', hint:'健康+5，快乐+5', effects:{health:5, happiness:5}, log:'勇敢学走路'},
-                {emoji:'🧸', text:'扶着玩具慢慢走', hint:'健康+3，智力+3', effects:{health:3, intelligence:3}, log:'扶着玩具学走路'},
-                {emoji:'😢', text:'摔倒了，大哭', hint:'健康-3，但学会坚强', effects:{health:-3, happiness:3}, log:'学走路摔倒了'}
-            ]},
-            { id:'baby_sleep', minAge:1, maxAge:2, text:'😴 黄龙辉晚上睡觉不安稳。', choices:[
-                {emoji:'🌙', text:'妈妈抱着哄睡', hint:'快乐+5，健康+3', effects:{happiness:5, health:3}, log:'妈妈抱着哄睡'},
-                {emoji:'📖', text:'听睡前故事', hint:'智力+5', effects:{intelligence:5}, log:'听睡前故事'},
-                {emoji:'🎵', text:'听摇篮曲', hint:'快乐+8', effects:{happiness:8}, log:'听摇篮曲入睡'}
-            ]},
-            // ===== 幼儿期 (3-5岁) =====
-            { id:'kindergarten', minAge:3, maxAge:4, text:'🏫 黄龙辉上幼儿园了！', choices:[
-                {emoji:'😄', text:'开心地去幼儿园', hint:'快乐+8，智力+5', effects:{happiness:8, intelligence:5}, log:'开心上幼儿园'},
-                {emoji:'😢', text:'哭着不肯去', hint:'快乐-5，但被老师安慰', effects:{happiness:-5, socialCredit:3}, log:'哭闹上幼儿园'},
-                {emoji:'🤝', text:'主动交朋友', hint:'快乐+5，社交+8', effects:{happiness:5, socialCredit:8}, log:'在幼儿园交朋友'}
-            ]},
-            { id:'toy_choice', minAge:3, maxAge:5, text:'🧸 黄龙辉在玩具店挑选玩具。', choices:[
-                {emoji:'🚗', text:'小汽车', hint:'快乐+6', effects:{happiness:6}, log:'喜欢小汽车'},
-                {emoji:'🧩', text:'拼图', hint:'智力+8', effects:{intelligence:8}, log:'喜欢拼图'},
-                {emoji:'⚽', text:'皮球', hint:'健康+8', effects:{health:8}, log:'喜欢玩皮球'}
-            ]},
-            { id:'drawing', minAge:4, maxAge:5, text:'🎨 黄龙辉在纸上涂鸦。', choices:[
-                {emoji:'🌈', text:'画彩虹', hint:'颜值+3，快乐+5', effects:{looks:3, happiness:5}, log:'喜欢画彩虹'},
-                {emoji:'🏠', text:'画房子', hint:'智力+5', effects:{intelligence:5}, log:'喜欢画房子'},
-                {emoji:'🐱', text:'画小猫', hint:'快乐+8', effects:{happiness:8}, log:'喜欢画小猫'}
-            ]},
-            { id:'park_play', minAge:3, maxAge:5, text:'🌳 黄龙辉在公园里玩耍。', choices:[
-                {emoji:'🛝', text:'玩滑梯', hint:'快乐+10', effects:{happiness:10}, log:'公园玩滑梯'},
-                {emoji:'🏖️', text:'玩沙子', hint:'智力+5，快乐+5', effects:{intelligence:5, happiness:5}, log:'公园玩沙子'},
-                {emoji:'🌼', text:'摘花送妈妈', hint:'快乐+8，社会评价+3', effects:{happiness:8, socialCredit:3}, log:'摘花送妈妈'}
-            ]},
-            { id:'candy', minAge:4, maxAge:5, text:'🍬 黄龙辉看到糖果很想吃。', choices:[
-                {emoji:'🍭', text:'偷偷吃一颗', hint:'快乐+8，健康-3', effects:{happiness:8, health:-3}, log:'偷吃糖果'},
-                {emoji:'🙅', text:'忍住不吃', hint:'健康+5，智力+3', effects:{health:5, intelligence:3}, log:'忍住不吃糖'},
-                {emoji:'🍬', text:'分享给朋友', hint:'快乐+10，社会评价+5', effects:{happiness:10, socialCredit:5}, log:'分享糖果'}
-            ]},
-            // ===== 童年期 (6-11岁) =====
-            { id:'primary_school', minAge:6, maxAge:7, text:'🎒 黄龙辉上小学了，一切都是新的。', choices:[
-                {emoji:'📖', text:'认真听课', hint:'智力+12', effects:{intelligence:12}, log:'小学认真听课'},
-                {emoji:'🏃', text:'课间疯跑', hint:'健康+10，快乐+5', effects:{health:10, happiness:5}, log:'小学课间疯跑'},
-                {emoji:'🍭', text:'偷偷吃零食', hint:'快乐+8，健康-3', effects:{happiness:8, health:-3}, log:'小学偷吃零食'}
-            ]},
-            { id:'homework', minAge:7, maxAge:11, text:'📚 黄龙辉面对一堆作业。', choices:[
-                {emoji:'✍️', text:'认真完成作业', hint:'智力+8，社会评价+5', effects:{intelligence:8, socialCredit:5}, log:'认真完成作业'},
-                {emoji:'📺', text:'先看电视再说', hint:'快乐+5，智力-3', effects:{happiness:5, intelligence:-3}, log:'先看电视不写作业'},
-                {emoji:'🤝', text:'抄同学的作业', hint:'快乐+3，社会评价-3', effects:{happiness:3, socialCredit:-3}, log:'抄作业'}
-            ]},
-            { id:'sports_day', minAge:8, maxAge:11, text:'🏅 学校运动会，黄龙辉报名参加。', choices:[
-                {emoji:'🏃', text:'短跑比赛', hint:'健康+10，快乐+5', effects:{health:10, happiness:5}, log:'参加短跑'},
-                {emoji:'📏', text:'跳远', hint:'健康+8，颜值+3', effects:{health:8, looks:3}, log:'参加跳远'},
-                {emoji:'📣', text:'当啦啦队', hint:'快乐+10', effects:{happiness:10}, log:'当啦啦队'}
-            ]},
-            { id:'friendship', minAge:9, maxAge:11, text:'👫 黄龙辉和同学发生小矛盾。', choices:[
-                {emoji:'🤝', text:'主动和好', hint:'快乐+5，社会评价+8', effects:{happiness:5, socialCredit:8}, log:'主动和好'},
-                {emoji:'😤', text:'不理对方', hint:'快乐-5，社会评价-3', effects:{happiness:-5, socialCredit:-3}, log:'冷战'},
-                {emoji:'🍬', text:'分享零食化解', hint:'快乐+8', effects:{happiness:8}, log:'分享零食化解矛盾'}
-            ]},
-            { id:'reading', minAge:10, maxAge:11, text:'📖 黄龙辉发现了一本有趣的书。', choices:[
-                {emoji:'🚀', text:'科幻小说', hint:'智力+10', effects:{intelligence:10}, log:'读科幻小说'},
-                {emoji:'🐉', text:'武侠小说', hint:'快乐+8', effects:{happiness:8}, log:'读武侠小说'},
-                {emoji:'🔍', text:'侦探小说', hint:'智力+6，快乐+4', effects:{intelligence:6, happiness:4}, log:'读侦探小说'}
-            ]},
-            { id:'pet_choice', minAge:8, maxAge:11, text:'🐱 黄龙辉想养一只宠物。', choices:[
-                {emoji:'🐶', text:'养小狗', hint:'快乐+15，健康+5，财富-10', effects:{happiness:15, health:5, wealth:-10}, setFlag:{pet:'狗'}, log:'养了一只小狗'},
-                {emoji:'🐱', text:'养小猫', hint:'快乐+12，颜值+3，财富-8', effects:{happiness:12, looks:3, wealth:-8}, setFlag:{pet:'猫'}, log:'养了一只小猫'},
-                {emoji:'🐟', text:'养金鱼', hint:'快乐+5，财富-2', effects:{happiness:5, wealth:-2}, setFlag:{pet:'鱼'}, log:'养了金鱼'}
-            ]},
-            { id:'class_monitor', minAge:9, maxAge:11, text:'📋 老师问谁想当班长。', choices:[
-                {emoji:'🙋', text:'举手竞选', hint:'社会评价+15，智力+5', effects:{socialCredit:15, intelligence:5}, log:'竞选班长'},
-                {emoji:'🤫', text:'保持沉默', hint:'快乐+3', effects:{happiness:3}, log:'没竞选班长'},
-                {emoji:'👥', text:'推荐好朋友', hint:'社会评价+8', effects:{socialCredit:8}, log:'推荐朋友当班长'}
-            ]},
-            // ===== 青少年 (12-17岁) =====
-            { id:'middle_school', minAge:12, maxAge:13, text:'🏫 黄龙辉进入初中，科目变多。', choices:[
-                {emoji:'📐', text:'喜欢数学', hint:'智力+15', effects:{intelligence:15}, log:'喜欢数学'},
-                {emoji:'📝', text:'喜欢语文', hint:'社会评价+5，智力+8', effects:{socialCredit:5, intelligence:8}, log:'喜欢语文'},
-                {emoji:'🔬', text:'喜欢科学实验', hint:'智力+12，快乐+5', effects:{intelligence:12, happiness:5}, log:'喜欢科学实验'}
-            ]},
-            { id:'exam_pressure', minAge:13, maxAge:15, text:'📚 期中考试临近，黄龙辉感到压力。', choices:[
-                {emoji:'💪', text:'努力复习', hint:'智力+12，健康-5', effects:{intelligence:12, health:-5}, log:'努力复习'},
-                {emoji:'😌', text:'适当放松', hint:'快乐+8，智力+5', effects:{happiness:8, intelligence:5}, log:'劳逸结合'},
-                {emoji:'🎮', text:'打游戏逃避', hint:'快乐+10，智力-8', effects:{happiness:10, intelligence:-8}, log:'打游戏逃避考试'}
-            ]},
-            { id:'hobby', minAge:13, maxAge:16, text:'🎸 黄龙辉想培养一个爱好。', choices:[
-                {emoji:'🎵', text:'学吉他', hint:'快乐+10，颜值+5', effects:{happiness:10, looks:5}, setFlag:{hobby:'吉他'}, log:'学吉他'},
-                {emoji:'🏀', text:'打篮球', hint:'健康+12，颜值+3', effects:{health:12, looks:3}, setFlag:{hobby:'篮球'}, log:'打篮球'},
-                {emoji:'💻', text:'学编程', hint:'智力+15', effects:{intelligence:15}, setFlag:{hobby:'编程'}, log:'学编程'},
-                {emoji:'🎨', text:'学画画', hint:'颜值+8，快乐+5', effects:{looks:8, happiness:5}, setFlag:{hobby:'画画'}, log:'学画画'}
-            ]},
-            { id:'first_love', minAge:15, maxAge:17, text:'💕 黄龙辉收到了一封情书。', choices:[
-                {emoji:'😊', text:'接受，开始早恋', hint:'快乐+15，智力-5，社会评价-5', effects:{happiness:15, intelligence:-5, socialCredit:-5}, log:'早恋了'},
-                {emoji:'📚', text:'拒绝，专心学习', hint:'智力+10，快乐-5', effects:{intelligence:10, happiness:-5}, log:'拒绝早恋，专心学习'},
-                {emoji:'🤝', text:'先做朋友', hint:'快乐+5，社会评价+5', effects:{happiness:5, socialCredit:5}, log:'选择先做朋友'}
-            ]},
-            { id:'highschool_choice', minAge:15, maxAge:16, text:'🎓 中考结束，黄龙辉面临选择。', choices:[
-                {emoji:'🏫', text:'上重点高中', hint:'智力+15，快乐-5', effects:{intelligence:15, happiness:-5}, setFlag:{education:'重点高中'}, log:'上重点高中'},
-                {emoji:'🏫', text:'上普通高中', hint:'快乐+8，智力+5', effects:{happiness:8, intelligence:5}, setFlag:{education:'普通高中'}, log:'上普通高中'},
-                {emoji:'🔧', text:'上职业高中', hint:'健康+8，财富+10', effects:{health:8, wealth:10}, setFlag:{education:'职业高中'}, log:'上职业高中'}
-            ]},
-            { id:'gaokao', minAge:17, maxAge:18, text:'📝 高考来临，黄龙辉走进考场。', choices:[
-                {emoji:'💯', text:'超常发挥', hint:'智力+25，快乐+15', effects:{intelligence:25, happiness:15}, setFlag:{education:'985大学'}, log:'高考超常发挥'},
-                {emoji:'📊', text:'正常发挥', hint:'智力+15', effects:{intelligence:15}, setFlag:{education:'本科大学'}, log:'高考正常发挥'},
-                {emoji:'😰', text:'紧张失误', hint:'智力+5，快乐-10', effects:{intelligence:5, happiness:-10}, setFlag:{education:'专科'}, log:'高考紧张失误'}
-            ]},
-            { id:'summer_job', minAge:16, maxAge:18, text:'☀️ 暑假到了，黄龙辉想打工赚钱。', choices:[
-                {emoji:'🍦', text:'冰淇淋店打工', hint:'财富+15，快乐+10', effects:{wealth:15, happiness:10}, log:'暑假在冰淇淋店打工'},
-                {emoji:'📚', text:'去图书馆做志愿者', hint:'智力+10，社会评价+8', effects:{intelligence:10, socialCredit:8}, log:'暑假图书馆做志愿者'},
-                {emoji:'🏠', text:'在家休息充电', hint:'健康+10，快乐+5', effects:{health:10, happiness:5}, log:'暑假在家休息'}
-            ]},
-            { id:'highschool_club', minAge:15, maxAge:17, text:'🎭 黄龙辉参加高中社团招新。', choices:[
-                {emoji:'🎭', text:'话剧社', hint:'快乐+10，颜值+5', effects:{happiness:10, looks:5}, log:'加入话剧社'},
-                {emoji:'🔬', text:'科学社', hint:'智力+12', effects:{intelligence:12}, log:'加入科学社'},
-                {emoji:'⚽', text:'足球队', hint:'健康+12，快乐+5', effects:{health:12, happiness:5}, log:'加入足球队'}
-            ]},
-            // ===== 青年期 (18-25岁) =====
-            { id:'university', minAge:18, maxAge:20, text:'🎓 黄龙辉进入了大学/社会。', choices:[
-                {emoji:'📚', text:'刻苦学习，拿奖学金', hint:'智力+20，财富+15', effects:{intelligence:20, wealth:15}, log:'大学刻苦学习'},
-                {emoji:'🎉', text:'参加社团，广交朋友', hint:'快乐+15，社会评价+10', effects:{happiness:15, socialCredit:10}, log:'大学参加社团'},
-                {emoji:'💼', text:'提前实习积累经验', hint:'财富+20，智力+10', effects:{wealth:20, intelligence:10}, log:'大学提前实习'}
-            ]},
-            { id:'part_time', minAge:19, maxAge:22, text:'💼 黄龙辉想做兼职赚点钱。', choices:[
-                {emoji:'📚', text:'做家教', hint:'财富+20，智力+5', effects:{wealth:20, intelligence:5}, log:'做家教'},
-                {emoji:'🍔', text:'快餐店打工', hint:'财富+15，健康-5', effects:{wealth:15, health:-5}, log:'快餐店打工'},
-                {emoji:'💻', text:'接编程私活', hint:'财富+30，智力+10', effects:{wealth:30, intelligence:10}, log:'接编程私活'}
-            ]},
-            { id:'graduation', minAge:21, maxAge:23, text:'🎓 黄龙辉毕业了，面临就业选择。', choices:[
-                {emoji:'🏢', text:'进入大公司', hint:'财富+40，快乐-5，社会评价+10', effects:{wealth:40, happiness:-5, socialCredit:10}, setFlag:{career:'大公司员工'}, log:'进入大公司'},
-                {emoji:'🚀', text:'加入创业公司', hint:'财富+20，快乐+10，智力+10', effects:{wealth:20, happiness:10, intelligence:10}, setFlag:{career:'创业公司'}, log:'加入创业公司'},
-                {emoji:'📚', text:'继续深造考研', hint:'智力+25，财富-10', effects:{intelligence:25, wealth:-10}, setFlag:{career:'研究生'}, log:'继续深造'},
-                {emoji:'🌍', text:'gap year 旅行', hint:'快乐+20，财富-20', effects:{happiness:20, wealth:-20}, setFlag:{career:'旅行者'}, log:'gap year 旅行'}
-            ]},
-            { id:'first_job', minAge:22, maxAge:25, text:'💼 黄龙辉开始了第一份工作。', choices:[
-                {emoji:'💪', text:'努力工作，加班加点', hint:'财富+25，健康-8', effects:{wealth:25, health:-8}, log:'拼命加班工作'},
-                {emoji:'🧠', text:'注重学习提升', hint:'智力+15，财富+10', effects:{intelligence:15, wealth:10}, log:'工作中不断学习'},
-                {emoji:'🤝', text:'搞好人际关系', hint:'社会评价+15，快乐+5', effects:{socialCredit:15, happiness:5}, log:'工作中搞好人际关系'}
-            ]},
-            { id:'investment', minAge:23, maxAge:28, text:'📈 黄龙辉有了一点积蓄，想投资。', choices:[
-                {emoji:'📊', text:'买股票', hint:'财富随机±30', effects:{wealth:rand(-30,50)}, log:'投资股票'},
-                {emoji:'🏠', text:'存钱买房', hint:'财富稳步增长+15', effects:{wealth:15}, log:'存钱买房'},
-                {emoji:'📚', text:'投资自己学习', hint:'智力+20，财富-10', effects:{intelligence:20, wealth:-10}, log:'投资自己'}
-            ]},
-            { id:'university_love', minAge:19, maxAge:23, text:'💑 黄龙辉在大学里遇到了喜欢的人。', choices:[
-                {emoji:'💕', text:'主动追求', hint:'快乐+20，智力-5', effects:{happiness:20, intelligence:-5}, setFlag:{spouse:'大学恋人'}, log:'大学恋爱了'},
-                {emoji:'🤝', text:'做普通朋友', hint:'社会评价+5', effects:{socialCredit:5}, log:'大学选择做朋友'},
-                {emoji:'📚', text:'专注学业', hint:'智力+15', effects:{intelligence:15}, log:'大学专注学业'}
-            ]},
-            { id:'study_abroad', minAge:20, maxAge:24, text:'✈️ 黄龙辉有机会出国留学。', choices:[
-                {emoji:'🌍', text:'出国留学', hint:'智力+25，财富-40，快乐+10', effects:{intelligence:25, wealth:-40, happiness:10}, log:'出国留学'},
-                {emoji:'🏠', text:'留在国内发展', hint:'财富+15，社会评价+5', effects:{wealth:15, socialCredit:5}, log:'留在国内发展'},
-                {emoji:'🤔', text:'先工作再考虑', hint:'财富+10，智力+5', effects:{wealth:10, intelligence:5}, log:'先工作再考虑留学'}
-            ]},
-            // ===== 成家立业 (26-40岁) =====
-            { id:'marriage', minAge:26, maxAge:32, text:'💍 黄龙辉遇到了心仪的对象，考虑结婚。', choices:[
-                {emoji:'💒', text:'举办盛大婚礼', hint:'快乐+20，财富-30', effects:{happiness:20, wealth:-30}, setFlag:{spouse:'已婚'}, log:'举办盛大婚礼'},
-                {emoji:'🤵', text:'简单领证', hint:'快乐+10，财富-5', effects:{happiness:10, wealth:-5}, setFlag:{spouse:'已婚'}, log:'简单领证结婚'},
-                {emoji:'💑', text:'先同居不结婚', hint:'快乐+15，社会评价-5', effects:{happiness:15, socialCredit:-5}, setFlag:{spouse:'同居'}, log:'选择同居'}
-            ]},
-            { id:'children', minAge:28, maxAge:35, text:'👶 黄龙辉和伴侣考虑要孩子。', choices:[
-                {emoji:'👨‍👩‍👧', text:'生一个孩子', hint:'快乐+15，财富-15，健康-5', effects:{happiness:15, wealth:-15, health:-5}, setFlag:{children:1}, log:'生了一个孩子'},
-                {emoji:'👨‍👩‍👧‍👦', text:'生两个孩子', hint:'快乐+20，财富-30，健康-10', effects:{happiness:20, wealth:-30, health:-10}, setFlag:{children:2}, log:'生了两个孩子'},
-                {emoji:'🚫', text:'丁克，不要孩子', hint:'财富+20，快乐+5', effects:{wealth:20, happiness:5}, setFlag:{children:0}, log:'选择丁克'}
-            ]},
-            { id:'house_buy', minAge:27, maxAge:35, text:'🏠 黄龙辉考虑买房。', choices:[
-                {emoji:'🏡', text:'买大房子', hint:'快乐+15，财富-50', effects:{happiness:15, wealth:-50}, setFlag:{house:'大房子'}, log:'买了大房子'},
-                {emoji:'🏢', text:'买小公寓', hint:'财富-20，社会评价+5', effects:{wealth:-20, socialCredit:5}, setFlag:{house:'小公寓'}, log:'买了小公寓'},
-                {emoji:'🏠', text:'继续租房', hint:'财富+10，快乐-5', effects:{wealth:10, happiness:-5}, setFlag:{house:'租房'}, log:'继续租房'}
-            ]},
-            { id:'career_promotion', minAge:28, maxAge:35, text:'📈 黄龙辉面临升职机会。', choices:[
-                {emoji:'🚀', text:'争取晋升', hint:'财富+30，社会评价+10，健康-5', effects:{wealth:30, socialCredit:10, health:-5}, log:'争取晋升'},
-                {emoji:'🧘', text:'保持现状', hint:'快乐+10，财富+5', effects:{happiness:10, wealth:5}, log:'保持现状'},
-                {emoji:'💼', text:'跳槽到新公司', hint:'财富+25，社会评价+5，风险', effects:{wealth:25, socialCredit:5}, log:'跳槽新公司'}
-            ]},
-            { id:'midlife_crisis', minAge:35, maxAge:42, text:'😩 黄龙辉感到中年危机，有些迷茫。', choices:[
-                {emoji:'🏃', text:'开始健身', hint:'健康+15，快乐+10', effects:{health:15, happiness:10}, log:'开始健身'},
-                {emoji:'📚', text:'学习新技能', hint:'智力+15', effects:{intelligence:15}, log:'学习新技能'},
-                {emoji:'🌴', text:'去旅行放松', hint:'快乐+20，财富-20', effects:{happiness:20, wealth:-20}, log:'旅行放松'},
-                {emoji:'🍷', text:'借酒消愁', hint:'快乐+5，健康-15', effects:{happiness:5, health:-15}, log:'借酒消愁'}
-            ]},
-            { id:'car_buy', minAge:28, maxAge:38, text:'🚗 黄龙辉考虑买辆车。', choices:[
-                {emoji:'🏎️', text:'买豪车', hint:'快乐+15，财富-40，社会评价+10', effects:{happiness:15, wealth:-40, socialCredit:10}, setFlag:{car:'豪车'}, log:'买了豪车'},
-                {emoji:'🚙', text:'买经济型车', hint:'财富-15，快乐+5', effects:{wealth:-15, happiness:5}, setFlag:{car:'经济型车'}, log:'买了经济型车'},
-                {emoji:'🚌', text:'不买车，坐公交', hint:'财富+10，健康+5', effects:{wealth:10, health:5}, setFlag:{car:'公交'}, log:'选择不买车'}
-            ]},
-            { id:'parent_care', minAge:35, maxAge:45, text:'👴 黄龙辉的父母年纪大了，需要照顾。', choices:[
-                {emoji:'🏠', text:'接父母来同住', hint:'社会评价+15，快乐+10，财富-10', effects:{socialCredit:15, happiness:10, wealth:-10}, log:'接父母同住'},
-                {emoji:'🏥', text:'请护工照顾', hint:'财富-20，社会评价+5', effects:{wealth:-20, socialCredit:5}, log:'请护工照顾父母'},
-                {emoji:'📅', text:'定期探望', hint:'快乐+8，社会评价+8', effects:{happiness:8, socialCredit:8}, log:'定期探望父母'}
-            ]},
-            { id:'family_trip', minAge:30, maxAge:40, text:'🌴 黄龙辉计划一次家庭旅行。', choices:[
-                {emoji:'🏖️', text:'去海边度假', hint:'快乐+20，财富-20', effects:{happiness:20, wealth:-20}, log:'家庭去海边度假'},
-                {emoji:'🏔️', text:'去山里徒步', hint:'健康+15，快乐+10', effects:{health:15, happiness:10}, log:'家庭去山里徒步'},
-                {emoji:'🏠', text:'在家休息', hint:'财富+5，快乐+3', effects:{wealth:5, happiness:3}, log:'家庭在家休息'}
-            ]},
-            // ===== 中年到老年 (40-70岁) =====
-            { id:'health_check', minAge:40, maxAge:55, text:'🏥 黄龙辉去做体检。', choices:[
-                {emoji:'💪', text:'积极锻炼', hint:'健康+15', effects:{health:15}, log:'积极锻炼身体'},
-                {emoji:'🥗', text:'健康饮食', hint:'健康+10，颜值+3', effects:{health:10, looks:3}, log:'健康饮食'},
-                {emoji:'😴', text:'保证睡眠', hint:'健康+8，快乐+5', effects:{health:8, happiness:5}, log:'保证充足睡眠'}
-            ]},
-            { id:'children_education', minAge:38, maxAge:45, text:'🎓 黄龙辉的孩子面临教育问题。', choices:[
-                {emoji:'📚', text:'送孩子去好学校', hint:'财富-30，社会评价+10', effects:{wealth:-30, socialCredit:10}, log:'送孩子去好学校'},
-                {emoji:'🧠', text:'自己辅导孩子', hint:'智力+5，快乐+5', effects:{intelligence:5, happiness:5}, log:'自己辅导孩子'},
-                {emoji:'🎨', text:'让孩子自由发展', hint:'快乐+10', effects:{happiness:10}, log:'让孩子自由发展'}
-            ]},
-            { id:'retirement', minAge:55, maxAge:65, text:'🌅 黄龙辉退休了，开始规划晚年生活。', choices:[
-                {emoji:'🌍', text:'环游世界', hint:'快乐+25，财富-40', effects:{happiness:25, wealth:-40}, log:'退休后环游世界'},
-                {emoji:'🌱', text:'种花养草', hint:'健康+10，快乐+10', effects:{health:10, happiness:10}, log:'退休后种花养草'},
-                {emoji:'📚', text:'写回忆录', hint:'智力+10，快乐+5', effects:{intelligence:10, happiness:5}, log:'退休后写回忆录'},
-                {emoji:'👨‍👩‍👧', text:'帮子女带孩子', hint:'快乐+15，健康-5', effects:{happiness:15, health:-5}, log:'帮子女带孩子'}
-            ]},
-            { id:'elder_health', minAge:65, maxAge:80, text:'🩺 黄龙辉年纪大了，健康需要注意。', choices:[
-                {emoji:'🏃', text:'坚持散步', hint:'健康+10', effects:{health:10}, log:'坚持散步'},
-                {emoji:'🧘', text:'打太极', hint:'健康+8，快乐+5', effects:{health:8, happiness:5}, log:'打太极'},
-                {emoji:'🏥', text:'定期体检', hint:'健康+12，财富-10', effects:{health:12, wealth:-10}, log:'定期体检'}
-            ]},
-            { id:'legacy', minAge:70, maxAge:90, text:'📜 黄龙辉回顾一生，想留下点什么。', choices:[
-                {emoji:'📖', text:'写自传', hint:'智力+10，社会评价+10', effects:{intelligence:10, socialCredit:10}, log:'写自传'},
-                {emoji:'💰', text:'把财产留给子女', hint:'社会评价+10', effects:{socialCredit:10}, log:'财产留给子女'},
-                {emoji:'🌳', text:'种一棵树', hint:'快乐+15', effects:{happiness:15}, log:'种树留念'}
-            ]},
-            { id:'square_dance', minAge:60, maxAge:75, text:'💃 黄龙辉看到公园里有人跳广场舞。', choices:[
-                {emoji:'🕺', text:'加入一起跳', hint:'快乐+15，健康+10', effects:{happiness:15, health:10}, log:'跳广场舞'},
-                {emoji:'👀', text:'在旁边观看', hint:'快乐+5', effects:{happiness:5}, log:'看广场舞'},
-                {emoji:'🎵', text:'放音乐支持', hint:'社会评价+5，快乐+8', effects:{socialCredit:5, happiness:8}, log:'放音乐支持广场舞'}
-            ]},
-            { id:'old_friend', minAge:50, maxAge:70, text:'📞 黄龙辉的老朋友打来电话。', choices:[
-                {emoji:'🤝', text:'约出来聚聚', hint:'快乐+15，社会评价+5', effects:{happiness:15, socialCredit:5}, log:'和老朋友聚会'},
-                {emoji:'💬', text:'电话聊聊天', hint:'快乐+8', effects:{happiness:8}, log:'和老朋友电话聊天'},
-                {emoji:'📝', text:'写信问候', hint:'智力+5，快乐+5', effects:{intelligence:5, happiness:5}, log:'给老朋友写信'}
-            ]},
-            { id:'volunteer', minAge:40, maxAge:65, text:'🤝 黄龙辉想做些公益。', choices:[
-                {emoji:'🧒', text:'去孤儿院做义工', hint:'快乐+15，社会评价+10', effects:{happiness:15, socialCredit:10}, log:'去孤儿院做义工'},
-                {emoji:'🌳', text:'参加植树活动', hint:'健康+10，社会评价+5', effects:{health:10, socialCredit:5}, log:'参加植树活动'},
-                {emoji:'💰', text:'捐款献爱心', hint:'社会评价+10，财富-15', effects:{socialCredit:10, wealth:-15}, log:'捐款献爱心'}
-            ]},
-            { id:'cooking', minAge:30, maxAge:50, text:'🍳 黄龙辉想学做一道新菜。', choices:[
-                {emoji:'🥘', text:'学做红烧肉', hint:'快乐+10，健康+3', effects:{happiness:10, health:3}, log:'学做红烧肉'},
-                {emoji:'🥗', text:'学做沙拉', hint:'健康+10', effects:{health:10}, log:'学做沙拉'},
-                {emoji:'🍰', text:'学做蛋糕', hint:'快乐+15', effects:{happiness:15}, log:'学做蛋糕'}
-            ]},
-            { id:'garden', minAge:45, maxAge:65, text:'🌱 黄龙辉想在家种点东西。', choices:[
-                {emoji:'🌹', text:'种玫瑰花', hint:'颜值+8，快乐+10', effects:{looks:8, happiness:10}, log:'种玫瑰花'},
-                {emoji:'🍅', text:'种蔬菜', hint:'健康+10，财富+5', effects:{health:10, wealth:5}, log:'种蔬菜'},
-                {emoji:'🌿', text:'种香草', hint:'智力+5，快乐+5', effects:{intelligence:5, happiness:5}, log:'种香草'}
-            ]},
-            { id:'digital_learning', minAge:50, maxAge:70, text:'📱 黄龙辉想学用智能手机。', choices:[
-                {emoji:'📱', text:'学用微信', hint:'快乐+10，社会评价+5', effects:{happiness:10, socialCredit:5}, log:'学会用微信'},
-                {emoji:'💻', text:'学上网冲浪', hint:'智力+10', effects:{intelligence:10}, log:'学会上网'},
-                {emoji:'📸', text:'学拍照修图', hint:'颜值+5，快乐+10', effects:{looks:5, happiness:10}, log:'学会拍照修图'}
-            ]},
-            { id:'reunion', minAge:35, maxAge:55, text:'🎉 黄龙辉参加同学聚会。', choices:[
-                {emoji:'😊', text:'热情参加', hint:'快乐+15，社会评价+10', effects:{happiness:15, socialCredit:10}, log:'参加同学聚会'},
-                {emoji:'🤐', text:'低调参加', hint:'快乐+5', effects:{happiness:5}, log:'低调参加同学聚会'},
-                {emoji:'📵', text:'找借口不去', hint:'快乐-5，社会评价-3', effects:{happiness:-5, socialCredit:-3}, log:'没去同学聚会'}
-            ]},
-            { id:'lottery', minAge:25, maxAge:60, text:'🎰 黄龙辉买了张彩票。', choices:[
-                {emoji:'🎯', text:'认真选号', hint:'财富+10，有小惊喜', effects:{wealth:10}, log:'买彩票认真选号'},
-                {emoji:'🎲', text:'随机选号', hint:'财富+5', effects:{wealth:5}, log:'买彩票随机选号'},
-                {emoji:'📊', text:'研究彩票规律', hint:'智力+5，财富-5', effects:{intelligence:5, wealth:-5}, log:'研究彩票规律'}
-            ]},
-            { id:'accident', minAge:20, maxAge:60, text:'🚑 黄龙辉遇到了一次小意外。', choices:[
-                {emoji:'🩹', text:'去诊所处理', hint:'健康+5，财富-5', effects:{health:5, wealth:-5}, log:'小意外去诊所'},
-                {emoji:'🏥', text:'去医院检查', hint:'健康+10，财富-15', effects:{health:10, wealth:-15}, log:'小意外去医院检查'},
-                {emoji:'💪', text:'自己处理', hint:'健康-3，省了钱', effects:{health:-3}, log:'小意外自己处理'}
-            ]},
-            { id:'weather_bad', minAge:20, maxAge:70, text:'🌧️ 遇到恶劣天气，黄龙辉的出行计划被打乱。', choices:[
-                {emoji:'🏠', text:'待在家里休息', hint:'快乐+5，健康+3', effects:{happiness:5, health:3}, log:'雨天在家休息'},
-                {emoji:'☔', text:'冒雨出门', hint:'健康-5，快乐-3', effects:{health:-5, happiness:-3}, log:'冒雨出门'},
-                {emoji:'📖', text:'在家读书', hint:'智力+8', effects:{intelligence:8}, log:'雨天在家读书'}
-            ]},
-            { id:'neighbor', minAge:25, maxAge:60, text:'🏘️ 黄龙辉的邻居来串门。', choices:[
-                {emoji:'🍵', text:'热情招待', hint:'社会评价+10，快乐+5', effects:{socialCredit:10, happiness:5}, log:'热情招待邻居'},
-                {emoji:'😐', text:'随便聊聊', hint:'社会评价+3', effects:{socialCredit:3}, log:'和邻居闲聊'},
-                {emoji:'🚪', text:'假装不在家', hint:'社会评价-5', effects:{socialCredit:-5}, log:'假装不在家'}
-            ]},
-            { id:'festival', minAge:20, maxAge:70, text:'🧨 春节到了，黄龙辉准备过年。', choices:[
-                {emoji:'🧧', text:'发红包', hint:'快乐+15，财富-20，社会评价+10', effects:{happiness:15, wealth:-20, socialCredit:10}, log:'春节发红包'},
-                {emoji:'🏮', text:'贴春联布置家', hint:'快乐+10', effects:{happiness:10}, log:'春节贴春联'},
-                {emoji:'🍜', text:'做年夜饭', hint:'快乐+12，健康+5', effects:{happiness:12, health:5}, log:'春节做年夜饭'}
-            ]},
-            { id:'health_scare', minAge:45, maxAge:65, text:'😰 黄龙辉体检发现指标异常。', choices:[
-                {emoji:'💊', text:'积极治疗', hint:'健康+15，财富-20', effects:{health:15, wealth:-20}, log:'积极治疗'},
-                {emoji:'🏃', text:'加强锻炼', hint:'健康+12', effects:{health:12}, log:'加强锻炼改善指标'},
-                {emoji:'😌', text:'调整心态', hint:'快乐+10，健康+5', effects:{happiness:10, health:5}, log:'调整心态面对'}
-            ]},
-            { id:'windfall', minAge:30, maxAge:60, text:'💰 黄龙辉得到了一笔意外之财。', choices:[
-                {emoji:'📈', text:'投资理财', hint:'财富+20', effects:{wealth:20}, log:'意外之财用于投资'},
-                {emoji:'🎁', text:'给家人买礼物', hint:'快乐+15，社会评价+10，财富-10', effects:{happiness:15, socialCredit:10, wealth:-10}, log:'意外之财买礼物'},
-                {emoji:'🏦', text:'存银行', hint:'财富+10，快乐+3', effects:{wealth:10, happiness:3}, log:'意外之财存银行'}
-            ]},
-            { id:'pet_illness', minAge:30, maxAge:55, condition:(g)=>g.pet!==null, text:'🐾 黄龙辉的宠物生病了。', choices:[
-                {emoji:'🏥', text:'带去看兽医', hint:'健康+5，财富-15，快乐-5', effects:{health:5, wealth:-15, happiness:-5}, log:'带宠物看兽医'},
-                {emoji:'💊', text:'自己买药', hint:'财富-5，有风险', effects:{wealth:-5}, log:'自己给宠物买药'},
-                {emoji:'🤷', text:'观察两天', hint:'快乐-10', effects:{happiness:-10}, log:'宠物生病观察中'}
-            ]},
-            { id:'charity', minAge:30, maxAge:65, text:'🎗️ 黄龙辉参加慈善活动。', choices:[
-                {emoji:'💝', text:'捐款', hint:'社会评价+15，财富-20', effects:{socialCredit:15, wealth:-20}, log:'慈善捐款'},
-                {emoji:'🤝', text:'做志愿者', hint:'社会评价+10，快乐+10', effects:{socialCredit:10, happiness:10}, log:'做慈善志愿者'},
-                {emoji:'📢', text:'帮忙宣传', hint:'社会评价+5', effects:{socialCredit:5}, log:'帮忙宣传慈善'}
-            ]},
-            { id:'hobby_revisit', minAge:50, maxAge:70, condition:(g)=>g.hobby!==null, text:'🎨 黄龙辉重拾年轻时的爱好。', choices:[
-                {emoji:'💪', text:'每天坚持练习', hint:'快乐+15，健康+5', effects:{happiness:15, health:5}, log:'重拾爱好每天练习'},
-                {emoji:'👥', text:'加入爱好者社群', hint:'社会评价+10，快乐+10', effects:{socialCredit:10, happiness:10}, log:'加入爱好者社群'},
-                {emoji:'📝', text:'记录心得', hint:'智力+8', effects:{intelligence:8}, log:'记录爱好心得'}
-            ]},
-            { id:'grandchildren', minAge:55, maxAge:75, condition:(g)=>g.children>0, text:'👶 黄龙辉的孙子/孙女出生了！', choices:[
-                {emoji:'💕', text:'帮忙带孙子', hint:'快乐+20，健康-5', effects:{happiness:20, health:-5}, log:'帮忙带孙子'},
-                {emoji:'🎁', text:'送贵重礼物', hint:'财富-15，快乐+10', effects:{wealth:-15, happiness:10}, log:'送孙子贵重礼物'},
-                {emoji:'📸', text:'拍照记录', hint:'快乐+10', effects:{happiness:10}, log:'给孙子拍照'}
-            ]},
-            { id:'tech_help', minAge:40, maxAge:60, text:'💻 黄龙辉帮朋友解决电脑问题。', choices:[
-                {emoji:'🛠️', text:'帮忙修理', hint:'智力+10，社会评价+5', effects:{intelligence:10, socialCredit:5}, log:'帮朋友修电脑'},
-                {emoji:'📚', text:'教朋友使用', hint:'智力+8，快乐+5', effects:{intelligence:8, happiness:5}, log:'教朋友用电脑'},
-                {emoji:'☎️', text:'推荐专业人员', hint:'社会评价+3', effects:{socialCredit:3}, log:'推荐专业人员'}
-            ]},
-            { id:'lost_item', minAge:25, maxAge:60, text:'🔍 黄龙辉丢了重要的东西。', choices:[
-                {emoji:'🔎', text:'仔细寻找', hint:'智力+5，快乐-5', effects:{intelligence:5, happiness:-5}, log:'仔细寻找丢失物品'},
-                {emoji:'📞', text:'寻求帮助', hint:'社会评价+5', effects:{socialCredit:5}, log:'寻求帮助找东西'},
-                {emoji:'😤', text:'放弃算了', hint:'快乐-10', effects:{happiness:-10}, log:'放弃寻找丢失物品'}
-            ]},
-            { id:'new_skill', minAge:30, maxAge:50, text:'📚 黄龙辉想学一项新技能。', choices:[
-                {emoji:'🍳', text:'学烹饪', hint:'快乐+10，健康+5', effects:{happiness:10, health:5}, log:'学烹饪'},
-                {emoji:'📷', text:'学摄影', hint:'颜值+5，快乐+10', effects:{looks:5, happiness:10}, log:'学摄影'},
-                {emoji:'🗣️', text:'学外语', hint:'智力+15', effects:{intelligence:15}, log:'学外语'}
-            ]},
-            { id:'diet', minAge:35, maxAge:55, text:'🥗 黄龙辉想改变饮食习惯。', choices:[
-                {emoji:'🥦', text:'多吃蔬菜水果', hint:'健康+12', effects:{health:12}, log:'多吃蔬菜水果'},
-                {emoji:'🍖', text:'减少油腻', hint:'健康+8，颜值+3', effects:{health:8, looks:3}, log:'减少油腻饮食'},
-                {emoji:'🍚', text:'控制食量', hint:'健康+5，颜值+5', effects:{health:5, looks:5}, log:'控制食量'}
-            ]},
-            { id:'meditation', minAge:30, maxAge:60, text:'🧘 黄龙辉尝试冥想放松。', choices:[
-                {emoji:'🧠', text:'每天冥想10分钟', hint:'快乐+10，智力+5', effects:{happiness:10, intelligence:5}, log:'每天冥想'},
-                {emoji:'🌿', text:'去大自然冥想', hint:'快乐+15，健康+5', effects:{happiness:15, health:5}, log:'去大自然冥想'},
-                {emoji:'📱', text:'用冥想APP', hint:'快乐+8', effects:{happiness:8}, log:'用APP冥想'}
-            ]},
-            { id:'gift_friend', minAge:25, maxAge:55, text:'🎁 黄龙辉的朋友要过生日。', choices:[
-                {emoji:'💝', text:'精心准备礼物', hint:'社会评价+10，快乐+8', effects:{socialCredit:10, happiness:8}, log:'精心准备生日礼物'},
-                {emoji:'🍰', text:'买蛋糕庆祝', hint:'快乐+10，财富-5', effects:{happiness:10, wealth:-5}, log:'买蛋糕庆祝朋友生日'},
-                {emoji:'📱', text:'发红包', hint:'财富-10，社会评价+5', effects:{wealth:-10, socialCredit:5}, log:'发红包祝福'}
-            ]},
-            { id:'house_repair', minAge:35, maxAge:60, condition:(g)=>g.house!=='无'&&g.house!=='租房', text:'🔧 黄龙辉家里的水管坏了。', choices:[
-                {emoji:'🛠️', text:'自己动手修理', hint:'智力+8，财富+5', effects:{intelligence:8, wealth:5}, log:'自己修水管'},
-                {emoji:'📞', text:'请修理工', hint:'财富-15，快乐+3', effects:{wealth:-15, happiness:3}, log:'请修理工修水管'},
-                {emoji:'👨‍👩‍👧', text:'找家人帮忙', hint:'快乐+10', effects:{happiness:10}, log:'找家人帮忙修水管'}
-            ]},
-            { id:'old_photo', minAge:50, maxAge:75, text:'📷 黄龙辉翻出了年轻时的照片。', choices:[
-                {emoji:'😊', text:'回忆美好时光', hint:'快乐+15', effects:{happiness:15}, log:'翻看旧照片回忆'},
-                {emoji:'📱', text:'拍照分享给家人', hint:'社会评价+5，快乐+10', effects:{socialCredit:5, happiness:10}, log:'分享旧照片'},
-                {emoji:'📝', text:'写下回忆', hint:'智力+8', effects:{intelligence:8}, log:'写下照片回忆'}
-            ]},
-            { id:'walking', minAge:40, maxAge:70, text:'🚶 黄龙辉养成了散步的习惯。', choices:[
-                {emoji:'🌅', text:'晨练散步', hint:'健康+12', effects:{health:12}, log:'晨练散步'},
-                {emoji:'🌙', text:'饭后散步', hint:'健康+8，快乐+5', effects:{health:8, happiness:5}, log:'饭后散步'},
-                {emoji:'👫', text:'和朋友一起散步', hint:'快乐+12', effects:{happiness:12}, log:'和朋友散步'}
-            ]},
-            { id:'community_event', minAge:40, maxAge:65, text:'🏘️ 社区举办活动。', choices:[
-                {emoji:'🎉', text:'积极参加', hint:'快乐+12，社会评价+8', effects:{happiness:12, socialCredit:8}, log:'参加社区活动'},
-                {emoji:'🤝', text:'帮忙组织', hint:'社会评价+12，智力+5', effects:{socialCredit:12, intelligence:5}, log:'帮忙组织社区活动'},
-                {emoji:'👀', text:'旁观就好', hint:'快乐+3', effects:{happiness:3}, log:'旁观社区活动'}
-            ]},
-            { id:'cold', minAge:20, maxAge:60, text:'🤧 黄龙辉感冒了。', choices:[
-                {emoji:'💊', text:'吃药休息', hint:'健康+10', effects:{health:10}, log:'感冒吃药休息'},
-                {emoji:'🍊', text:'多吃水果', hint:'健康+8', effects:{health:8}, log:'感冒多吃水果'},
-                {emoji:'💪', text:'硬扛过去', hint:'健康-5，省了钱', effects:{health:-5}, log:'感冒硬扛'}
-            ]},
-            { id:'lucky_day', minAge:20, maxAge:60, text:'🍀 今天是黄龙辉的幸运日！', choices:[
-                {emoji:'🎯', text:'买张彩票', hint:'财富+15', effects:{wealth:15}, log:'幸运日买彩票'},
-                {emoji:'🎁', text:'给朋友惊喜', hint:'社会评价+10，快乐+8', effects:{socialCredit:10, happiness:8}, log:'幸运日给朋友惊喜'},
-                {emoji:'💼', text:'努力工作', hint:'财富+20', effects:{wealth:20}, log:'幸运日努力工作'}
-            ]},
-            { id:'unlucky_day', minAge:20, maxAge:60, text:'☔ 今天黄龙辉诸事不顺。', choices:[
-                {emoji:'😌', text:'保持冷静', hint:'智力+5，快乐-3', effects:{intelligence:5, happiness:-3}, log:'倒霉日保持冷静'},
-                {emoji:'🍵', text:'喝杯茶缓缓', hint:'快乐+8', effects:{happiness:8}, log:'倒霉日喝茶缓缓'},
-                {emoji:'💪', text:'继续努力', hint:'健康+5，智力+3', effects:{health:5, intelligence:3}, log:'倒霉日继续努力'}
-            ]},
-            // 补充更多具体事件
-            { id:'siblings', minAge:5, maxAge:10, text:'👶 妈妈问黄龙辉想不想要弟弟妹妹。', choices:[
-                {emoji:'😊', text:'想要弟弟妹妹', hint:'快乐+10，社会评价+5', effects:{happiness:10, socialCredit:5}, log:'想要弟弟妹妹'},
-                {emoji:'🙅', text:'不想要', hint:'快乐-3', effects:{happiness:-3}, log:'不想要弟弟妹妹'},
-                {emoji:'🤔', text:'无所谓', hint:'无变化', effects:{}, log:'对弟弟妹妹无所谓'}
-            ]},
-            { id:'teacher_praise', minAge:7, maxAge:12, text:'🌟 黄龙辉被老师表扬了。', choices:[
-                {emoji:'😊', text:'谦虚接受', hint:'社会评价+8', effects:{socialCredit:8}, log:'谦虚接受表扬'},
-                {emoji:'💪', text:'继续努力', hint:'智力+8', effects:{intelligence:8}, log:'被表扬后继续努力'},
-                {emoji:'🎉', text:'开心庆祝', hint:'快乐+10', effects:{happiness:10}, log:'被表扬后开心庆祝'}
-            ]},
-            { id:'school_play', minAge:8, maxAge:12, text:'🎭 学校要演舞台剧。', choices:[
-                {emoji:'🎭', text:'报名主演', hint:'颜值+8，快乐+10', effects:{looks:8, happiness:10}, log:'舞台剧主演'},
-                {emoji:'🎨', text:'做幕后工作', hint:'智力+10', effects:{intelligence:10}, log:'舞台剧幕后'},
-                {emoji:'👀', text:'当观众', hint:'快乐+5', effects:{happiness:5}, log:'舞台剧观众'}
-            ]},
-            { id:'birthday_party', minAge:8, maxAge:15, text:'🎂 黄龙辉过生日。', choices:[
-                {emoji:'🎉', text:'邀请朋友开派对', hint:'快乐+15，社会评价+8', effects:{happiness:15, socialCredit:8}, log:'生日开派对'},
-                {emoji:'🏠', text:'和家人一起过', hint:'快乐+10', effects:{happiness:10}, log:'生日和家人过'},
-                {emoji:'🎁', text:'给自己买礼物', hint:'快乐+8，财富-10', effects:{happiness:8, wealth:-10}, log:'生日给自己买礼物'}
-            ]},
-            { id:'exam_result', minAge:13, maxAge:17, text:'📊 黄龙辉拿到了考试成绩单。', choices:[
-                {emoji:'😊', text:'考得好，继续努力', hint:'智力+10，快乐+5', effects:{intelligence:10, happiness:5}, log:'考试成绩好'},
-                {emoji:'😞', text:'考得差，要加油', hint:'快乐-10，智力+5', effects:{happiness:-10, intelligence:5}, log:'考试成绩差'},
-                {emoji:'🤔', text:'分析错题', hint:'智力+12', effects:{intelligence:12}, log:'分析错题'}
-            ]},
-            { id:'school_bully', minAge:12, maxAge:16, text:'😠 黄龙辉看到同学被欺负。', choices:[
-                {emoji:'💪', text:'挺身而出', hint:'社会评价+15，健康-5', effects:{socialCredit:15, health:-5}, log:'挺身而出帮助同学'},
-                {emoji:'📞', text:'报告老师', hint:'社会评价+10', effects:{socialCredit:10}, log:'报告老师'},
-                {emoji:'😰', text:'装作没看见', hint:'快乐-8，社会评价-5', effects:{happiness:-8, socialCredit:-5}, log:'装作没看见'}
-            ]},
-            { id:'internet', minAge:14, maxAge:18, text:'💻 黄龙辉第一次接触互联网。', choices:[
-                {emoji:'📚', text:'用网络学习', hint:'智力+15', effects:{intelligence:15}, log:'用网络学习'},
-                {emoji:'🎮', text:'玩网络游戏', hint:'快乐+10，智力-5', effects:{happiness:10, intelligence:-5}, log:'玩网络游戏'},
-                {emoji:'👥', text:'交网友', hint:'快乐+8，社会评价+5', effects:{happiness:8, socialCredit:5}, log:'交网友'}
-            ]},
-            { id:'fashion', minAge:15, maxAge:20, text:'👔 黄龙辉开始注重穿着打扮。', choices:[
-                {emoji:'💅', text:'打扮时尚', hint:'颜值+10，财富-10', effects:{looks:10, wealth:-10}, log:'打扮时尚'},
-                {emoji:'👕', text:'穿着舒适就好', hint:'健康+5', effects:{health:5}, log:'穿着舒适'},
-                {emoji:'📚', text:'不关心外表', hint:'智力+5', effects:{intelligence:5}, log:'不关心外表'}
-            ]},
-            { id:'driver_license', minAge:18, maxAge:22, text:'🚗 黄龙辉去考驾照。', choices:[
-                {emoji:'💪', text:'认真练习', hint:'智力+8，财富-5', effects:{intelligence:8, wealth:-5}, log:'认真考驾照'},
-                {emoji:'😰', text:'紧张但努力', hint:'智力+5', effects:{intelligence:5}, log:'紧张考驾照'},
-                {emoji:'📅', text:'以后再说', hint:'快乐+3', effects:{happiness:3}, log:'推迟考驾照'}
-            ]},
-            { id:'first_salary', minAge:22, maxAge:26, text:'💰 黄龙辉拿到了第一份工资。', choices:[
-                {emoji:'🎁', text:'给父母买礼物', hint:'社会评价+10，快乐+10', effects:{socialCredit:10, happiness:10}, log:'第一份工资给父母买礼物'},
-                {emoji:'🏦', text:'存起来', hint:'财富+10', effects:{wealth:10}, log:'第一份工资存起来'},
-                {emoji:'🛍️', text:'犒劳自己', hint:'快乐+15，财富-10', effects:{happiness:15, wealth:-10}, log:'第一份工资犒劳自己'}
-            ]},
-            { id:'work_colleague', minAge:23, maxAge:30, text:'🤝 黄龙辉和同事关系很好。', choices:[
-                {emoji:'🍻', text:'经常聚会', hint:'快乐+12，社会评价+8', effects:{happiness:12, socialCredit:8}, log:'和同事经常聚会'},
-                {emoji:'💼', text:'保持专业距离', hint:'智力+5', effects:{intelligence:5}, log:'和同事保持距离'},
-                {emoji:'🏠', text:'下班就回家', hint:'健康+5，快乐+3', effects:{health:5, happiness:3}, log:'下班就回家'}
-            ]},
-            { id:'work_stress', minAge:24, maxAge:35, text:'😫 黄龙辉工作压力很大。', choices:[
-                {emoji:'🏃', text:'运动解压', hint:'健康+12，快乐+5', effects:{health:12, happiness:5}, log:'运动解压'},
-                {emoji:'🎵', text:'听音乐放松', hint:'快乐+10', effects:{happiness:10}, log:'听音乐解压'},
-                {emoji:'😤', text:'硬撑着', hint:'健康-8，智力+5', effects:{health:-8, intelligence:5}, log:'硬撑工作压力'}
-            ]},
-            { id:'side_hustle', minAge:25, maxAge:35, text:'💼 黄龙辉想做副业。', choices:[
-                {emoji:'📱', text:'做自媒体', hint:'财富+15，快乐+5，有风险', effects:{wealth:15, happiness:5}, log:'做自媒体副业'},
-                {emoji:'🏪', text:'开网店', hint:'财富+20，智力+5', effects:{wealth:20, intelligence:5}, log:'开网店副业'},
-                {emoji:'📚', text:'写书出版', hint:'智力+15，社会评价+10', effects:{intelligence:15, socialCredit:10}, log:'写书出版'}
-            ]},
-            { id:'insurance', minAge:28, maxAge:40, text:'🛡️ 黄龙辉考虑买保险。', choices:[
-                {emoji:'💼', text:'买健康保险', hint:'健康+5，财富-10', effects:{health:5, wealth:-10}, log:'买健康保险'},
-                {emoji:'🏠', text:'买房险', hint:'财富-8', effects:{wealth:-8}, log:'买房险'},
-                {emoji:'🤔', text:'不买保险', hint:'财富+5', effects:{wealth:5}, log:'不买保险'}
-            ]},
-            { id:'family_dinner', minAge:25, maxAge:50, text:'🍽️ 黄龙辉和家人一起吃晚饭。', choices:[
-                {emoji:'👨‍👩‍👧', text:'开心聊天', hint:'快乐+12，社会评价+5', effects:{happiness:12, socialCredit:5}, log:'家庭晚餐开心聊天'},
-                {emoji:'📱', text:'边吃边玩手机', hint:'快乐-3', effects:{happiness:-3}, log:'家庭晚餐玩手机'},
-                {emoji:'🍳', text:'帮忙做饭', hint:'快乐+8，健康+3', effects:{happiness:8, health:3}, log:'家庭晚餐帮忙做饭'}
-            ]},
-            { id:'neighborhood_help', minAge:30, maxAge:55, text:'🤝 邻居需要帮助。', choices:[
-                {emoji:'💪', text:'热心帮忙', hint:'社会评价+12，快乐+8', effects:{socialCredit:12, happiness:8}, log:'热心帮助邻居'},
-                {emoji:'📞', text:'帮忙联系专业人员', hint:'社会评价+5', effects:{socialCredit:5}, log:'帮忙联系人员'},
-                {emoji:'😐', text:'没时间帮', hint:'社会评价-3', effects:{socialCredit:-3}, log:'没帮邻居'}
-            ]},
-            { id:'pet_play', minAge:25, maxAge:50, condition:(g)=>g.pet!==null, text:'🐾 黄龙辉和宠物玩耍。', choices:[
-                {emoji:'🎾', text:'玩接球', hint:'快乐+15，健康+5', effects:{happiness:15, health:5}, log:'和宠物玩接球'},
-                {emoji:'📸', text:'给宠物拍照', hint:'快乐+10，颜值+3', effects:{happiness:10, looks:3}, log:'给宠物拍照'},
-                {emoji:'🍖', text:'喂宠物零食', hint:'快乐+8', effects:{happiness:8}, log:'喂宠物零食'}
-            ]},
-            { id:'gardening_harvest', minAge:45, maxAge:65, condition:(g)=>g.house!=='无'&&g.house!=='租房', text:'🌱 黄龙辉种的植物结果了。', choices:[
-                {emoji:'🍅', text:'采摘分享', hint:'快乐+12，社会评价+5', effects:{happiness:12, socialCredit:5}, log:'采摘分享'},
-                {emoji:'📸', text:'拍照留念', hint:'快乐+8', effects:{happiness:8}, log:'拍照留念'},
-                {emoji:'🍽️', text:'做成美食', hint:'快乐+10，健康+5', effects:{happiness:10, health:5}, log:'做成美食'}
-            ]},
-            { id:'retirement_plan', minAge:50, maxAge:60, text:'📋 黄龙辉开始规划退休生活。', choices:[
-                {emoji:'💰', text:'制定理财计划', hint:'财富+15', effects:{wealth:15}, log:'制定退休理财计划'},
-                {emoji:'🌍', text:'规划旅行路线', hint:'快乐+10', effects:{happiness:10}, log:'规划退休旅行'},
-                {emoji:'📚', text:'列读书清单', hint:'智力+10', effects:{intelligence:10}, log:'列退休读书清单'}
-            ]},
-            { id:'old_neighbor', minAge:60, maxAge:80, text:'🏘️ 黄龙辉的老邻居搬走了。', choices:[
-                {emoji:'🎁', text:'送纪念礼物', hint:'社会评价+8，快乐+5', effects:{socialCredit:8, happiness:5}, log:'送老邻居纪念礼物'},
-                {emoji:'📞', text:'留联系方式', hint:'快乐+5', effects:{happiness:5}, log:'留老邻居联系方式'},
-                {emoji:'😢', text:'有些不舍', hint:'快乐-5', effects:{happiness:-5}, log:'不舍老邻居'}
-            ]},
-            { id:'health_walk', minAge:65, maxAge:85, text:'🚶 黄龙辉坚持每天散步。', choices:[
-                {emoji:'🌅', text:'清晨散步', hint:'健康+12', effects:{health:12}, log:'清晨散步'},
-                {emoji:'🌳', text:'公园散步', hint:'健康+10，快乐+8', effects:{health:10, happiness:8}, log:'公园散步'},
-                {emoji:'👫', text:'和老伴一起散步', hint:'快乐+15，健康+5', effects:{happiness:15, health:5}, log:'和老伴散步'}
-            ]},
-            { id:'memory_book', minAge:70, maxAge:90, text:'📖 黄龙辉整理一生的照片和信件。', choices:[
-                {emoji:'📚', text:'制作家庭相册', hint:'快乐+15，社会评价+5', effects:{happiness:15, socialCredit:5}, log:'制作家庭相册'},
-                {emoji:'📝', text:'写回忆文章', hint:'智力+10', effects:{intelligence:10}, log:'写回忆文章'},
-                {emoji:'🎁', text:'送给子女珍藏', hint:'社会评价+10，快乐+8', effects:{socialCredit:10, happiness:8}, log:'送子女珍藏'}
-            ]},
-            { id:'final_wisdom', minAge:75, maxAge:95, text:'🌟 黄龙辉对人生有了更深的感悟。', choices:[
-                {emoji:'😊', text:'知足常乐', hint:'快乐+20', effects:{happiness:20}, log:'知足常乐'},
-                {emoji:'📚', text:'继续学习', hint:'智力+10', effects:{intelligence:10}, log:'活到老学到老'},
-                {emoji:'💕', text:'珍惜家人', hint:'社会评价+10，快乐+10', effects:{socialCredit:10, happiness:10}, log:'珍惜家人'}
-            ]},
-        ];
+  <div id="controls">
+    <div id="frameRow">
+      <label>多帧合成</label>
+      <input type="range" id="frameSlider" min="4" max="32" step="2" value="16">
+      <span id="frameVal">16 帧</span>
+    </div>
+    <div id="shutterRow">
+      <div id="thumbWrap"><img id="thumb" alt=""></div>
+      <button id="shutter" aria-label="拍摄"></button>
+      <button id="dlBtn" disabled>⬇</button>
+    </div>
+  </div>
+</div>
 
-        console.log('事件池数量:', eventPool.length);
-        updateUI();
-        document.getElementById('eventText').textContent = '点击下方按钮开始人生...';
-    </script>
+<div id="overlay">
+  <div class="ring"></div>
+  <div id="ovText">准备中…</div>
+  <div id="ovBarWrap"><div id="ovBar"></div></div>
+</div>
+
+<div id="resultView">
+  <div id="resultImgWrap"><img id="resultImg" alt="合成结果" draggable="false"></div>
+  <div id="metaLine"></div>
+  <div id="resultBar">
+    <button class="rbtn" id="backBtn">返回重拍</button>
+    <button class="rbtn" id="saveBtn">保存到相册</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= 配置 ================= */
+  // mp200：保持传感器比例，总像素≈2亿，长边不超过 16384（浏览器画布安全上限）
+  // k4：长边 3840，保持传感器比例（4:3 传感器 → 3840×2880）
+  var MODES = {
+    mp200: { type:"area",  pixels: 2e8,   maxSide: 16384, name: "2亿像素" },
+    k4:    { type:"edge",  longEdge: 3840,                name: "4K 超解析" }
+  };
+  var mode = "k4";
+  var FRAME_COUNT = 16;
+  var busy = false;
+  var lastBlobUrl = null;
+  var ROT = 0;           // 0/90/180/270，部分机型需手动校正
+  var VW = 0, VH = 0;    // 相机帧实际尺寸
+
+  var video = document.getElementById("video");
+  var videoBox = document.getElementById("videoBox");
+  var stage = document.getElementById("stage");
+  var camChip = document.getElementById("camChip");
+  var resChip = document.getElementById("resChip");
+  var shutter = document.getElementById("shutter");
+  var overlay = document.getElementById("overlay");
+  var ovText = document.getElementById("ovText");
+  var ovBar = document.getElementById("ovBar");
+  var resultView = document.getElementById("resultView");
+  var resultImgWrap = document.getElementById("resultImgWrap");
+  var resultImg = document.getElementById("resultImg");
+  var metaLine = document.getElementById("metaLine");
+
+  /* ================= 目标尺寸计算（保持传感器比例，不再硬裁） ================= */
+  function computeTarget(vw, vh){
+    var m = MODES[mode];
+    var f;
+    if (m.type === "area"){
+      f = Math.sqrt(m.pixels / (vw * vh));
+      var fCap = m.maxSide / Math.max(vw, vh);
+      if (f > fCap) f = fCap;
+    } else {
+      f = m.longEdge / Math.max(vw, vh);
+    }
+    return { w: Math.round(vw * f), h: Math.round(vh * f) };
+  }
+
+  function updateResChip(){
+    var t = computeTarget(VW || 4000, VH || 3000);
+    var mp = (t.w * t.h / 1e8).toFixed(2);
+    resChip.textContent = MODES[mode].name + " · " + t.w + "×" + t.h + "（" + mp + " 亿）";
+  }
+
+  /* ================= 相机启动 ================= */
+  var stream = null;
+  function startCamera(){
+    var constraints = {
+      audio: false,
+      video: { facingMode: { ideal: "environment" }, width: { ideal: 99999 }, height: { ideal: 99999 } }
+    };
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+      navigator.mediaDevices.getUserMedia(constraints).then(onStream).catch(function(){
+        navigator.mediaDevices.getUserMedia({ audio:false, video:{ facingMode:"environment" } })
+          .then(onStream).catch(showErr);
+      });
+    } else showErr();
+  }
+  function onStream(s){
+    stream = s;
+    video.srcObject = s;
+    video.onloadedmetadata = function(){
+      var t = s.getVideoTracks()[0];
+      var caps = {};
+      try { caps = t.getCapabilities ? t.getCapabilities() : {}; } catch(e){}
+      var cw = caps.width ? caps.width.max : video.videoWidth;
+      var ch = caps.height ? caps.height.max : video.videoHeight;
+      VW = video.videoWidth; VH = video.videoHeight;
+      camChip.textContent = "原生 " + VW + "×" + VH;
+      // 自动猜测旋转：竖持手机但帧是横的 → 转 90
+      var portrait = window.innerHeight > window.innerWidth;
+      if (portrait && VW > VH && ROT === 0){ ROT = 90; }
+      applyRotation();
+      updateResChip();
+    };
+  }
+  function showErr(){
+    camChip.textContent = "无法访问相机";
+    ovText.textContent = "请授权相机权限，并通过 HTTPS 访问本页面";
+    overlay.classList.add("show");
+  }
+
+  /* ================= 旋转校正 ================= */
+  function applyRotation(){
+    document.getElementById("rotVal").textContent = ROT + "°";
+    if (ROT % 180 !== 0){
+      // 交换盒子的宽高再旋转，让画面铺满屏幕
+      videoBox.style.width = stage.clientHeight + "px";
+      videoBox.style.height = stage.clientWidth + "px";
+    } else {
+      videoBox.style.width = "100%";
+      videoBox.style.height = "100%";
+    }
+    video.style.transform = "rotate(" + ROT + "deg)";
+  }
+  document.getElementById("rotBtn").addEventListener("click", function(){
+    if (busy) return;
+    ROT = (ROT + 90) % 360;
+    applyRotation();
+  });
+  window.addEventListener("resize", applyRotation);
+
+  /* ================= 模式切换 ================= */
+  var modeBtns = document.querySelectorAll(".mode-btn");
+  modeBtns.forEach(function(b){
+    b.addEventListener("click", function(){
+      if (busy) return;
+      modeBtns.forEach(function(x){ x.classList.remove("active"); });
+      b.classList.add("active");
+      mode = b.getAttribute("data-mode");
+      updateResChip();
+    });
+  });
+
+  /* ================= 帧数滑块 ================= */
+  var slider = document.getElementById("frameSlider");
+  var frameVal = document.getElementById("frameVal");
+  slider.addEventListener("input", function(){
+    FRAME_COUNT = +slider.value;
+    frameVal.textContent = FRAME_COUNT + " 帧";
+  });
+
+  /* ================= 对焦框 ================= */
+  stage.addEventListener("click", function(e){
+    if (e.target.closest("#modeBar,#hud")) return;
+    var box = document.getElementById("focusBox");
+    var r = stage.getBoundingClientRect();
+    box.style.display = "block";
+    box.style.left = (e.clientX - r.left - 36) + "px";
+    box.style.top  = (e.clientY - r.top  - 36) + "px";
+    setTimeout(function(){ box.style.display = "none"; }, 800);
+  });
+
+  /* ================= 工具 ================= */
+  function setProgress(p, text){
+    ovBar.style.width = (p*100).toFixed(1) + "%";
+    if (text) ovText.textContent = text;
+  }
+  function nextFrame(){
+    return new Promise(function(res){ requestAnimationFrame(function(){ requestAnimationFrame(res); }); });
+  }
+
+  /* ================= 多帧连拍（带旋转校正） ================= */
+  function drawRotated(ctx, vw, vh){
+    var rad = ROT * Math.PI / 180;
+    ctx.save();
+    ctx.translate(vw/2, vh/2);
+    ctx.rotate(rad);
+    ctx.drawImage(video, -vw/2, -vh/2);
+    ctx.restore();
+  }
+  function captureFrames(n){
+    return new Promise(function(resolve){
+      var frames = [];
+      var count = 0;
+      function snap(){
+        var c = document.createElement("canvas");
+        c.width = VW; c.height = VH;
+        var ctx = c.getContext("2d", { willReadFrequently: true });
+        drawRotated(ctx, VW, VH);
+        frames.push({ canvas: c, ctx: ctx });
+        count++;
+        setProgress(count / n * 0.45, "连拍采帧 " + count + " / " + n);
+        if (count < n) setTimeout(snap, 60);
+        else resolve(frames);
+      }
+      snap();
+    });
+  }
+
+  /* ================= 帧对齐（块匹配平移估计） ================= */
+  function alignFrames(frames){
+    var rw = frames[0].canvas.width, rh = frames[0].canvas.height;
+    var ref = frames[0].ctx.getImageData(0, 0, rw, rh);
+    var aligned = [frames[0]];
+    var SEARCH = 6, STEP = 2;
+    for (var i = 1; i < frames.length; i++){
+      var f = frames[i];
+      var img = f.ctx.getImageData(0, 0, rw, rh);
+      var bestDx = 0, bestDy = 0, bestErr = Infinity;
+      for (var dy = -SEARCH; dy <= SEARCH; dy += STEP){
+        for (var dx = -SEARCH; dx <= SEARCH; dx += STEP){
+          var err = 0, cnt = 0;
+          for (var sy = rh*0.25; sy < rh*0.75; sy += 24){
+            for (var sx = rw*0.25; sx < rw*0.75; sx += 24){
+              var x1 = sx + dx, y1 = sy + dy;
+              if (x1 < 0 || y1 < 0 || x1 >= rw || y1 >= rh) continue;
+              var p0 = (sy*rw + sx) * 4, p1 = (y1*rw + x1) * 4;
+              err += Math.abs(ref.data[p0]   - img.data[p1])
+                   + Math.abs(ref.data[p0+1] - img.data[p1+1])
+                   + Math.abs(ref.data[p0+2] - img.data[p1+2]);
+              cnt++;
+            }
+          }
+          if (cnt && err / cnt < bestErr){ bestErr = err / cnt; bestDx = dx; bestDy = dy; }
+        }
+      }
+      var ac = document.createElement("canvas");
+      ac.width = rw; ac.height = rh;
+      var actx = ac.getContext("2d", { willReadFrequently: true });
+      actx.drawImage(f.canvas, bestDx, bestDy);
+      aligned.push({ canvas: ac, ctx: actx });
+      setProgress(0.45 + i / frames.length * 0.25, "帧对齐 " + i + " / " + (frames.length - 1));
+    }
+    return aligned;
+  }
+
+  /* ================= 分块均值叠加降噪 ================= */
+  function averageStack(aligned){
+    var rw = aligned[0].canvas.width, rh = aligned[0].canvas.height;
+    var TILE = 512;
+    var out = document.createElement("canvas");
+    out.width = rw; out.height = rh;
+    var octx = out.getContext("2d");
+    var n = aligned.length;
+    for (var ty = 0; ty < rh; ty += TILE){
+      var th = Math.min(TILE, rh - ty);
+      for (var tx = 0; tx < rw; tx += TILE){
+        var tw = Math.min(TILE, rw - tx);
+        var acc = new Float32Array(tw * th * 4);
+        for (var i = 0; i < n; i++){
+          var d = aligned[i].ctx.getImageData(tx, ty, tw, th).data;
+          for (var j = 0; j < d.length; j++) acc[j] += d[j];
+        }
+        var res = octx.createImageData(tw, th);
+        var rd = res.data;
+        for (var k = 0; k < rd.length; k++) rd[k] = acc[k] / n;
+        octx.putImageData(res, tx, ty);
+        setProgress(0.7 + (ty / rh) * 0.15, "多帧降噪叠加…");
+      }
+    }
+    return out;
+  }
+
+  /* ================= 超分放大（保持传感器比例） ================= */
+  function superResolve(cleanCanvas, targetW, targetH){
+    var out = document.createElement("canvas");
+    out.width = targetW; out.height = targetH;
+    var ctx = out.getContext("2d");
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(cleanCanvas, 0, 0, targetW, targetH);
+    setProgress(0.88, "超分辨率重建 " + targetW + "×" + targetH + "…");
+    return out;
+  }
+
+  /* ================= 全分块 USM 锐化（不爆内存） ================= */
+  function unsharp(canvas, amount, radius, threshold){
+    var w = canvas.width, h = canvas.height;
+    var ctx = canvas.getContext("2d");
+    var TILE = 512;
+    var PAD = Math.ceil(radius * 2) + 2;
+    var tmp = document.createElement("canvas");
+    for (var ty = 0; ty < h; ty += TILE){
+      var th = Math.min(TILE, h - ty);
+      for (var tx = 0; tx < w; tx += TILE){
+        var tw = Math.min(TILE, w - tx);
+        var sw = tw + PAD * 2, sh = th + PAD * 2;
+        tmp.width = sw; tmp.height = sh;
+        var tctx = tmp.getContext("2d", { willReadFrequently: true });
+        tctx.filter = "blur(" + radius + "px)";
+        tctx.drawImage(canvas, tx - PAD, ty - PAD, sw, sh, 0, 0, sw, sh);
+        tctx.filter = "none";
+        var a = ctx.getImageData(tx, ty, tw, th);
+        var b = tctx.getImageData(PAD, PAD, tw, th);
+        var ad = a.data, bd = b.data;
+        for (var i = 0; i < ad.length; i += 4){
+          for (var c = 0; c < 3; c++){
+            var diff = ad[i+c] - bd[i+c];
+            if (diff >= threshold || diff <= -threshold){
+              var v = ad[i+c] + amount * diff;
+              ad[i+c] = v < 0 ? 0 : v > 255 ? 255 : v;
+            }
+          }
+        }
+        ctx.putImageData(a, tx, ty);
+      }
+      setProgress(0.9 + (ty / h) * 0.08, "细节增强…");
+    }
+    return canvas;
+  }
+
+  /* ================= 主流程 ================= */
+  async function shoot(){
+    if (busy || !stream) return;
+    busy = true;
+    shutter.classList.add("busy");
+    overlay.classList.add("show");
+    setProgress(0, "准备拍摄…");
+    try {
+      var target = computeTarget(VW, VH);
+
+      var frames = await captureFrames(FRAME_COUNT);
+      var aligned = alignFrames(frames);
+      await nextFrame();
+
+      var clean = averageStack(aligned);
+      await nextFrame();
+
+      var big = superResolve(clean, target.w, target.h);
+      await nextFrame();
+
+      var amt = mode === "mp200" ? 0.9 : 1.4;
+      var rad = mode === "mp200" ? 1.2 : 1.6;
+      unsharp(big, amt, rad, 2);
+
+      setProgress(0.99, "编码输出…");
+      await nextFrame();
+
+      var blob = await new Promise(function(res){ big.toBlob(res, "image/jpeg", 0.95); });
+      if (!blob) throw new Error("编码失败（可能超出浏览器画布上限，请换 4K 模式）");
+      if (lastBlobUrl) URL.revokeObjectURL(lastBlobUrl);
+      lastBlobUrl = URL.createObjectURL(blob);
+
+      document.getElementById("thumb").src = lastBlobUrl;
+      document.getElementById("dlBtn").disabled = false;
+
+      resultImg.src = lastBlobUrl;
+      resetResultView();
+      var mp = (target.w * target.h / 1e8).toFixed(2);
+      metaLine.textContent = MODES[mode].name + " · " + target.w + "×" + target.h
+        + "（" + mp + " 亿像素）· " + FRAME_COUNT + " 帧合成 · "
+        + (blob.size/1024/1024).toFixed(1) + " MB · 双指可放大";
+      resultView.classList.add("show");
+    } catch(err){
+      alert("合成失败：" + (err && err.message ? err.message : err));
+    } finally {
+      overlay.classList.remove("show");
+      shutter.classList.remove("busy");
+      busy = false;
+    }
+  }
+
+  /* ================= 成片查看：双指缩放 + 双击放大 ================= */
+  var zoom = 1, minZoom = 1;
+  function applyZoom(){
+    resultImg.style.transform = "scale(" + zoom + ")";
+  }
+  function resetResultView(){
+    zoom = 1; applyZoom();
+    resultImgWrap.scrollTop = 0; resultImgWrap.scrollLeft = 0;
+  }
+  (function(){
+    var pointers = new Map();
+    var lastDist = 0, lastTap = 0;
+    resultImgWrap.addEventListener("pointerdown", function(e){
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pointers.size === 2){
+        var pts = Array.from(pointers.values());
+        lastDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      }
+      var now = Date.now();
+      if (now - lastTap < 300 && pointers.size === 1){
+        zoom = (zoom > 1.5) ? 1 : 4;   // 双击：100% ↔ 400%
+        applyZoom();
+      }
+      lastTap = now;
+    });
+    resultImgWrap.addEventListener("pointermove", function(e){
+      if (!pointers.has(e.pointerId)) return;
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pointers.size === 2){
+        var pts = Array.from(pointers.values());
+        var dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+        if (lastDist > 0){
+          zoom = Math.min(8, Math.max(1, zoom * dist / lastDist));
+          applyZoom();
+        }
+        lastDist = dist;
+      }
+    });
+    function up(e){ pointers.delete(e.pointerId); lastDist = 0; }
+    resultImgWrap.addEventListener("pointerup", up);
+    resultImgWrap.addEventListener("pointercancel", up);
+    resultImgWrap.addEventListener("wheel", function(e){
+      e.preventDefault();
+      zoom = Math.min(8, Math.max(1, zoom * (e.deltaY < 0 ? 1.1 : 0.9)));
+      applyZoom();
+    }, { passive:false });
+  })();
+
+  /* ================= 事件绑定 ================= */
+  shutter.addEventListener("click", shoot);
+  document.getElementById("dlBtn").addEventListener("click", function(){
+    if (!lastBlobUrl) return;
+    var a = document.createElement("a");
+    a.href = lastBlobUrl;
+    a.download = MODES[mode].name + "_" + Date.now() + ".jpg";
+    a.click();
+  });
+  document.getElementById("saveBtn").addEventListener("click", function(){
+    var a = document.createElement("a");
+    a.href = lastBlobUrl;
+    a.download = MODES[mode].name + "_" + Date.now() + ".jpg";
+    a.click();
+  });
+  document.getElementById("backBtn").addEventListener("click", function(){
+    resultView.classList.remove("show");
+  });
+  document.addEventListener("dblclick", function(e){ e.preventDefault(); }, { passive:false });
+
+  startCamera();
+  updateResChip();
+})();
+</script>
 </body>
 </html>
